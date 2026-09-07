@@ -1,0 +1,165 @@
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import {
+  UNDOABLE_ACTIONS,
+  type AuditAction,
+  type AuditEntry,
+  type PlayerSource,
+  type SessionFact,
+  type SessionPlayerFact,
+} from "@/domain/types";
+import type { Tx } from "../db/client";
+import * as s from "../db/schema";
+
+type EventPatch = Partial<Omit<typeof s.event.$inferInsert, "id">>;
+type PlayerPatch = Partial<Omit<typeof s.players.$inferInsert, "id">>;
+type GamePatch = Partial<Omit<typeof s.games.$inferInsert, "id" | "slug">>;
+type TablePatch = Partial<Omit<typeof s.tables.$inferInsert, "id">>;
+type SessionPatch = Partial<Omit<typeof s.sessions.$inferInsert, "id">>;
+
+export function bumpVersion(tx: Tx): void {
+  tx.update(s.event)
+    .set({ dataVersion: sql`${s.event.dataVersion} + 1` })
+    .where(eq(s.event.id, 1))
+    .run();
+}
+
+export function updateEventRow(tx: Tx, patch: EventPatch): void {
+  tx.update(s.event).set(patch).where(eq(s.event.id, 1)).run();
+}
+
+export function insertPlayer(
+  tx: Tx,
+  values: { name: string; nickname: string | null; color: string; source: PlayerSource; isDemo?: boolean; createdAt: number },
+): number {
+  const row = tx
+    .insert(s.players)
+    .values({ ...values, isDemo: values.isDemo ?? false })
+    .returning({ id: s.players.id })
+    .get();
+  return row.id;
+}
+
+export function updatePlayerRow(tx: Tx, id: number, patch: PlayerPatch): void {
+  tx.update(s.players).set(patch).where(eq(s.players.id, id)).run();
+}
+
+export function deletePlayerRow(tx: Tx, id: number): void {
+  tx.delete(s.players).where(eq(s.players.id, id)).run();
+}
+
+export function reassignPlayerSeats(tx: Tx, fromId: number, toId: number): void {
+  tx.update(s.sessionPlayers).set({ playerId: toId }).where(eq(s.sessionPlayers.playerId, fromId)).run();
+}
+
+export function updateGameRow(tx: Tx, id: number, patch: GamePatch): void {
+  tx.update(s.games).set(patch).where(eq(s.games.id, id)).run();
+}
+
+export function insertTable(tx: Tx, values: { number: number; label: string | null }): number {
+  return tx.insert(s.tables).values(values).returning({ id: s.tables.id }).get().id;
+}
+
+export function updateTableRow(tx: Tx, id: number, patch: TablePatch): void {
+  tx.update(s.tables).set(patch).where(eq(s.tables.id, id)).run();
+}
+
+export function deleteTableRow(tx: Tx, id: number): void {
+  tx.delete(s.tables).where(eq(s.tables.id, id)).run();
+}
+
+export function tableHasSessions(tx: Tx, tableId: number): boolean {
+  return Boolean(tx.select({ id: s.sessions.id }).from(s.sessions).where(eq(s.sessions.tableId, tableId)).get());
+}
+
+export function insertSession(
+  tx: Tx,
+  values: Omit<typeof s.sessions.$inferInsert, "id">,
+  players: SessionPlayerFact[],
+): number {
+  const id = tx.insert(s.sessions).values(values).returning({ id: s.sessions.id }).get().id;
+  replaceSessionPlayers(tx, id, players);
+  return id;
+}
+
+export function updateSessionRow(tx: Tx, id: number, patch: SessionPatch): void {
+  tx.update(s.sessions).set(patch).where(eq(s.sessions.id, id)).run();
+}
+
+export function deleteSessionRow(tx: Tx, id: number): void {
+  tx.delete(s.sessions).where(eq(s.sessions.id, id)).run();
+}
+
+export function replaceSessionPlayers(tx: Tx, sessionId: number, players: SessionPlayerFact[]): void {
+  tx.delete(s.sessionPlayers).where(eq(s.sessionPlayers.sessionId, sessionId)).run();
+  if (players.length === 0) return;
+  tx.insert(s.sessionPlayers)
+    .values(players.map((p) => ({ sessionId, ...p })))
+    .run();
+}
+
+/** Upsert a full session (row + seats) by id. Used for undo and edits. */
+export function writeSession(tx: Tx, fact: SessionFact): void {
+  const { players, id, ...row } = fact;
+  tx.insert(s.sessions)
+    .values({ id, ...row })
+    .onConflictDoUpdate({ target: s.sessions.id, set: row })
+    .run();
+  replaceSessionPlayers(tx, id, players);
+}
+
+export function insertAnnouncement(
+  tx: Tx,
+  value: { type: "result_reveal"; payload: { sessionId: number } } | { type: "milestone"; payload: { count: number } },
+  createdAt: number,
+): number {
+  return tx
+    .insert(s.announcements)
+    .values({ type: value.type, payload: value.payload, createdAt })
+    .returning({ id: s.announcements.id })
+    .get().id;
+}
+
+export function milestoneExists(tx: Tx, count: number): boolean {
+  return tx
+    .select()
+    .from(s.announcements)
+    .where(eq(s.announcements.type, "milestone"))
+    .all()
+    .some((a) => a.payload.count === count);
+}
+
+export function insertAudit(
+  tx: Tx,
+  entry: { action: AuditAction; summary: string; before: SessionFact | null; after: SessionFact | null; at: number },
+): number {
+  return tx.insert(s.auditLog).values(entry).returning({ id: s.auditLog.id }).get().id;
+}
+
+export function lastUndoableAudit(tx: Tx): AuditEntry | null {
+  return (
+    tx
+      .select()
+      .from(s.auditLog)
+      .where(and(eq(s.auditLog.undone, false), inArray(s.auditLog.action, UNDOABLE_ACTIONS)))
+      .orderBy(desc(s.auditLog.id))
+      .get() ?? null
+  );
+}
+
+export function markAuditUndone(tx: Tx, id: number): void {
+  tx.update(s.auditLog).set({ undone: true }).where(eq(s.auditLog.id, id)).run();
+}
+
+export function deleteDemoData(tx: Tx): void {
+  tx.delete(s.sessions).where(eq(s.sessions.isDemo, true)).run();
+  const demoIds = tx
+    .select({ id: s.players.id })
+    .from(s.players)
+    .where(eq(s.players.isDemo, true))
+    .all()
+    .map((p) => p.id);
+  if (demoIds.length > 0) {
+    tx.delete(s.sessionPlayers).where(inArray(s.sessionPlayers.playerId, demoIds)).run();
+    tx.delete(s.players).where(inArray(s.players.id, demoIds)).run();
+  }
+}

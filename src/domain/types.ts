@@ -108,3 +108,29 @@ export interface Facts {
   sessions: SessionFact[];
   announcements: AnnouncementFact[];
 }
+
+export type AuditAction =
+  | "result.create"
+  | "result.update"
+  | "result.delete"
+  | "joker.correct"
+  | "session.cancel"
+  | "player.merge"
+  | "undo";
+
+export const UNDOABLE_ACTIONS: AuditAction[] = [
+  "result.create",
+  "result.update",
+  "result.delete",
+  "joker.correct",
+];
+
+export interface AuditEntry {
+  id: number;
+  at: number;
+  action: AuditAction;
+  summary: string;
+  before: SessionFact | null;
+  after: SessionFact | null;
+  undone: boolean;
+}
