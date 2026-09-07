@@ -9,7 +9,14 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "setup": "tsx scripts/setup.ts",
+    "db:migrate": "tsx scripts/setup.ts",
+    "db:seed": "tsx scripts/setup.ts",
+    "db:seed:demo": "tsx scripts/seed-demo.ts",
+    "db:clear-demo": "tsx scripts/clear-demo.ts",
+    "db:reset": "tsx scripts/reset.ts --yes",
+    "backup": "tsx scripts/backup.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
