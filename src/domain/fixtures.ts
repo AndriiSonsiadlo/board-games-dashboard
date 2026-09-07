@@ -1,4 +1,12 @@
-import type { GameFact, PlayerFact, ScoringSettings, SessionFact } from "./types";
+import {
+  DEFAULT_SCENES,
+  type EventFact,
+  type GameFact,
+  type PlayerFact,
+  type ScoringSettings,
+  type SessionFact,
+  type TableFact,
+} from "./types";
 
 export function makePlayer(id: number, name: string, overrides: Partial<PlayerFact> = {}): PlayerFact {
   return {
@@ -64,4 +72,59 @@ export function makeDoneSession(
 
 export function makeSettings(overrides: Partial<ScoringSettings> = {}): ScoringSettings {
   return { strategy: "total", bestN: 4, participationFloor: 0, jokerMultiplier: 1.5, ...overrides };
+}
+
+
+export function makeEvent(overrides: Partial<EventFact> = {}): EventFact {
+  return {
+    name: "Board Games Cup",
+    city: "Warsaw",
+    year: 2026,
+    status: "live",
+    startedAt: 0,
+    finishedAt: null,
+    finaleRevealed: false,
+    scoring: makeSettings({ strategy: "bestN", participationFloor: 0.2 }),
+    sceneDurationSec: 12,
+    enabledScenes: [...DEFAULT_SCENES],
+    showPointsInReveals: false,
+    screenLang: "en",
+    accentColor: "#c9a45c",
+    publicBaseUrl: null,
+    screenControl: { paused: false, skipNonce: 0, finaleStep: 0 },
+    dataVersion: 1,
+    ...overrides,
+  };
+}
+
+export function makeTable(id: number, number = id, overrides: Partial<TableFact> = {}): TableFact {
+  return { id, number, label: null, active: true, ...overrides };
+}
+
+/** players: [playerId, jokerDeclared?] */
+export function makeOpenSession(
+  id: number,
+  tableId: number,
+  gameId: number,
+  status: "setup" | "playing" | "pending",
+  players: Array<[number, boolean?]>,
+  startedAt: number | null = 1000,
+): SessionFact {
+  return {
+    id,
+    tableId,
+    gameId,
+    status,
+    createdAt: 500,
+    startedAt: status === "setup" ? null : startedAt,
+    finishedAt: status === "pending" ? (startedAt ?? 0) + 60_000 : null,
+    notes: null,
+    isDemo: false,
+    players: players.map(([playerId, joker], seat) => ({
+      playerId,
+      seat,
+      jokerDeclared: joker ?? false,
+      placement: null,
+    })),
+  };
 }
