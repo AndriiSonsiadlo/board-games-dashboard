@@ -1,7 +1,7 @@
 "use client";
 
-import { Spade } from "lucide-react";
-import { useState } from "react";
+import { Plus, Spade } from "lucide-react";
+import { useCallback, useState } from "react";
 import { cancelSessionAction, finishSessionAction, resumeSessionAction, startSessionAction } from "@/app/admin/actions";
 import type { AdminSeatView, TableView } from "@/domain/snapshot";
 import { useI18n } from "@/i18n/LangProvider";
@@ -15,6 +15,7 @@ import { useAdminLookups } from "../common/lookups";
 import { useAdminLive } from "../live/LiveProvider";
 import { Button } from "../ui/Button";
 import { ConfirmButton } from "../ui/ConfirmButton";
+import { ResultSheet, type ResultTarget } from "./ResultSheet";
 import { ScreenRemote } from "./ScreenRemote";
 import { SeatSheet } from "./SeatSheet";
 import { useRunner } from "./useRunner";
@@ -25,7 +26,10 @@ export function ControlRoom() {
   const { t } = useI18n();
   const { snapshot } = useAdminLive();
   const [seatTableId, setSeatTableId] = useState<number | null>(null);
+  const [resultTarget, setResultTarget] = useState<ResultTarget | null>(null);
+  const closeResult = useCallback(() => setResultTarget(null), []);
   const seatTable = snapshot.tables.find((x) => x.tableId === seatTableId) ?? null;
+  const finished = snapshot.event.status === "finished";
 
   return (
     <div className="space-y-6">
@@ -50,19 +54,45 @@ export function ControlRoom() {
       ) : (
         <ul className="divide-y divide-line border-y border-line">
           {snapshot.tables.map((table) => (
-            <TableRow key={table.tableId} table={table} onSeat={() => setSeatTableId(table.tableId)} />
+            <TableRow
+              key={table.tableId}
+              table={table}
+              onSeat={() => setSeatTableId(table.tableId)}
+              onResult={(sessionId) => setResultTarget({ mode: "session", sessionId })}
+            />
           ))}
         </ul>
       )}
 
+      {!finished ? (
+        <Button
+          variant="primary"
+          size="lg"
+          className="fixed right-4 bottom-24 z-20 shadow-[0_12px_40px_rgba(0,0,0,0.5)] md:right-10 md:bottom-10"
+          onClick={() => setResultTarget({ mode: "direct" })}
+        >
+          <Plus className="size-5" />
+          {t.room.newResult}
+        </Button>
+      ) : null}
+
       {seatTable ? (
         <SeatSheet key={seatTable.tableId} open onOpenChange={(o) => !o && setSeatTableId(null)} table={seatTable} />
       ) : null}
+      {resultTarget ? <ResultSheet target={resultTarget} onClose={closeResult} /> : null}
     </div>
   );
 }
 
-function TableRow({ table, onSeat }: { table: AdminTable; onSeat: () => void }) {
+function TableRow({
+  table,
+  onSeat,
+  onResult,
+}: {
+  table: AdminTable;
+  onSeat: () => void;
+  onResult: (sessionId: number) => void;
+}) {
   const { t } = useI18n();
   const { snapshot } = useAdminLive();
   const lookups = useAdminLookups(snapshot);
@@ -139,11 +169,17 @@ function TableRow({ table, onSeat }: { table: AdminTable; onSeat: () => void }) 
             <Button variant="primary" disabled={pending} onClick={() => run(() => finishSessionAction(session.id))}>
               {t.room.finish}
             </Button>
+            <Button disabled={finished} onClick={() => onResult(session.id)}>
+              {t.room.enterResult}
+            </Button>
             {cancel}
           </>
         ) : null}
         {table.state === "pending" && session ? (
           <>
+            <Button variant="primary" disabled={finished} onClick={() => onResult(session.id)}>
+              {t.room.enterResult}
+            </Button>
             <Button disabled={pending} onClick={() => run(() => resumeSessionAction(session.id))}>
               {t.room.resume}
             </Button>
