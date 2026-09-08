@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter_Tight, JetBrains_Mono, Oswald } from "next/font/google";
+import { LangProvider } from "@/i18n/LangProvider";
+import { getLang } from "@/i18n/server";
 import "./globals.css";
 
 const oswald = Oswald({ subsets: ["latin", "cyrillic"], variable: "--font-oswald" });
@@ -17,10 +19,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang();
   return (
-    <html lang="en" className={`${oswald.variable} ${interTight.variable} ${jetbrains.variable}`}>
-      <body className="min-h-dvh bg-bg text-text">{children}</body>
+    <html lang={lang} className={`${oswald.variable} ${interTight.variable} ${jetbrains.variable}`}>
+      <body className="min-h-dvh bg-bg text-text">
+        <LangProvider lang={lang}>{children}</LangProvider>
+      </body>
     </html>
   );
 }
