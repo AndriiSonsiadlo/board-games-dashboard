@@ -121,6 +121,7 @@ export const en = {
     players: "Players",
     tapInOrder: "Tap players in finishing order",
     resetOrder: "Reset",
+    reorder: "Reorder",
     tie: "Tie",
     unplaced: "Not placed",
     unplacedHint: "Players left unplaced are removed from this game.",

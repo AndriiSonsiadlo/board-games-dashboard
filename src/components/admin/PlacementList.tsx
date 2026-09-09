@@ -117,7 +117,7 @@ function PlacementRow({
         {...attributes}
         {...listeners}
         className="grid size-10 shrink-0 touch-none place-items-center text-muted"
-        aria-label="Reorder"
+        aria-label={t.result.reorder}
       >
         <GripVertical className="size-4" />
       </button>

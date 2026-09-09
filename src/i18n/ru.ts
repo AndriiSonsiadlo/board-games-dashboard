@@ -121,6 +121,7 @@ export const ru: Dict = {
     players: "Игроки",
     tapInOrder: "Нажимайте на игроков в порядке финиша",
     resetOrder: "Сброс",
+    reorder: "Изменить порядок",
     tie: "Ничья",
     unplaced: "Без места",
     unplacedHint: "Игроки без места будут убраны из этой игры.",
