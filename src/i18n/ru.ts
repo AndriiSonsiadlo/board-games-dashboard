@@ -260,6 +260,7 @@ export const ru: Dict = {
       title: "Сеть",
       baseUrl: "Публичный адрес",
       baseUrlHint: "Этот адрес используют телефоны и QR-коды. Выберите адрес Wi-Fi.",
+      baseUrlPlaceholder: "http://192.168.1.20:3000",
       detected: "Найденные адреса",
       none: "Сетевые адреса не найдены.",
       use: "Выбрать",

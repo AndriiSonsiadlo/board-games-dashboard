@@ -260,6 +260,7 @@ export const en = {
       title: "Network",
       baseUrl: "Public address",
       baseUrlHint: "Phones and QR codes use this address. Pick the Wi-Fi address.",
+      baseUrlPlaceholder: "http://192.168.1.20:3000",
       detected: "Detected addresses",
       none: "No network addresses found.",
       use: "Use",
