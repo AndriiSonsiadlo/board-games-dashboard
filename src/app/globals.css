@@ -104,3 +104,31 @@
 @utility animate-overlay-in {
   animation: overlay-in 200ms ease-out;
 }
+
+@keyframes light-sweep {
+  from {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+@keyframes hairline-scan {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+@utility animate-light-sweep {
+  animation: light-sweep 1.6s var(--ease-out-quint) 0.2s both;
+}
+
+@utility animate-hairline-scan {
+  animation: hairline-scan var(--scene-ms, 12000ms) linear both;
+}
