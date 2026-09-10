@@ -33,7 +33,7 @@ export function ScreenFooter({
       ) : null}
       <div className="flex h-full items-center gap-8">
         <BrandMark className="size-[44px] text-text" />
-        <span className="font-display text-[26px] uppercase tracking-[0.3em]">Board Games Cup</span>
+        <span className="font-display text-[26px] uppercase tracking-[0.3em]">{t.common.appName}</span>
         <span className="font-display text-[22px] uppercase tracking-[0.3em] text-muted">
           {snapshot.event.city} · {snapshot.event.year}
         </span>

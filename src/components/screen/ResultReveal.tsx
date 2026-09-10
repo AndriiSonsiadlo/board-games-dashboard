@@ -97,7 +97,7 @@ export function ResultReveal({
               ))}
               <span
                 aria-hidden
-                className="animate-light-sweep pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-accent/25 to-transparent"
+                className="animate-light-sweep pointer-events-none absolute inset-y-0 left-0 w-24 bg-accent/25 blur-2xl"
               />
             </motion.div>
           ) : null}

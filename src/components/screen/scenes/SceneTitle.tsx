@@ -11,6 +11,10 @@ export function SceneTitle({ snapshot }: { snapshot: PublicSnapshot }) {
   const { t } = useI18n();
   const e = snapshot.event;
   const statusLine = e.status === "draft" ? t.screen.startsSoon : e.status === "finished" ? t.screen.finished : t.screen.liveEvent;
+  // t.common.appName ("Board Games Cup") drives the split two-line wordmark; the last word is the large line.
+  const nameWords = t.common.appName.split(" ");
+  const nameHighlight = nameWords.pop() ?? t.common.appName;
+  const nameLead = nameWords.join(" ");
 
   return (
     <div className="flex h-full flex-col items-center justify-center text-center">
@@ -23,7 +27,7 @@ export function SceneTitle({ snapshot }: { snapshot: PublicSnapshot }) {
         transition={{ duration: 1.4, ease: EASE, delay: 0.2 }}
         className="mt-12 font-display text-[56px] uppercase text-muted"
       >
-        Board Games
+        {nameLead}
       </motion.div>
       <motion.div
         initial={{ opacity: 0, y: 40 }}
@@ -31,7 +35,7 @@ export function SceneTitle({ snapshot }: { snapshot: PublicSnapshot }) {
         transition={{ duration: 1.1, ease: EASE, delay: 0.45 }}
         className="font-display text-[340px] font-semibold uppercase leading-[0.82] tracking-tight"
       >
-        Cup
+        {nameHighlight}
       </motion.div>
       <motion.div
         initial={{ opacity: 0 }}
