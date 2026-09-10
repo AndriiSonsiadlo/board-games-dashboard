@@ -11,6 +11,7 @@ export function useCheckedIn(players: PlayerView[]) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: syncs React state from localStorage (an external system) on mount.
       if (raw) setStored(JSON.parse(raw) as { id: number; name: string });
     } catch {
       // storage unavailable: behave as not checked in
