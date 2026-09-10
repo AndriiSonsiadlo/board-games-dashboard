@@ -415,10 +415,13 @@ function PinChange() {
       <Field label={t.settings.security.newPin}>
         <input type="password" inputMode="numeric" value={next} onChange={(e) => setNext(e.target.value)} className={inputClass} />
       </Field>
-      <Button
+      <ConfirmButton
+        variant="secondary"
         loading={pending}
         disabled={current.length < 4 || next.length < 4}
-        onClick={() =>
+        label={t.settings.security.change}
+        confirmLabel={t.common.tapToConfirm}
+        onConfirm={() =>
           run(() => changePinAction({ current, next }), {
             success: t.settings.security.changed,
             onOk: () => {
@@ -427,9 +430,7 @@ function PinChange() {
             },
           })
         }
-      >
-        {t.settings.security.change}
-      </Button>
+      />
     </div>
   );
 }
