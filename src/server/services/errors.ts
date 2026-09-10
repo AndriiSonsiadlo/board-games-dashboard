@@ -16,7 +16,9 @@ export type ErrorCode =
   | "nothing_to_undo"
   | "undo_conflict"
   | "open_sessions"
-  | "wrong_pin";
+  | "wrong_pin"
+  | "demo_player_in_use"
+  | "duplicate_name";
 
 export class ServiceError extends Error {
   constructor(readonly code: ErrorCode) {

@@ -46,7 +46,9 @@ export const en = {
     wrong_pin: "Wrong PIN.",
     unauthorized: "Session expired. Log in again.",
     unexpected: "Something went wrong. Try again.",
-    locked: "Too many attempts. Wait 30 seconds.",
+    locked: "Too many attempts. Wait a moment and try again.",
+    demo_player_in_use: "This demo player also sits in a real game. Resolve that first.",
+    duplicate_name: "That name is already checked in.",
   },
   status: {
     draft: "Starts soon",

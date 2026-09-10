@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { createTestDb } from "../testDb";
 import { seedBase } from "../seed/base";
+import { ServiceError } from "../services/errors";
 import { getDataVersion, loadFacts, loadSession } from "./facts";
 import {
   bumpVersion,
@@ -101,8 +102,8 @@ describe("version, announcements, audit, demo cleanup", () => {
       { playerId: demo, seat: 0, jokerDeclared: false, placement: 1 },
       { playerId: real, seat: 1, jokerDeclared: false, placement: 2 },
     ]);
+    // The demo player has no seat outside demo sessions, so clearing is safe.
     insertSession(ctx.db, { gameId: 1, status: "setup", createdAt: now, isDemo: false }, [
-      { playerId: demo, seat: 0, jokerDeclared: false, placement: null },
       { playerId: real, seat: 1, jokerDeclared: false, placement: null },
     ]);
     deleteDemoData(ctx.db);
@@ -110,5 +111,34 @@ describe("version, announcements, audit, demo cleanup", () => {
     expect(facts.players.map((p) => p.name)).toEqual(["Real"]);
     expect(facts.sessions).toHaveLength(1);
     expect(facts.sessions[0].players.map((p) => p.playerId)).toEqual([real]);
+  });
+
+  test("deleteDemoData refuses when a demo player also holds a seat in a non-demo session", () => {
+    const now = Date.now();
+    const real = insertPlayer(ctx.db, { name: "Real", nickname: null, color: "#fff", source: "admin", createdAt: now });
+    const demo = insertPlayer(ctx.db, { name: "Demo", nickname: null, color: "#fff", source: "admin", isDemo: true, createdAt: now });
+    insertSession(ctx.db, { gameId: 1, status: "done", createdAt: now, isDemo: true }, [
+      { playerId: demo, seat: 0, jokerDeclared: false, placement: 1 },
+      { playerId: real, seat: 1, jokerDeclared: false, placement: 2 },
+    ]);
+    // A rehearsal/demo game that also seated a real demo player creates a non-demo
+    // session with a demo seat mixed in (seatTable never sets isDemo). Clearing demo
+    // data must not silently corrupt or delete this session.
+    insertSession(ctx.db, { gameId: 1, status: "setup", createdAt: now, isDemo: false }, [
+      { playerId: demo, seat: 0, jokerDeclared: false, placement: null },
+      { playerId: real, seat: 1, jokerDeclared: false, placement: null },
+    ]);
+
+    expect(() => deleteDemoData(ctx.db)).toThrow(ServiceError);
+    try {
+      deleteDemoData(ctx.db);
+    } catch (error) {
+      expect((error as ServiceError).code).toBe("demo_player_in_use");
+    }
+
+    // Nothing should have been deleted.
+    const facts = loadFacts(ctx.db);
+    expect(facts.players.map((p) => p.name).sort()).toEqual(["Demo", "Real"]);
+    expect(facts.sessions).toHaveLength(2);
   });
 });

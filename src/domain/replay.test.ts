@@ -121,6 +121,26 @@ describe("replay", () => {
   });
 });
 
+describe("replay containment", () => {
+  test("skips a session with a malformed stored result instead of throwing", () => {
+    // Placements [1, 3] have a gap (no place 2) and are invalid for a 2-player
+    // result; scoreResult throws RangeError("Invalid result: invalid_placements").
+    // A single corrupted row like this (bad manual edit, prior bug, etc.) must
+    // not take down every consumer of replay().
+    const corrupt = makeDoneSession(5, 1, 3000, [
+      [3, 1],
+      [4, 3],
+    ]);
+    const result = replay({ players, games, sessions: [r1, corrupt] }, makeSettings());
+    expect(result.results.map((r) => r.sessionId)).toEqual([1]);
+    expect(ranks(result.standings).slice(0, 3)).toEqual([
+      [1, 1],
+      [2, 2],
+      [3, 3],
+    ]);
+  });
+});
+
 describe("durationMinutes", () => {
   test("rounds elapsed minutes", () => {
     expect(durationMinutes(makeDoneSession(9, 1, 60 * 60_000, [[1, 1], [2, 2]], { startedAt: 0 }))).toBe(60);

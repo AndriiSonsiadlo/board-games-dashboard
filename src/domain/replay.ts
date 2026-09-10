@@ -111,15 +111,23 @@ export function replay(input: ReplayInput, settings: ScoringSettings): Replay {
 
   for (const session of done) {
     const game = gamesById.get(session.gameId)!;
-    const scored = scoreResult(
-      game.weight,
-      session.players.map((p) => ({
-        playerId: p.playerId,
-        placement: p.placement!,
-        jokerDeclared: p.jokerDeclared,
-      })),
-      settings,
-    );
+    let scored: ScoredPlacement[];
+    try {
+      scored = scoreResult(
+        game.weight,
+        session.players.map((p) => ({
+          playerId: p.playerId,
+          placement: p.placement!,
+          jokerDeclared: p.jokerDeclared,
+        })),
+        settings,
+      );
+    } catch (error) {
+      // A single malformed stored result (bad manual edit, a prior data bug, ...)
+      // must not crash every consumer of replay(); skip it and keep going.
+      console.error(`replay: skipping malformed result for session ${session.id}`, error);
+      continue;
+    }
     const finishedAt = session.finishedAt!;
     results.push({
       sessionId: session.id,

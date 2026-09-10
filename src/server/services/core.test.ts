@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { verifyPin } from "../auth/pin";
+import { signToken, verifyToken } from "../auth/token";
 import { getDataVersion, loadFacts, loadSecrets } from "../repo/facts";
 import { insertPlayer, insertSession } from "../repo/writes";
 import { createTestDb } from "../testDb";
@@ -143,6 +144,19 @@ describe("settings", () => {
     changePin(ctx.db, { current: "1234", next: "5678" });
     expect(verifyPin("5678", loadSecrets(ctx.db).adminPinHash)).toBe(true);
   });
+
+  test("change PIN invalidates existing session tokens", () => {
+    const before = loadSecrets(ctx.db).sessionSecret;
+    const token = signToken(before, Date.now() + 1000);
+    expect(verifyToken(before, token)).toBe(true);
+
+    changePin(ctx.db, { current: "1234", next: "5678" });
+
+    const after = loadSecrets(ctx.db).sessionSecret;
+    expect(after).not.toBe(before);
+    // The old token was signed with the rotated-away secret, so it must fail now.
+    expect(verifyToken(after, token)).toBe(false);
+  });
 });
 
 describe("players", () => {
@@ -165,6 +179,16 @@ describe("players", () => {
   test("check-in creates a checkin player", () => {
     const id = checkIn(ctx.db, { name: "Olena", nickname: null });
     expect(facts().players.find((p) => p.id === id)?.source).toBe("checkin");
+  });
+
+  test("check-in rejects an exact-normalized-name duplicate but allows genuinely new names", () => {
+    checkIn(ctx.db, { name: "Olena", nickname: null });
+    // Different capitalization/whitespace still normalizes to the same name.
+    expectCode(() => checkIn(ctx.db, { name: "  olena  ", nickname: null }), "duplicate_name");
+    expect(facts().players).toHaveLength(1);
+
+    const id = checkIn(ctx.db, { name: "Sasha", nickname: null });
+    expect(facts().players.map((p) => p.id)).toContain(id);
   });
 
   test("update player", () => {

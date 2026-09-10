@@ -1,6 +1,6 @@
 import { ALL_SCENES, type Lang, type SceneId, type ScoringStrategy } from "@/domain/types";
 import { isOpenSession } from "@/domain/tables";
-import { hashPin, verifyPin } from "../auth/pin";
+import { hashPin, randomSecret, verifyPin } from "../auth/pin";
 import type { Db } from "../db/client";
 import { getEventRow, loadFacts } from "../repo/facts";
 import { deleteDemoData, updateEventRow } from "../repo/writes";
@@ -148,7 +148,9 @@ export function changePin(db: Db, input: { current: string; next: string }): voi
     (tx) => {
       if (!verifyPin(input.current, getEventRow(tx).adminPinHash)) throw new ServiceError("wrong_pin");
       check(/^\d{4,8}$/.test(input.next));
-      updateEventRow(tx, { adminPinHash: hashPin(input.next) });
+      // Rotate the session secret too, so cookies already issued (up to 12h TTL)
+      // stop validating and every device has to log in again with the new PIN.
+      updateEventRow(tx, { adminPinHash: hashPin(input.next), sessionSecret: randomSecret() });
     },
     { allowWhenFinished: true },
   );

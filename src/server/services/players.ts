@@ -57,7 +57,19 @@ export function bulkAddPlayers(db: Db, text: string): number[] {
 }
 
 export function checkIn(db: Db, input: { name: string; nickname?: string | null }): number {
-  return addPlayer(db, { ...input, source: "checkin" });
+  const name = cleanName(input.name);
+  const nickname = cleanNickname(input.nickname);
+  return mutate(db, (tx) => {
+    // The client's similar-name suggestion (findSimilarPlayers) is a fuzzy match the
+    // guest can bypass or miss; this is a hard server-side guard against the exact
+    // normalized-name duplicate it might let through (e.g. a second device or a
+    // cleared local storage re-checking in under the same name).
+    const target = normalizeName(name);
+    if (loadFacts(tx).players.some((p) => normalizeName(p.name) === target)) {
+      throw new ServiceError("duplicate_name");
+    }
+    return createPlayer(tx, name, nickname, "checkin");
+  });
 }
 
 export function updatePlayer(db: Db, id: number, patch: PlayerPatch): void {

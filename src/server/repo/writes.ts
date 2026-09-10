@@ -9,6 +9,7 @@ import {
 } from "@/domain/types";
 import type { Tx } from "../db/client";
 import * as s from "../db/schema";
+import { ServiceError } from "../services/errors";
 
 type EventPatch = Partial<Omit<typeof s.event.$inferInsert, "id">>;
 type PlayerPatch = Partial<Omit<typeof s.players.$inferInsert, "id">>;
@@ -151,13 +152,27 @@ export function markAuditUndone(tx: Tx, id: number): void {
 }
 
 export function deleteDemoData(tx: Tx): void {
-  tx.delete(s.sessions).where(eq(s.sessions.isDemo, true)).run();
   const demoIds = tx
     .select({ id: s.players.id })
     .from(s.players)
     .where(eq(s.players.isDemo, true))
     .all()
     .map((p) => p.id);
+
+  if (demoIds.length > 0) {
+    // A demo player can also hold a seat in a non-demo session (e.g. a rehearsal game
+    // that included a real player never marks the session isDemo). Hand-deleting that
+    // seat here would silently corrupt or vanish real session data, so refuse instead.
+    const seatedElsewhere = tx
+      .select({ sessionId: s.sessionPlayers.sessionId })
+      .from(s.sessionPlayers)
+      .innerJoin(s.sessions, eq(s.sessionPlayers.sessionId, s.sessions.id))
+      .where(and(inArray(s.sessionPlayers.playerId, demoIds), eq(s.sessions.isDemo, false)))
+      .get();
+    if (seatedElsewhere) throw new ServiceError("demo_player_in_use");
+  }
+
+  tx.delete(s.sessions).where(eq(s.sessions.isDemo, true)).run();
   if (demoIds.length > 0) {
     tx.delete(s.sessionPlayers).where(inArray(s.sessionPlayers.playerId, demoIds)).run();
     tx.delete(s.players).where(inArray(s.players.id, demoIds)).run();
