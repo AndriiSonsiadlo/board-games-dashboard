@@ -119,6 +119,26 @@ describe("replay", () => {
     const result = replay({ players: roster, games, sessions: [r1] }, makeSettings());
     expect(result.standings.map((r) => r.playerId).sort()).toEqual([1, 2, 3]);
   });
+
+  test("player results carry family, duration, opponents and last-place flag", () => {
+    const tied = makeDoneSession(3, 2, 3000, [
+      [1, 1],
+      [2, 2],
+      [4, 2],
+    ], { tableId: null, startedAt: 3000 });
+    const result = replay({ players, games, sessions: [r1, tied] }, makeSettings());
+    const amyR1 = result.byPlayer.get(1)!.find((r) => r.sessionId === 1)!;
+    expect(amyR1.family).toBe("game-1");
+    expect(amyR1.durationMin).toBe(30);
+    expect(amyR1.opponents).toEqual([2, 3]);
+    expect(amyR1.last).toBe(false);
+    expect(result.byPlayer.get(3)!.find((r) => r.sessionId === 1)!.last).toBe(true);
+    const danTied = result.byPlayer.get(4)!.find((r) => r.sessionId === 3)!;
+    expect(danTied.last).toBe(true);
+    expect(danTied.durationMin).toBeNull();
+    expect(danTied.tableId).toBeNull();
+    expect(result.unlocks.length).toBeGreaterThan(0);
+  });
 });
 
 describe("replay containment", () => {

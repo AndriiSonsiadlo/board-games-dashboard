@@ -1,3 +1,4 @@
+import { computeUnlocks, type Unlock } from "./achievements";
 import { scoreResult, type ScoredPlacement } from "./scoring";
 import { rankStandings, selectCounted, type PlayerTotals, type StandingRow } from "./standings";
 import type { GameFact, PlayerFact, ScoringSettings, SessionFact } from "./types";
@@ -5,10 +6,16 @@ import type { GameFact, PlayerFact, ScoringSettings, SessionFact } from "./types
 export interface PlayerResult {
   sessionId: number;
   gameId: number;
+  family: string;
   tableId: number | null;
   finishedAt: number;
+  durationMin: number | null;
   placement: number;
   playerCount: number;
+  /** Other players in the same result. */
+  opponents: number[];
+  /** Finished in the lowest placement of a result that has more than one placement value. */
+  last: boolean;
   base: number;
   points: number;
   jokerDeclared: boolean;
@@ -44,12 +51,14 @@ export interface Replay {
   byPlayer: Map<number, PlayerResult[]>;
   rankHistory: Map<number, HistoryPoint[]>;
   trends: Map<number, number | null>;
+  unlocks: Unlock[];
 }
 
 export interface ReplayInput {
   players: PlayerFact[];
   games: GameFact[];
   sessions: SessionFact[];
+  disabledAchievements?: string[];
 }
 
 export function isCompleteResult(session: SessionFact): boolean {
@@ -129,24 +138,30 @@ export function replay(input: ReplayInput, settings: ScoringSettings): Replay {
       continue;
     }
     const finishedAt = session.finishedAt!;
+    const durationMin = durationMinutes(session);
     results.push({
       sessionId: session.id,
       gameId: session.gameId,
       tableId: session.tableId,
       startedAt: session.startedAt,
       finishedAt,
-      durationMin: durationMinutes(session),
+      durationMin,
       players: scored,
     });
 
+    const lowest = Math.max(...scored.map((s) => s.placement));
     for (const s of scored) {
       byPlayer.get(s.playerId)?.push({
         sessionId: session.id,
         gameId: session.gameId,
+        family: game.family,
         tableId: session.tableId,
         finishedAt,
+        durationMin,
         placement: s.placement,
         playerCount: scored.length,
+        opponents: scored.filter((o) => o.playerId !== s.playerId).map((o) => o.playerId),
+        last: lowest > 1 && s.placement === lowest,
         base: s.base,
         points: s.points,
         jokerDeclared: s.jokerDeclared,
@@ -178,5 +193,6 @@ export function replay(input: ReplayInput, settings: ScoringSettings): Replay {
     trends.set(player.id, before === null || now === null ? null : before - now);
   }
 
-  return { results, steps, standings: current, byPlayer, rankHistory, trends };
+  const unlocks = computeUnlocks({ results, steps, byPlayer }, gamesById, new Set(input.disabledAchievements ?? []));
+  return { results, steps, standings: current, byPlayer, rankHistory, trends, unlocks };
 }
