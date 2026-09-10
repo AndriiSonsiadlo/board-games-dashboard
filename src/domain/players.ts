@@ -1,5 +1,3 @@
-import type { PlayerFact } from "./types";
-
 /** Muted hues at similar lightness so no player color shouts. */
 export const PLAYER_COLORS = [
   "#8fa7c9",
@@ -31,7 +29,7 @@ export function normalizeName(name: string): string {
     .trim();
 }
 
-export function findSimilarPlayers(players: PlayerFact[], name: string): PlayerFact[] {
+export function findSimilarPlayers<T extends { name: string }>(players: T[], name: string): T[] {
   const target = normalizeName(name);
   if (target.length < 3) return [];
   return players.filter((p) => {
