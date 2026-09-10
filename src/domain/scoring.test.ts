@@ -92,6 +92,19 @@ describe("ties", () => {
     ];
     expectClose(points(6, placements, 0), [4, 4, 4, 0]);
   });
+
+  test("a tied player's Joker multiplies their averaged tie share", () => {
+    const placements: PlacementInput[] = [
+      { playerId: 1, placement: 1, jokerDeclared: true },
+      { playerId: 2, placement: 1, jokerDeclared: false },
+      { playerId: 3, placement: 3, jokerDeclared: false },
+      { playerId: 4, placement: 4, jokerDeclared: false },
+    ];
+    const scored = scoreResult(6, placements, params(0));
+    expect(scored[0].base).toBeCloseTo(5); // tie-for-first share, same as non-Joker tie
+    expect(scored[0].points).toBeCloseTo(7.5); // 5 * 1.5 Joker multiplier
+    expect(scored[1].points).toBeCloseTo(5); // untouched tied partner
+  });
 });
 
 describe("joker", () => {

@@ -26,7 +26,7 @@ export function useRotation(scenes: SceneId[], durationMs: number, paused: boole
     if (skipNonce === lastNonce.current) return;
     lastNonce.current = skipNonce;
     advance();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- advance is a new function reference every render (not memoized); this effect must only re-run when skipNonce changes to signal an external skip command, not whenever advance is recreated
   }, [skipNonce]);
 
   return { scene: scenes[index % count] ?? "title", cycle };

@@ -86,7 +86,11 @@ export function SeatSheet({
             <span>
               {fmt(t.seat.selected, { n: seats.length })}
               {game ? (
-                <span className={cn(seats.length > 0 && seats.length < game.minPlayers && "text-accent")}>
+                <span
+                  className={cn(
+                    ((seats.length > 0 && seats.length < game.minPlayers) || tooMany) && "text-accent",
+                  )}
+                >
                   {` · ${fmt(t.seat.range, { min: game.minPlayers, max: game.maxPlayers })}`}
                 </span>
               ) : null}
