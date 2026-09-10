@@ -112,6 +112,8 @@ Standings are secret until the finale. The server builds two different snapshots
 
 `/screen` always requests the public snapshot, even in a browser logged in as admin. A unit test asserts no forbidden fields exist in the public snapshot. Optional exceptions, both controlled in Settings: per-game points inside a result reveal, and the Contenders scene (top five in alphabetical order, no ranks).
 
+**Tier 1 note:** there is no in-app "reveal the finale" action yet (that's Tier 2 work) — `/leaderboard` stays sealed and `/screen` never shows points or ranks for the entire event. Organizers who want to share final standings at the end of the night can do so manually via `/admin/leaderboard` on their own screen (e.g. mirroring/casting the admin laptop, or reading results aloud).
+
 ## Projector mode
 
 `/screen` renders a fixed 1920×1080 stage scaled to any display. Scenes rotate (Title, Live room, Recent results, Event stats, optional Contenders) with a configurable duration. The control room's Projector bar pauses, resumes or skips scenes and replays the last result. "Show on screen" after a result queues a reveal: game title, places from last to second, then the winner. Milestones play at 10, 25, 50, 75 and 100 games.
