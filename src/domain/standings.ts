@@ -52,6 +52,10 @@ export function selectCounted(
 /** Rounds to 6 decimals so floating noise never decides a rank. */
 const pts = (value: number) => Math.round(value * 1e6);
 
+export function pointsEqual(a: number, b: number): boolean {
+  return pts(a) === pts(b);
+}
+
 export function compareTotals(a: PlayerTotals, b: PlayerTotals): number {
   const aPlayed = a.gamesPlayed > 0;
   const bPlayed = b.gamesPlayed > 0;
