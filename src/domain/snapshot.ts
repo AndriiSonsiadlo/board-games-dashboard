@@ -1,3 +1,5 @@
+import { ACHIEVEMENTS, achievementDef, isAchievementId, type AchievementId, type Unlock } from "./achievements";
+import { buildFinaleScript, clampStep, revealStepOf, type FinaleBeat } from "./finale";
 import type { Replay, ReplayResult } from "./replay";
 import type { StandingRow } from "./standings";
 import { isOpenSession, tableState, type TableState } from "./tables";
@@ -117,11 +119,33 @@ export interface Counters {
   gamesCompleted: number;
   tablesActive: number;
   players: number;
+  achievementsUnlocked: number;
+}
+
+export interface AchievementsView {
+  enabled: AchievementId[];
+  /** Newest first. */
+  unlocks: Unlock[];
+  sealedUnlockCount: number;
+  /** Players with at least one result; the denominator for rarity. */
+  eligiblePlayers: number;
+}
+
+export interface FinaleView {
+  step: number;
+  total: number;
+  current: FinaleBeat | null;
+}
+
+export interface AdminFinaleView extends FinaleView {
+  beats: FinaleBeat[];
+  revealStep: number;
 }
 
 export type ScreenAnnouncement =
   | { id: number; createdAt: number; type: "result_reveal"; result: ResultView<PublicPlacementView> }
-  | { id: number; createdAt: number; type: "milestone"; count: number };
+  | { id: number; createdAt: number; type: "milestone"; count: number }
+  | { id: number; createdAt: number; type: "achievement"; achievementId: AchievementId; playerId: number; sessionId: number };
 
 export interface PublicSnapshot {
   audience: "public";
@@ -133,6 +157,8 @@ export interface PublicSnapshot {
   recentResults: ResultView<PublicPlacementView>[];
   counters: Counters;
   announcements: ScreenAnnouncement[];
+  achievements: AchievementsView;
+  finale: FinaleView | null;
   contenders: number[] | null;
   leaderboard: LeaderboardRow[] | null;
 }
@@ -148,6 +174,8 @@ export interface AdminSnapshot {
   results: ResultView<ScoredPlacementView>[];
   counters: Counters;
   announcements: ScreenAnnouncement[];
+  achievements: AchievementsView;
+  finale: AdminFinaleView | null;
   leaderboard: LeaderboardRow[];
 }
 
@@ -225,6 +253,7 @@ function counters(facts: Facts, rp: Replay, tables: TableView<unknown>[]): Count
     gamesCompleted: rp.results.length,
     tablesActive: tables.filter((t) => t.state !== "available").length,
     players: facts.players.filter((p) => p.active).length,
+    achievementsUnlocked: rp.unlocks.length,
   };
 }
 
@@ -267,19 +296,31 @@ function adminResult(r: ReplayResult): ResultView<ScoredPlacementView> {
   };
 }
 
-function announcements(facts: Facts, rp: Replay, now: number, withPoints: boolean): ScreenAnnouncement[] {
+function announcements(
+  facts: Facts,
+  rp: Replay,
+  now: number,
+  opts: { withPoints: boolean; includeSealed: boolean },
+): ScreenAnnouncement[] {
   const results = new Map(rp.results.map((r) => [r.sessionId, r]));
+  const unlocked = new Set(rp.unlocks.map((u) => `${u.achievementId}:${u.playerId}`));
   return facts.announcements
     .filter((a) => a.createdAt >= now - ANNOUNCEMENT_WINDOW_MS)
     .sort((a, b) => a.id - b.id)
     .flatMap((a): ScreenAnnouncement[] => {
-      if (a.type === "achievement") return [];
       if (a.type === "milestone") {
         return [{ id: a.id, createdAt: a.createdAt, type: "milestone", count: a.payload.count }];
       }
+      if (a.type === "achievement") {
+        const { achievementId, playerId, sessionId } = a.payload;
+        if (!isAchievementId(achievementId)) return [];
+        if (achievementDef(achievementId).sealed && !opts.includeSealed) return [];
+        if (!unlocked.has(`${achievementId}:${playerId}`)) return [];
+        return [{ id: a.id, createdAt: a.createdAt, type: "achievement", achievementId, playerId, sessionId }];
+      }
       const result = results.get(a.payload.sessionId);
       return result
-        ? [{ id: a.id, createdAt: a.createdAt, type: "result_reveal", result: publicResult(result, withPoints) }]
+        ? [{ id: a.id, createdAt: a.createdAt, type: "result_reveal", result: publicResult(result, opts.withPoints) }]
         : [];
     });
 }
@@ -291,6 +332,30 @@ function leaderboard(facts: Facts, rp: Replay): LeaderboardRow[] {
     trend: rp.trends.get(row.playerId) ?? null,
     jokerUsed: jokers.has(row.playerId),
   }));
+}
+
+function achievementsView(facts: Facts, rp: Replay, includeSealed: boolean): AchievementsView {
+  const disabled = new Set(facts.disabledAchievements);
+  const sealed = (u: Unlock) => achievementDef(u.achievementId).sealed;
+  return {
+    enabled: ACHIEVEMENTS.filter((d) => !disabled.has(d.id)).map((d) => d.id),
+    unlocks: rp.unlocks
+      .filter((u) => includeSealed || !sealed(u))
+      .map((u, i) => ({ u, i }))
+      .sort((a, b) => b.u.at - a.u.at || b.i - a.i)
+      .map(({ u }) => u),
+    sealedUnlockCount: rp.unlocks.filter(sealed).length,
+    eligiblePlayers: rp.standings.filter((r) => r.rank !== null).length,
+  };
+}
+
+function finaleScript(facts: Facts, rp: Replay): FinaleBeat[] | null {
+  return facts.event.status === "finished" ? buildFinaleScript(facts, rp) : null;
+}
+
+function finaleView(beats: FinaleBeat[], requested: number): FinaleView {
+  const step = clampStep(requested, beats);
+  return { step, total: beats.length, current: step > 0 ? beats[step - 1] : null };
 }
 
 export function buildPublicSnapshot(facts: Facts, rp: Replay, now: number): PublicSnapshot {
@@ -307,6 +372,8 @@ export function buildPublicSnapshot(facts: Facts, rp: Replay, now: number): Publ
         .map((r) => r.playerId)
         .sort((a, b) => (names.get(a) ?? "").localeCompare(names.get(b) ?? ""))
     : null;
+  const script = finaleScript(facts, rp);
+  const finaleStep = facts.event.screenControl.finaleStep;
 
   return {
     audience: "public",
@@ -320,7 +387,12 @@ export function buildPublicSnapshot(facts: Facts, rp: Replay, now: number): Publ
       .slice(0, RECENT_RESULTS_LIMIT)
       .map((r) => publicResult(r, revealed)),
     counters: counters(facts, rp, tables),
-    announcements: announcements(facts, rp, now, revealed || facts.event.showPointsInReveals),
+    announcements: announcements(facts, rp, now, {
+      withPoints: revealed || facts.event.showPointsInReveals,
+      includeSealed: revealed,
+    }),
+    achievements: achievementsView(facts, rp, revealed),
+    finale: script && finaleStep > 0 ? finaleView(script, finaleStep) : null,
     contenders,
     leaderboard: revealed ? leaderboard(facts, rp) : null,
   };
@@ -333,6 +405,7 @@ export function buildAdminSnapshot(facts: Facts, rp: Replay, now: number): Admin
     seat: p.seat,
     jokerDeclared: p.jokerDeclared,
   }));
+  const script = finaleScript(facts, rp);
   return {
     audience: "admin",
     version: facts.event.dataVersion,
@@ -350,7 +423,11 @@ export function buildAdminSnapshot(facts: Facts, rp: Replay, now: number): Admin
     tables,
     results: [...rp.results].reverse().map(adminResult),
     counters: counters(facts, rp, tables),
-    announcements: announcements(facts, rp, now, true),
+    announcements: announcements(facts, rp, now, { withPoints: true, includeSealed: true }),
+    achievements: achievementsView(facts, rp, true),
+    finale: script
+      ? { ...finaleView(script, facts.event.screenControl.finaleStep), beats: script, revealStep: revealStepOf(script) }
+      : null,
     leaderboard: leaderboard(facts, rp),
   };
 }

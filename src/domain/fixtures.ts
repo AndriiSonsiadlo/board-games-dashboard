@@ -101,6 +101,31 @@ export function makeTable(id: number, number = id, overrides: Partial<TableFact>
   return { id, number, label: null, active: true, ...overrides };
 }
 
+/** Keys the public audience must never receive before the finale reveal. */
+export const FORBIDDEN_PUBLIC_KEYS = [
+  "points",
+  "base",
+  "rank",
+  "counted",
+  "raw",
+  "jokerDeclared",
+  "jokerUsed",
+  "gamesPlayed",
+  "wins",
+  "podiums",
+  "trend",
+  "countedSessionIds",
+  "excludedSessionIds",
+];
+
+export function keysDeep(value: unknown, path = "$"): Array<[string, string]> {
+  if (Array.isArray(value)) return value.flatMap((v, i) => keysDeep(v, `${path}[${i}]`));
+  if (value && typeof value === "object") {
+    return Object.entries(value).flatMap(([k, v]) => [[k, `${path}.${k}`] as [string, string], ...keysDeep(v, `${path}.${k}`)]);
+  }
+  return [];
+}
+
 /** players: [playerId, jokerDeclared?] */
 export function makeOpenSession(
   id: number,

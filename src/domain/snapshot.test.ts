@@ -1,5 +1,8 @@
 import { describe, expect, test } from "vitest";
+import { achievementDef } from "./achievements";
 import {
+  FORBIDDEN_PUBLIC_KEYS,
+  keysDeep,
   makeDoneSession,
   makeEvent,
   makeGame,
@@ -10,33 +13,6 @@ import {
 import { replay } from "./replay";
 import { buildAdminSnapshot, buildPublicSnapshot } from "./snapshot";
 import type { AnnouncementFact, EventFact, Facts } from "./types";
-
-const FORBIDDEN = [
-  "points",
-  "base",
-  "rank",
-  "counted",
-  "raw",
-  "jokerDeclared",
-  "jokerUsed",
-  "gamesPlayed",
-  "wins",
-  "podiums",
-  "trend",
-  "countedSessionIds",
-  "excludedSessionIds",
-];
-
-function keysDeep(value: unknown, path = "$"): Array<[string, string]> {
-  if (Array.isArray(value)) return value.flatMap((v, i) => keysDeep(v, `${path}[${i}]`));
-  if (value && typeof value === "object") {
-    return Object.entries(value).flatMap(([k, v]) => [
-      [k, `${path}.${k}`] as [string, string],
-      ...keysDeep(v, `${path}.${k}`),
-    ]);
-  }
-  return [];
-}
 
 const NOW = 10_000_000;
 
@@ -86,7 +62,7 @@ const reveal = (id: number, sessionId: number, createdAt = NOW - 10_000): Announ
 describe("public snapshot before finale", () => {
   test("contains no standings, points or joker fields anywhere", () => {
     const { pub } = build(facts({}, [reveal(1, 11)]));
-    const leaks = keysDeep(pub).filter(([key]) => FORBIDDEN.includes(key));
+    const leaks = keysDeep(pub).filter(([key]) => FORBIDDEN_PUBLIC_KEYS.includes(key));
     expect(leaks).toEqual([]);
     expect(pub.leaderboard).toBeNull();
     expect(pub.contenders).toBeNull();
@@ -110,13 +86,18 @@ describe("public snapshot before finale", () => {
       { playerId: 2, placement: 2 },
       { playerId: 3, placement: 3 },
     ]);
-    expect(pub.counters).toEqual({ gamesCompleted: 2, tablesActive: 2, players: 5 });
+    expect(pub.counters).toEqual({
+      gamesCompleted: 2,
+      tablesActive: 2,
+      players: 5,
+      achievementsUnlocked: build(facts()).admin.achievements.unlocks.length,
+    });
     expect(pub.players.map((p) => p.id)).toEqual([1, 2, 3, 4, 5]);
   });
 
   test("reveal points appear only inside announcements when enabled", () => {
     const { pub } = build(facts({ showPointsInReveals: true }, [reveal(1, 11)]));
-    const leaks = keysDeep(pub).filter(([key]) => FORBIDDEN.includes(key));
+    const leaks = keysDeep(pub).filter(([key]) => FORBIDDEN_PUBLIC_KEYS.includes(key));
     expect(leaks.length).toBeGreaterThan(0);
     expect(leaks.every(([, path]) => path.startsWith("$.announcements"))).toBe(true);
     expect(leaks.every(([key]) => key === "points")).toBe(true);
@@ -171,5 +152,92 @@ describe("admin snapshot", () => {
     expect(admin.event.scoring.bestN).toBe(4);
     expect(admin.players.find((p) => p.id === 6)).toMatchObject({ active: false, jokerUsed: false });
     expect(admin.allTables.map((t) => t.number)).toEqual([1, 2, 3, 4]);
+  });
+});
+
+const achievementAnnouncement = (id: number, achievementId: string, playerId: number): AnnouncementFact => ({
+  id,
+  type: "achievement",
+  payload: { sessionId: 10, playerId, achievementId },
+  createdAt: NOW - 5_000,
+});
+
+describe("achievements in snapshots", () => {
+  test("public sees public unlocks and only a sealed count; admin sees everything", () => {
+    const { pub, admin } = build(facts());
+    const sealed = (id: Parameters<typeof achievementDef>[0]) => achievementDef(id).sealed;
+    expect(admin.achievements.unlocks.some((u) => u.achievementId === "joker-master" && u.playerId === 1)).toBe(true);
+    expect(pub.achievements.unlocks.some((u) => u.achievementId === "opening-move" && u.playerId === 1)).toBe(true);
+    expect(pub.achievements.unlocks.every((u) => !sealed(u.achievementId))).toBe(true);
+    expect(pub.achievements.sealedUnlockCount).toBe(admin.achievements.unlocks.filter((u) => sealed(u.achievementId)).length);
+    expect(pub.achievements.sealedUnlockCount).toBeGreaterThan(0);
+    expect(pub.achievements.eligiblePlayers).toBe(3);
+    expect(pub.achievements.enabled).toHaveLength(22);
+    expect(pub.counters.achievementsUnlocked).toBe(admin.achievements.unlocks.length);
+  });
+
+  test("unlocks are newest first", () => {
+    const { admin } = build(facts());
+    const times = admin.achievements.unlocks.map((u) => u.at);
+    expect([...times].sort((a, b) => b - a)).toEqual(times);
+  });
+
+  test("disabled achievements disappear from the view", () => {
+    const f = { ...facts(), disabledAchievements: ["opening-move"] };
+    const { pub } = build(f);
+    expect(pub.achievements.enabled).not.toContain("opening-move");
+    expect(pub.achievements.unlocks.some((u) => u.achievementId === "opening-move")).toBe(false);
+  });
+
+  test("after the reveal, public unlocks include sealed ones", () => {
+    const { pub } = build(facts({ status: "finished", finaleRevealed: true }));
+    expect(pub.achievements.unlocks.some((u) => u.achievementId === "joker-master")).toBe(true);
+  });
+
+  test("achievement announcements: sealed and stale ones never reach the public", () => {
+    const f = facts({}, [
+      achievementAnnouncement(1, "opening-move", 1),
+      achievementAnnouncement(2, "joker-master", 1),
+      achievementAnnouncement(3, "hot-streak", 2),
+    ]);
+    const { pub, admin } = build(f);
+    expect(pub.announcements).toEqual([
+      { id: 1, createdAt: NOW - 5_000, type: "achievement", achievementId: "opening-move", playerId: 1, sessionId: 10 },
+    ]);
+    expect(admin.announcements.map((a) => a.id)).toEqual([1, 2]);
+  });
+});
+
+describe("finale views", () => {
+  test("no finale before the event is finished", () => {
+    const { pub, admin } = build(facts({ screenControl: { paused: false, skipNonce: 0, finaleStep: 3 } }));
+    expect(pub.finale).toBeNull();
+    expect(admin.finale).toBeNull();
+  });
+
+  test("finished at step 0: admin has the script, public has nothing", () => {
+    const { pub, admin } = build(facts({ status: "finished" }));
+    expect(pub.finale).toBeNull();
+    expect(admin.finale?.step).toBe(0);
+    expect(admin.finale?.current).toBeNull();
+    expect(admin.finale?.revealStep).toBe(admin.finale!.beats.findIndex((b) => b.kind === "podium") + 1);
+  });
+
+  test("public carries only the current beat and no standings fields before the reveal", () => {
+    const script = build(facts({ status: "finished" })).admin.finale!.beats;
+    const placeStep = script.findIndex((b) => b.kind === "place") + 1;
+    const championStep = script.findIndex((b) => b.kind === "champion") + 1;
+    for (const step of [1, 2, 3, placeStep, championStep]) {
+      const { pub } = build(facts({ status: "finished", screenControl: { paused: false, skipNonce: 0, finaleStep: step } }));
+      expect(pub.finale).toEqual({ step, total: script.length, current: script[step - 1] });
+      expect(pub.finale).not.toHaveProperty("beats");
+      expect(keysDeep(pub).filter(([key]) => FORBIDDEN_PUBLIC_KEYS.includes(key))).toEqual([]);
+    }
+  });
+
+  test("step is clamped to the script length", () => {
+    const { pub } = build(facts({ status: "finished", finaleRevealed: true, screenControl: { paused: false, skipNonce: 0, finaleStep: 99 } }));
+    expect(pub.finale?.step).toBe(pub.finale?.total);
+    expect(pub.finale?.current?.kind).toBe("closing");
   });
 });
