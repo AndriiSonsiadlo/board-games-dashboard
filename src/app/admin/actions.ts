@@ -4,6 +4,7 @@ import type { AuditEntry } from "@/domain/types";
 import type { ActionResult } from "@/lib/action";
 import { listAudit } from "@/server/repo/facts";
 import { runAdminAction } from "@/server/runAction";
+import { setAchievementEnabled } from "@/server/services/achievements";
 import { addTable, removeTable, updateGame, updateTable, type GamePatch } from "@/server/services/catalog";
 import {
   changePin,
@@ -19,6 +20,7 @@ import {
   type ScoringPatch,
   type ScreenPatch,
 } from "@/server/services/event";
+import { finaleCommand, setFinaleRevealed, type FinaleCommand } from "@/server/services/finale";
 import { addPlayer, bulkAddPlayers, mergePlayers, updatePlayer, type PlayerPatch } from "@/server/services/players";
 import {
   cancelSession,
@@ -190,4 +192,17 @@ export async function changePinAction(input: { current: string; next: string }):
 
 export async function clearDemoDataAction(): Result {
   return runAdminAction((db) => clearDemoData(db));
+}
+
+// Achievements and finale
+export async function setAchievementEnabledAction(input: { achievementId: string; enabled: boolean }): Result {
+  return runAdminAction((db) => setAchievementEnabled(db, input));
+}
+
+export async function finaleCommandAction(command: FinaleCommand): Result<{ step: number; total: number }> {
+  return runAdminAction((db) => finaleCommand(db, command));
+}
+
+export async function setFinaleRevealedAction(revealed: boolean): Result {
+  return runAdminAction((db) => setFinaleRevealed(db, revealed));
 }

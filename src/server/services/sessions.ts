@@ -15,6 +15,7 @@ import {
   updateSessionRow,
   writeSession,
 } from "../repo/writes";
+import { mutateResult } from "./achievements";
 import { ServiceError } from "./errors";
 import { mutate } from "./mutate";
 
@@ -220,7 +221,7 @@ export function cancelSession(db: Db, sessionId: number): void {
 }
 
 export function recordResult(db: Db, input: { sessionId: number; placements: PlacementEntry[] }): void {
-  mutate(db, (tx) => {
+  mutateResult(db, (tx) => {
     const facts = loadFacts(tx);
     const before = requireSession(facts, input.sessionId);
     requireStatus(before, "playing", "pending");
@@ -248,7 +249,7 @@ export function recordDirectResult(
   db: Db,
   input: { gameId: number; tableId: number | null; placements: DirectPlacement[] },
 ): number {
-  return mutate(db, (tx) => {
+  return mutateResult(db, (tx) => {
     const facts = loadFacts(tx);
     const game = requireGame(facts, input.gameId, false);
     if (input.tableId !== null) requireTable(facts, input.tableId, false);
@@ -292,7 +293,7 @@ export function editResult(
   db: Db,
   input: { sessionId: number; gameId: number; tableId: number | null; placements: DirectPlacement[] },
 ): void {
-  mutate(db, (tx) => {
+  mutateResult(db, (tx) => {
     const facts = loadFacts(tx);
     const before = requireSession(facts, input.sessionId);
     requireStatus(before, "done");
@@ -323,7 +324,7 @@ export function editResult(
 }
 
 export function deleteResult(db: Db, sessionId: number): void {
-  mutate(db, (tx) => {
+  mutateResult(db, (tx) => {
     const facts = loadFacts(tx);
     const before = requireSession(facts, sessionId);
     requireStatus(before, "done");
@@ -333,7 +334,7 @@ export function deleteResult(db: Db, sessionId: number): void {
 }
 
 export function correctJoker(db: Db, input: { sessionId: number; playerId: number; jokerDeclared: boolean }): void {
-  mutate(db, (tx) => {
+  mutateResult(db, (tx) => {
     const facts = loadFacts(tx);
     const before = requireSession(facts, input.sessionId);
     if (before.status === "cancelled") fail("invalid_status");
@@ -379,7 +380,7 @@ function assertRestorable(facts: Facts, target: SessionFact): void {
 }
 
 export function undoLast(db: Db): { action: AuditAction; summary: string } {
-  return mutate(db, (tx) => {
+  return mutateResult(db, (tx) => {
     const entry = lastUndoableAudit(tx) ?? fail("nothing_to_undo");
     const facts = loadFacts(tx);
     const reference = entry.before ?? entry.after ?? fail("undo_conflict");

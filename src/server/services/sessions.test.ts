@@ -394,7 +394,10 @@ describe("announcements and event state", () => {
     const id = playFullGame();
     showOnScreen(ctx.db, id);
     replayLastReveal(ctx.db);
-    expect(facts().announcements.map((a) => a.type)).toEqual(["result_reveal", "result_reveal"]);
+    expect(facts().announcements.filter((a) => a.type !== "achievement").map((a) => a.type)).toEqual([
+      "result_reveal",
+      "result_reveal",
+    ]);
     expectCode(() => showOnScreen(ctx.db, 999), "not_found");
   });
 
@@ -430,6 +433,6 @@ describe("announcements and event state", () => {
       "event_finished",
     );
     showOnScreen(ctx.db, id);
-    expect(facts().announcements).toHaveLength(1);
+    expect(facts().announcements.filter((a) => a.type !== "achievement")).toHaveLength(1);
   });
 });

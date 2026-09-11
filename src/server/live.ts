@@ -1,3 +1,4 @@
+import { buildProfile, type PlayerProfile } from "@/domain/profile";
 import { replay, type Replay } from "@/domain/replay";
 import { buildAdminSnapshot, buildPublicSnapshot, type AdminSnapshot, type PublicSnapshot } from "@/domain/snapshot";
 import type { Facts } from "@/domain/types";
@@ -32,4 +33,9 @@ export function getPublicSnapshot(db: Db, now = Date.now()): PublicSnapshot {
 export function getAdminSnapshot(db: Db, now = Date.now()): AdminSnapshot {
   const state = getLiveState(db);
   return buildAdminSnapshot(state.facts, state.replay, now);
+}
+
+export function getProfile(db: Db, playerId: number, audience: "public" | "admin"): PlayerProfile | null {
+  const state = getLiveState(db);
+  return buildProfile(state.facts, state.replay, playerId, audience);
 }
