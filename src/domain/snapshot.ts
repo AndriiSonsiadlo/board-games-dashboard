@@ -273,6 +273,7 @@ function announcements(facts: Facts, rp: Replay, now: number, withPoints: boolea
     .filter((a) => a.createdAt >= now - ANNOUNCEMENT_WINDOW_MS)
     .sort((a, b) => a.id - b.id)
     .flatMap((a): ScreenAnnouncement[] => {
+      if (a.type === "achievement") return [];
       if (a.type === "milestone") {
         return [{ id: a.id, createdAt: a.createdAt, type: "milestone", count: a.payload.count }];
       }

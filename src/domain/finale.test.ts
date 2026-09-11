@@ -15,6 +15,7 @@ function facts(sessions: SessionFact[], playerCount = 5): Facts {
     tables: [],
     sessions,
     announcements: [],
+    disabledAchievements: [],
   };
 }
 

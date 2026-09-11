@@ -110,7 +110,10 @@ export function writeSession(tx: Tx, fact: SessionFact): void {
 
 export function insertAnnouncement(
   tx: Tx,
-  value: { type: "result_reveal"; payload: { sessionId: number } } | { type: "milestone"; payload: { count: number } },
+  value:
+    | { type: "result_reveal"; payload: { sessionId: number } }
+    | { type: "milestone"; payload: { count: number } }
+    | { type: "achievement"; payload: { sessionId: number; playerId: number; achievementId: string } },
   createdAt: number,
 ): number {
   return tx
@@ -127,6 +130,13 @@ export function milestoneExists(tx: Tx, count: number): boolean {
     .where(eq(s.announcements.type, "milestone"))
     .all()
     .some((a) => a.payload.count === count);
+}
+
+export function upsertAchievementSetting(tx: Tx, achievementId: string, enabled: boolean): void {
+  tx.insert(s.achievementSettings)
+    .values({ achievementId, enabled })
+    .onConflictDoUpdate({ target: s.achievementSettings.achievementId, set: { enabled } })
+    .run();
 }
 
 export function insertAudit(

@@ -13,6 +13,7 @@ import {
   lastUndoableAudit,
   markAuditUndone,
   milestoneExists,
+  upsertAchievementSetting,
   writeSession,
 } from "./writes";
 
@@ -83,6 +84,25 @@ describe("version, announcements, audit, demo cleanup", () => {
     expect(milestoneExists(ctx.db, 10)).toBe(true);
     expect(milestoneExists(ctx.db, 25)).toBe(false);
     expect(loadFacts(ctx.db).announcements.map((a) => a.type)).toEqual(["result_reveal", "milestone"]);
+  });
+
+  test("achievement announcements round trip with their string id", () => {
+    insertAnnouncement(ctx.db, { type: "achievement", payload: { sessionId: 4, playerId: 2, achievementId: "phoenix" } }, 7);
+    expect(loadFacts(ctx.db).announcements[0]).toEqual({
+      id: expect.any(Number),
+      type: "achievement",
+      payload: { sessionId: 4, playerId: 2, achievementId: "phoenix" },
+      createdAt: 7,
+    });
+  });
+
+  test("achievement settings: only disabled ids are reported, upsert toggles", () => {
+    expect(loadFacts(ctx.db).disabledAchievements).toEqual([]);
+    upsertAchievementSetting(ctx.db, "marathon", false);
+    upsertAchievementSetting(ctx.db, "phoenix", false);
+    expect(loadFacts(ctx.db).disabledAchievements.sort()).toEqual(["marathon", "phoenix"]);
+    upsertAchievementSetting(ctx.db, "marathon", true);
+    expect(loadFacts(ctx.db).disabledAchievements).toEqual(["phoenix"]);
   });
 
   test("lastUndoableAudit skips undone and non-undoable entries", () => {

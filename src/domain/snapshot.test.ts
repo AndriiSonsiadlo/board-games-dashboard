@@ -67,6 +67,7 @@ function facts(event: Partial<EventFact> = {}, announcements: AnnouncementFact[]
       makeOpenSession(13, 2, 2, "setup", [[1], [2]]),
     ],
     announcements,
+    disabledAchievements: [],
   };
 }
 

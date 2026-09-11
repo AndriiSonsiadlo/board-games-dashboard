@@ -100,8 +100,8 @@ export const sessionPlayers = sqliteTable(
 
 export const announcements = sqliteTable("announcements", {
   id: integer().primaryKey({ autoIncrement: true }),
-  type: text({ enum: ["result_reveal", "milestone"] }).notNull(),
-  payload: text({ mode: "json" }).$type<Record<string, number>>().notNull(),
+  type: text({ enum: ["result_reveal", "milestone", "achievement"] }).notNull(),
+  payload: text({ mode: "json" }).$type<Record<string, number | string>>().notNull(),
   createdAt: integer().notNull(),
 });
 
@@ -113,4 +113,9 @@ export const auditLog = sqliteTable("audit_log", {
   before: text({ mode: "json" }).$type<SessionFact | null>(),
   after: text({ mode: "json" }).$type<SessionFact | null>(),
   undone: integer({ mode: "boolean" }).notNull().default(false),
+});
+
+export const achievementSettings = sqliteTable("achievement_settings", {
+  achievementId: text().primaryKey(),
+  enabled: integer({ mode: "boolean" }).notNull().default(true),
 });

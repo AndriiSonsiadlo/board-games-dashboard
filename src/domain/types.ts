@@ -98,7 +98,13 @@ export interface SessionFact {
 
 export type AnnouncementFact =
   | { id: number; type: "result_reveal"; payload: { sessionId: number }; createdAt: number }
-  | { id: number; type: "milestone"; payload: { count: number }; createdAt: number };
+  | { id: number; type: "milestone"; payload: { count: number }; createdAt: number }
+  | {
+      id: number;
+      type: "achievement";
+      payload: { sessionId: number; playerId: number; achievementId: string };
+      createdAt: number;
+    };
 
 export interface Facts {
   event: EventFact;
@@ -107,6 +113,8 @@ export interface Facts {
   tables: TableFact[];
   sessions: SessionFact[];
   announcements: AnnouncementFact[];
+  /** Achievement ids switched off in admin; every other achievement is enabled. */
+  disabledAchievements: string[];
 }
 
 export type AuditAction =

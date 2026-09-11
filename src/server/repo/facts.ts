@@ -1,10 +1,28 @@
 import { asc, desc, eq } from "drizzle-orm";
-import type { AuditEntry, Facts, SessionFact } from "@/domain/types";
+import type { AnnouncementFact, AuditEntry, Facts, SessionFact } from "@/domain/types";
 import type { Tx } from "../db/client";
 import * as s from "../db/schema";
 
 type SessionRow = typeof s.sessions.$inferSelect;
 type SessionPlayerRow = typeof s.sessionPlayers.$inferSelect;
+type AnnouncementRow = typeof s.announcements.$inferSelect;
+
+function toAnnouncementFact(a: AnnouncementRow): AnnouncementFact {
+  const num = (key: string) => (typeof a.payload[key] === "number" ? (a.payload[key] as number) : 0);
+  switch (a.type) {
+    case "milestone":
+      return { id: a.id, type: "milestone", payload: { count: num("count") }, createdAt: a.createdAt };
+    case "achievement":
+      return {
+        id: a.id,
+        type: "achievement",
+        payload: { sessionId: num("sessionId"), playerId: num("playerId"), achievementId: String(a.payload.achievementId ?? "") },
+        createdAt: a.createdAt,
+      };
+    default:
+      return { id: a.id, type: "result_reveal", payload: { sessionId: num("sessionId") }, createdAt: a.createdAt };
+  }
+}
 
 function toSessionFact(row: SessionRow, players: SessionPlayerRow[]): SessionFact {
   return {
@@ -61,7 +79,7 @@ export function loadFacts(tx: Tx): Facts {
     .select()
     .from(s.announcements)
     .orderBy(desc(s.announcements.id))
-    .limit(20)
+    .limit(50)
     .all();
 
   return {
@@ -92,11 +110,13 @@ export function loadFacts(tx: Tx): Facts {
     games: tx.select().from(s.games).orderBy(asc(s.games.weight), asc(s.games.name)).all(),
     tables: tx.select().from(s.tables).orderBy(asc(s.tables.number)).all(),
     sessions: sessionRows.map((row) => toSessionFact(row, seatRows)),
-    announcements: announcementRows.map((a) =>
-      a.type === "milestone"
-        ? { id: a.id, type: "milestone" as const, payload: { count: a.payload.count ?? 0 }, createdAt: a.createdAt }
-        : { id: a.id, type: "result_reveal" as const, payload: { sessionId: a.payload.sessionId ?? 0 }, createdAt: a.createdAt },
-    ),
+    announcements: announcementRows.map(toAnnouncementFact),
+    disabledAchievements: tx
+      .select({ id: s.achievementSettings.achievementId })
+      .from(s.achievementSettings)
+      .where(eq(s.achievementSettings.enabled, false))
+      .all()
+      .map((r) => r.id),
   };
 }
 
