@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { ACHIEVEMENT_IDS } from "@/domain/achievements";
 import { en } from "./en";
 import { fmt, getDict, isLang, ordinal, plural } from "./index";
 import { ru } from "./ru";
@@ -35,6 +36,22 @@ describe("dictionaries", () => {
     expect(getDict("en")).toBe(en);
     expect(isLang("ru")).toBe(true);
     expect(isLang("de")).toBe(false);
+  });
+
+  test("every achievement has a title and description in both languages", () => {
+    for (const dict of [en, ru]) {
+      expect(Object.keys(dict.achievements.defs).sort()).toEqual([...ACHIEVEMENT_IDS].sort());
+      for (const id of ACHIEVEMENT_IDS) {
+        expect(dict.achievements.defs[id].title.trim()).not.toBe("");
+        expect(dict.achievements.defs[id].description.trim()).not.toBe("");
+      }
+    }
+  });
+
+  test("Russian sealed-unlock plural", () => {
+    expect(plural("ru", 1, ru.plurals.sealedUnlocks)).toBe("скрытое достижение");
+    expect(plural("ru", 3, ru.plurals.sealedUnlocks)).toBe("скрытых достижения");
+    expect(plural("ru", 5, ru.plurals.sealedUnlocks)).toBe("скрытых достижений");
   });
 });
 
