@@ -53,6 +53,15 @@ describe("dictionaries", () => {
     expect(plural("ru", 3, ru.plurals.sealedUnlocks)).toBe("скрытых достижения");
     expect(plural("ru", 5, ru.plurals.sealedUnlocks)).toBe("скрытых достижений");
   });
+
+  test("tier 3 plurals and templates", () => {
+    expect(plural("ru", 5, ru.plurals.wins)).toBe("побед");
+    expect(plural("ru", 3, ru.plurals.times)).toBe("раза");
+    expect(plural("ru", 21, ru.plurals.achievements)).toBe("достижение");
+    expect(plural("en", 1, en.plurals.minutes)).toBe("minute");
+    expect(fmt(en.timeline.result, { winners: "Amy", game: "Uno" })).toBe("Amy won Uno");
+    expect(fmt(ru.home.hotStreak, { n: 3 })).toBe("Побед подряд: 3");
+  });
 });
 
 describe("helpers", () => {
