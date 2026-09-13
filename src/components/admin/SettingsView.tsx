@@ -1,6 +1,7 @@
 "use client";
 
 import { Download } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import {
   changePinAction,
@@ -150,6 +151,12 @@ function Lifecycle() {
       ) : null}
       {status === "finished" ? (
         <>
+          <Link
+            href="/admin/finale"
+            className="flex h-14 w-full items-center justify-center rounded-md bg-accent font-display uppercase tracking-[0.08em] text-bg"
+          >
+            {t.settings.event.openFinale}
+          </Link>
           <p className="text-sm text-muted">{t.settings.event.reopenHint}</p>
           <ConfirmButton
             variant="secondary"

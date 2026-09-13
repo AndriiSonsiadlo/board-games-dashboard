@@ -18,6 +18,7 @@ import { ConfirmButton } from "../ui/ConfirmButton";
 import { ResultSheet, type ResultTarget } from "./ResultSheet";
 import { ScreenRemote } from "./ScreenRemote";
 import { SeatSheet } from "./SeatSheet";
+import { UnlockFeed } from "./UnlockFeed";
 import { useRunner } from "./useRunner";
 
 type AdminTable = TableView<AdminSeatView>;
@@ -48,6 +49,7 @@ export function ControlRoom() {
       ) : null}
 
       <ScreenRemote />
+      <UnlockFeed />
 
       {snapshot.tables.length === 0 ? (
         <p className="text-muted">{t.room.noTables}</p>

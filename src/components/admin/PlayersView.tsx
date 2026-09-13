@@ -1,6 +1,7 @@
 "use client";
 
 import { ListPlus, Pencil, Spade } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useMemo, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { addPlayerAction, bulkAddPlayersAction } from "@/app/admin/actions";
@@ -120,7 +121,9 @@ export function PlayersView() {
             <Avatar name={p.name} color={p.color} />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="truncate">{p.name}</span>
+                <Link href={`/players/${p.id}`} target="_blank" className="truncate hover:text-accent">
+                  {p.name}
+                </Link>
                 {p.nickname ? <span className="text-sm text-muted">{p.nickname}</span> : null}
               </div>
               <div className="mt-1 flex flex-wrap gap-1.5">

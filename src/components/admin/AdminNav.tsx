@@ -1,6 +1,6 @@
 "use client";
 
-import { Armchair, Dices, Eye, LayoutGrid, ListOrdered, LogOut, Menu, MonitorPlay, Settings, Trophy, Users, type LucideIcon } from "lucide-react";
+import { Armchair, Award, Crown, Dices, Eye, LayoutGrid, ListOrdered, LogOut, Menu, MonitorPlay, Settings, Trophy, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -34,6 +34,8 @@ export function AdminNav() {
   const secondary: Item[] = [
     { href: "/admin/games", label: t.nav.games, icon: Dices },
     { href: "/admin/tables", label: t.nav.tables, icon: Armchair },
+    { href: "/admin/achievements", label: t.nav.achievements, icon: Award },
+    { href: "/admin/finale", label: t.nav.finale, icon: Crown },
     { href: "/admin/settings", label: t.nav.settings, icon: Settings },
     { href: "/screen", label: t.nav.screen, icon: MonitorPlay, external: true },
     { href: "/", label: t.nav.publicSite, icon: Eye, external: true },
