@@ -11,6 +11,7 @@ import { usePublicLive } from "../live/LiveProvider";
 import { EASE } from "../motion/FadeRise";
 import { AnnouncementPlayer } from "./AnnouncementPlayer";
 import { availableScenes } from "./logic";
+import { SceneAchievements } from "./scenes/SceneAchievements";
 import { SceneContenders } from "./scenes/SceneContenders";
 import { SceneCounters } from "./scenes/SceneCounters";
 import { SceneRecent } from "./scenes/SceneRecent";
@@ -26,6 +27,7 @@ const SCENES: Record<SceneId, (props: { snapshot: PublicSnapshot }) => React.Rea
   room: SceneRoom,
   recent: SceneRecent,
   counters: SceneCounters,
+  achievements: SceneAchievements,
   contenders: SceneContenders,
 };
 

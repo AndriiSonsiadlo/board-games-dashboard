@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { GameFact } from "@/domain/types";
+import { DEFAULT_SCENES, type GameFact } from "@/domain/types";
 import { hashPin, randomSecret } from "../auth/pin";
 import type { Db } from "../db/client";
 import * as s from "../db/schema";
@@ -139,7 +139,12 @@ export function seedBase(db: Db, opts: { adminPin: string; tableCount?: number }
     const existing = tx.select({ id: s.event.id }).from(s.event).where(eq(s.event.id, 1)).get();
     if (!existing) {
       tx.insert(s.event)
-        .values({ id: 1, adminPinHash: hashPin(opts.adminPin), sessionSecret: randomSecret() })
+        .values({
+          id: 1,
+          adminPinHash: hashPin(opts.adminPin),
+          sessionSecret: randomSecret(),
+          enabledScenes: [...DEFAULT_SCENES],
+        })
         .run();
     }
 

@@ -15,6 +15,13 @@
       "when": 1789599798725,
       "tag": "0001_achievement_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789635713397,
+      "tag": "0002_enable_achievements_scene",
+      "breakpoints": true
     }
   ]
 }

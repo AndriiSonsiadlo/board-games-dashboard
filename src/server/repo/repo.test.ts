@@ -34,7 +34,7 @@ describe("base seed", () => {
       participationFloor: 0.2,
       jokerMultiplier: 1.5,
     });
-    expect(facts.event.enabledScenes).toEqual(["title", "room", "recent", "counters"]);
+    expect(facts.event.enabledScenes).toEqual(["title", "room", "recent", "counters", "achievements"]);
     expect(facts.tables).toHaveLength(3);
     expect(facts.games).toHaveLength(9);
     expect(facts.games[0].slug).toBe("uno");

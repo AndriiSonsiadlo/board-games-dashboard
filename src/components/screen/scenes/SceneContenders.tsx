@@ -13,7 +13,7 @@ export function SceneContenders({ snapshot }: { snapshot: PublicSnapshot }) {
 
   return (
     <div className="flex h-full flex-col px-[120px] pt-[110px] pb-[150px]">
-      <SceneHeading index="04" title={t.screen.contenders} note={t.screen.contendersNote} />
+      <SceneHeading index="05" title={t.screen.contenders} note={t.screen.contendersNote} />
       <div className="flex flex-1 flex-col justify-center gap-6">
         {(snapshot.contenders ?? []).map((id, i) => {
           const p = lookups.players.get(id);

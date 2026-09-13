@@ -1,19 +1,27 @@
-import { expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import type { ScreenAnnouncement } from "@/domain/snapshot";
-import { availableScenes, nextAnnouncements, podiumSlots, revealTimeline } from "./logic";
+import { availableScenes, nextAnnouncements, pickNext, podiumSlots, revealTimeline } from "./logic";
 
 const result = { sessionId: 1, gameId: 1, tableId: 1, startedAt: 0, finishedAt: 0, durationMin: null, placements: [] };
 
+const noAchievements = { enabled: [], unlocks: [], sealedUnlockCount: 0, eligiblePlayers: 0 };
+
 test("availableScenes drops empty scenes and never returns an empty list", () => {
-  expect(availableScenes(["title", "recent", "contenders", "room"], { recentResults: [], contenders: null })).toEqual([
-    "title",
-    "room",
-  ]);
-  expect(availableScenes(["recent", "contenders"], { recentResults: [result], contenders: [3] })).toEqual([
-    "recent",
-    "contenders",
-  ]);
-  expect(availableScenes(["recent"], { recentResults: [], contenders: [] })).toEqual(["title"]);
+  expect(
+    availableScenes(["title", "recent", "contenders", "room", "achievements"], {
+      recentResults: [],
+      contenders: null,
+      achievements: noAchievements,
+    }),
+  ).toEqual(["title", "room"]);
+  expect(
+    availableScenes(["recent", "contenders", "achievements"], {
+      recentResults: [result],
+      contenders: [3],
+      achievements: { ...noAchievements, sealedUnlockCount: 1 },
+    }),
+  ).toEqual(["recent", "contenders", "achievements"]);
+  expect(availableScenes(["recent"], { recentResults: [], contenders: [], achievements: noAchievements })).toEqual(["title"]);
 });
 
 test("nextAnnouncements keeps unseen, recent announcements in id order", () => {
@@ -58,4 +66,41 @@ test("podiumSlots groups ties and orders 2nd, 1st, 3rd", () => {
     { placement: 1, playerIds: [5, 6] },
     { placement: 3, playerIds: [7] },
   ]);
+});
+
+describe("pickNext", () => {
+  const card = (id: number, sessionId: number, createdAt: number): ScreenAnnouncement => ({
+    id,
+    createdAt,
+    type: "achievement",
+    achievementId: "catan-lord",
+    playerId: 1,
+    sessionId,
+  });
+  const revealOf = (id: number, sessionId: number): ScreenAnnouncement => ({
+    id,
+    createdAt: 0,
+    type: "result_reveal",
+    result: { ...result, sessionId },
+  });
+  const milestone: ScreenAnnouncement = { id: 9, createdAt: 0, type: "milestone", count: 10 };
+
+  test("plays non-achievement items in order", () => {
+    expect(pickNext([milestone], 0)?.id).toBe(9);
+    expect(pickNext([], 0)).toBeNull();
+  });
+
+  test("holds a fresh achievement, then plays it", () => {
+    expect(pickNext([card(1, 5, 10_000)], 20_000, 15_000)).toBeNull();
+    expect(pickNext([card(1, 5, 10_000)], 25_000, 15_000)?.id).toBe(1);
+  });
+
+  test("a queued reveal of the same game always goes first", () => {
+    expect(pickNext([card(1, 5, 0), revealOf(2, 5)], 60_000, 15_000)?.id).toBe(2);
+    expect(pickNext([card(1, 5, 0), revealOf(2, 6)], 60_000, 15_000)?.id).toBe(1);
+  });
+
+  test("other announcements are not blocked by a held achievement", () => {
+    expect(pickNext([card(1, 5, 10_000), milestone], 11_000, 15_000)?.id).toBe(9);
+  });
 });

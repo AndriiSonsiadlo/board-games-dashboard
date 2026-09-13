@@ -3,11 +3,14 @@ import type { SceneId } from "@/domain/types";
 
 export function availableScenes(
   enabled: SceneId[],
-  snapshot: Pick<PublicSnapshot, "recentResults" | "contenders">,
+  snapshot: Pick<PublicSnapshot, "recentResults" | "contenders" | "achievements">,
 ): SceneId[] {
   const scenes = enabled.filter((scene) => {
     if (scene === "recent") return snapshot.recentResults.length > 0;
     if (scene === "contenders") return (snapshot.contenders?.length ?? 0) > 0;
+    if (scene === "achievements") {
+      return snapshot.achievements.unlocks.length > 0 || snapshot.achievements.sealedUnlockCount > 0;
+    }
     return true;
   });
   return scenes.length > 0 ? scenes : ["title"];
@@ -51,4 +54,24 @@ export function podiumSlots(
     placement,
     playerIds: placements.filter((p) => p.placement === placement).map((p) => p.playerId),
   })).filter((slot) => slot.playerIds.length > 0);
+}
+
+export const ACHIEVEMENT_HOLD_MS = 15_000;
+
+/**
+ * Next announcement to play from a queue in id order. Achievement cards wait a moment after
+ * they were created so that "Show on screen" for the same game can play the reveal first;
+ * a reveal already queued for that game always goes first.
+ */
+export function pickNext(
+  queue: ScreenAnnouncement[],
+  now: number,
+  holdMs = ACHIEVEMENT_HOLD_MS,
+): ScreenAnnouncement | null {
+  for (const item of queue) {
+    if (item.type !== "achievement") return item;
+    const revealQueued = queue.some((q) => q.type === "result_reveal" && q.result.sessionId === item.sessionId);
+    if (!revealQueued && now - item.createdAt >= holdMs) return item;
+  }
+  return null;
 }

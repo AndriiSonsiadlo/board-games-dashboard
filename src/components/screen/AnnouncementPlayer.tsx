@@ -3,7 +3,8 @@
 import { AnimatePresence } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PublicSnapshot, ScreenAnnouncement } from "@/domain/snapshot";
-import { nextAnnouncements } from "./logic";
+import { AchievementCard } from "./AchievementCard";
+import { nextAnnouncements, pickNext } from "./logic";
 import { MilestoneCard } from "./MilestoneCard";
 import { ResultReveal } from "./ResultReveal";
 
@@ -34,6 +35,8 @@ export function AnnouncementPlayer({
   onActiveChange: (active: boolean) => void;
 }) {
   const [queue, setQueue] = useState<ScreenAnnouncement[]>([]);
+  const [current, setCurrent] = useState<ScreenAnnouncement | null>(null);
+  const [tick, setTick] = useState(0);
   const seen = useRef<number | null>(null);
 
   useEffect(() => {
@@ -45,13 +48,25 @@ export function AnnouncementPlayer({
     setQueue((q) => [...q, ...fresh]);
   }, [snapshot.announcements]);
 
-  const current = queue[0];
+  useEffect(() => {
+    if (current || queue.length === 0) return;
+    const id = setTimeout(() => {
+      const next = pickNext(queue, Date.now());
+      if (!next) {
+        setTick((n) => n + 1);
+        return;
+      }
+      setQueue((q) => q.filter((item) => item.id !== next.id));
+      setCurrent(next);
+    }, 400);
+    return () => clearTimeout(id);
+  }, [current, queue, tick]);
 
   useEffect(() => {
     onActiveChange(Boolean(current));
   }, [current, onActiveChange]);
 
-  const done = useCallback(() => setQueue((q) => q.slice(1)), []);
+  const done = useCallback(() => setCurrent(null), []);
 
   return (
     <AnimatePresence>
@@ -59,6 +74,15 @@ export function AnnouncementPlayer({
         <ResultReveal key={current.id} snapshot={snapshot} result={current.result} onDone={done} />
       ) : null}
       {current?.type === "milestone" ? <MilestoneCard key={current.id} count={current.count} onDone={done} /> : null}
+      {current?.type === "achievement" ? (
+        <AchievementCard
+          key={current.id}
+          snapshot={snapshot}
+          achievementId={current.achievementId}
+          playerId={current.playerId}
+          onDone={done}
+        />
+      ) : null}
     </AnimatePresence>
   );
 }
