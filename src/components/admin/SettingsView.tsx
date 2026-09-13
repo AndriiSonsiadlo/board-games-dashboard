@@ -1,6 +1,6 @@
 "use client";
 
-import { Download } from "lucide-react";
+import { Download, QrCode } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -100,6 +100,13 @@ export function SettingsView({ addresses, port }: { addresses: { name: string; a
       </Section>
       <Section title={t.settings.network.title}>
         <Network addresses={addresses} port={port} />
+        <Link
+          href="/admin/qr"
+          className="inline-flex h-11 items-center gap-2 rounded-md border border-line-strong bg-surface-2 px-4 font-display text-sm uppercase tracking-[0.08em]"
+        >
+          <QrCode className="size-4" />
+          {t.settings.network.qrSheet}
+        </Link>
       </Section>
       <Section title={t.settings.security.title}>
         <PinChange />

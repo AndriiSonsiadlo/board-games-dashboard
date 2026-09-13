@@ -132,3 +132,11 @@
 @utility animate-hairline-scan {
   animation: hairline-scan var(--scene-ms, 12000ms) linear both;
 }
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+}
