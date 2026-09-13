@@ -17,7 +17,10 @@ npm run dev                   # http://localhost:3000
 | `/` | Participants: live room, recent results, check-in |
 | `/checkin` | Self check-in |
 | `/leaderboard` | Sealed until the finale |
+| `/achievements` | Achievements, rarity and who unlocked them (sealed ones hidden until the finale) |
+| `/players/<id>` | Player profile; standings part appears after the finale (or for the organizer) |
 | `/screen` | Projector (always anonymous) |
+| `/screen?rehearsal=1` | Finale rehearsal with placeholder names (add `&lang=ru` for Russian) |
 | `/admin` | Organizer (PIN) |
 
 ## Event night on Windows
@@ -82,7 +85,8 @@ src/i18n       English and Russian dictionaries.
 | `tables` | Number, label, active |
 | `sessions` | One game at one table: status setup → playing → pending → done (or cancelled), timestamps |
 | `session_players` | Seat order, Joker declared, placement |
-| `announcements` | Queue for the projector (result reveals, milestones) |
+| `announcements` | Queue for the projector (result reveals, achievement unlocks, milestones) |
+| `achievement_settings` | Achievements switched off by the organizer (missing row = enabled) |
 | `audit_log` | Result create/update/delete, Joker corrections, merges, undo (with before/after JSON) |
 
 ## Scoring
@@ -112,11 +116,19 @@ Standings are secret until the finale. The server builds two different snapshots
 
 `/screen` always requests the public snapshot, even in a browser logged in as admin. A unit test asserts no forbidden fields exist in the public snapshot. Optional exceptions, both controlled in Settings: per-game points inside a result reveal, and the Contenders scene (top five in alphabetical order, no ranks).
 
-**Tier 1 note:** there is no in-app "reveal the finale" action yet (that's Tier 2 work) — `/leaderboard` stays sealed and `/screen` never shows points or ranks for the entire event. Organizers who want to share final standings at the end of the night can do so manually via `/admin/leaderboard` on their own screen (e.g. mirroring/casting the admin laptop, or reading results aloud).
+Achievements are recomputed from results like points, so a correction or undo also corrects them. Public achievements are announced on the projector a few seconds after a result (after its reveal, if you press "Show on screen"). Five achievements are sealed (Comeback, Underdog, Giant Slayer, Joker Master, Risk Taker): until the finale only their total count is public.
 
 ## Projector mode
 
-`/screen` renders a fixed 1920×1080 stage scaled to any display. Scenes rotate (Title, Live room, Recent results, Event stats, optional Contenders) with a configurable duration. The control room's Projector bar pauses, resumes or skips scenes and replays the last result. "Show on screen" after a result queues a reveal: game title, places from last to second, then the winner. Milestones play at 10, 25, 50, 75 and 100 games.
+`/screen` renders a fixed 1920×1080 stage scaled to any display. Scenes rotate (Title, Live room, Recent results, Event stats, Achievements, optional Contenders) with a configurable duration. The control room's Projector bar pauses, resumes or skips scenes and replays the last result. "Show on screen" after a result queues a reveal: game title, places from last to second, then the winner, then a podium hold. Milestones play at 10, 25, 50, 75 and 100 games. Achievement unlocks play as their own cards a few seconds later, holding back until any reveal of the same game has played first.
+
+## Finale
+
+1. Close all tables, then Settings → Finish event → Open finale remote (`/admin/finale`).
+2. Each Next advances the projector: event complete, the evening in numbers, sealed achievements one by one, 3rd place, 2nd place, champion (co-champions when counted points, wins and raw points are equal), final standings, closing card.
+3. The final standings step makes standings public on every phone and `/leaderboard`. The "Standings public" switch can undo or force that.
+4. Auto-advance moves every 10 s. "Back to scenes" returns the projector to rotation.
+5. Rehearse beforehand at `/screen?rehearsal=1` (Space or arrow keys); it never touches real data. Reopening the event resets the finale.
 
 ## Where to change things
 
@@ -128,6 +140,7 @@ Standings are secret until the finale. The server builds two different snapshots
 | Event name, city, year, accent color | Admin → Settings → Event |
 | Colors, radii, fonts | `src/app/globals.css` (`@theme` tokens), fonts in `src/app/layout.tsx` |
 | Text (English/Russian) | `src/i18n/en.ts`, `src/i18n/ru.ts` |
+| Achievement on/off | Admin → Achievements; rules in `src/domain/achievements.ts` |
 
 ## Troubleshooting
 
@@ -138,5 +151,4 @@ Standings are secret until the finale. The server builds two different snapshots
 
 ## Roadmap
 
-- Tier 2: cinematic result celebration, achievements with unlock announcements, finale ceremony, player profiles.
 - Tier 3: statistics page, event timeline, QR code sheet, hot-streak markers.
