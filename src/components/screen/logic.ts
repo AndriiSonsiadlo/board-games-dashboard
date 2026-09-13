@@ -26,15 +26,29 @@ const TITLE_MS = 2200;
 const FIRST_PLACE_MS = 2600;
 const STEP_MS = 900;
 const WINNER_PAUSE_MS = 700;
-const WINNER_HOLD_MS = 5000;
+const WINNER_HOLD_MS = 4000;
+const PODIUM_HOLD_MS = 3000;
 
 export function revealTimeline(nonWinnerCount: number) {
   const winnerMs = FIRST_PLACE_MS + nonWinnerCount * STEP_MS + WINNER_PAUSE_MS;
+  const podiumMs = winnerMs + WINNER_HOLD_MS;
   return {
     titleMs: TITLE_MS,
     firstPlaceMs: FIRST_PLACE_MS,
     stepMs: STEP_MS,
     winnerMs,
-    doneMs: winnerMs + WINNER_HOLD_MS,
+    podiumMs,
+    doneMs: podiumMs + PODIUM_HOLD_MS,
   };
+}
+
+const PODIUM_ORDER = [2, 1, 3] as const;
+
+export function podiumSlots(
+  placements: { playerId: number; placement: number }[],
+): { placement: 1 | 2 | 3; playerIds: number[] }[] {
+  return PODIUM_ORDER.map((placement) => ({
+    placement,
+    playerIds: placements.filter((p) => p.placement === placement).map((p) => p.playerId),
+  })).filter((slot) => slot.playerIds.length > 0);
 }
