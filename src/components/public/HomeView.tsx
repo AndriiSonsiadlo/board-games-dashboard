@@ -1,18 +1,20 @@
 "use client";
 
-import { ArrowRight, Lock, UserPlus } from "lucide-react";
+import { ArrowRight, Award, Lock, UserPlus, UserRound } from "lucide-react";
 import Link from "next/link";
 import { ordinal, fmt } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
 import { formatClock, pad2 } from "@/lib/format";
 import { BrandMark } from "../brand/Wordmark";
+import { AchievementIcon } from "../common/AchievementIcon";
 import { ElapsedClock } from "../common/ElapsedClock";
 import { GameIcon } from "../common/GameIcon";
 import { StateLabel } from "../common/StateLabel";
 import { usePublicLookups } from "../common/lookups";
 import { usePublicLive } from "../live/LiveProvider";
 import { FadeRise } from "../motion/FadeRise";
+import { FindMe } from "./FindMe";
 import { useCheckedIn } from "./useCheckedIn";
 
 function SectionTitle({ index, children }: { index: string; children: React.ReactNode }) {
@@ -48,10 +50,14 @@ export function HomeView() {
         <p className="max-w-md text-muted">{t.home.subtitle}</p>
         <div className="flex flex-wrap gap-2">
           {me ? (
-            <span className="inline-flex h-11 items-center gap-2 rounded-md border border-line px-4 text-sm">
-              <span className="size-2 rounded-full bg-up" />
-              {fmt(t.home.checkedInAs, { name: me.name })}
-            </span>
+            <Link
+              href={`/players/${me.id}`}
+              className="inline-flex h-11 items-center gap-2 rounded-md border border-line px-4 text-sm"
+            >
+              <UserRound className="size-4 text-up" />
+              {t.home.myProfile}
+              <span className="text-muted">· {me.name}</span>
+            </Link>
           ) : snapshot.event.status !== "finished" ? (
             <Link
               href="/checkin"
@@ -69,16 +75,24 @@ export function HomeView() {
             {t.home.standings}
             <ArrowRight className="size-4" />
           </Link>
+          <Link
+            href="/achievements"
+            className="inline-flex h-11 items-center gap-2 rounded-md border border-line-strong px-4 font-display text-sm uppercase tracking-[0.08em]"
+          >
+            <Award className="size-4" />
+            {t.home.achievements}
+          </Link>
         </div>
       </FadeRise>
 
-      <section className="grid grid-cols-3 divide-x divide-line border-y border-line">
+      <section className="grid grid-cols-2 border-y border-line sm:grid-cols-4">
         {[
           { label: t.home.gamesCompleted, value: snapshot.counters.gamesCompleted },
           { label: t.home.tablesActive, value: snapshot.counters.tablesActive },
           { label: t.home.players, value: snapshot.counters.players },
+          { label: t.home.achievementsUnlocked, value: snapshot.counters.achievementsUnlocked },
         ].map((c) => (
-          <div key={c.label} className="px-3 py-5 first:pl-0">
+          <div key={c.label} className="py-5 pr-3">
             <div className="font-display text-4xl tabular sm:text-5xl">{c.value}</div>
             <div className="mt-1 text-xs text-muted">{c.label}</div>
           </div>
@@ -142,7 +156,12 @@ export function HomeView() {
                       <span className={cn("font-mono text-xs", p.placement === 1 ? "text-accent" : "text-muted")}>
                         {ordinal(lang, p.placement)}
                       </span>
-                      <span className={p.placement === 1 ? "text-text" : "text-text/80"}>{lookups.players.get(p.playerId)?.name}</span>
+                      <Link
+                        href={`/players/${p.playerId}`}
+                        className={cn("hover:text-accent", p.placement === 1 ? "text-text" : "text-text/80")}
+                      >
+                        {lookups.players.get(p.playerId)?.name}
+                      </Link>
                     </li>
                   ))}
                 </ol>
@@ -150,6 +169,30 @@ export function HomeView() {
             );
           })}
         </ul>
+      </section>
+
+      <section className="space-y-4">
+        <SectionTitle index="03">{t.home.latestUnlocks}</SectionTitle>
+        {snapshot.achievements.unlocks.length === 0 ? <p className="text-muted">{t.achievements.none}</p> : null}
+        <ul className="divide-y divide-line">
+          {snapshot.achievements.unlocks.slice(0, 5).map((u) => (
+            <li key={`${u.achievementId}:${u.playerId}`} className="flex items-center gap-3 py-3">
+              <AchievementIcon id={u.achievementId} className="size-4 shrink-0 text-accent" />
+              <span className="font-display uppercase tracking-wide">{t.achievements.defs[u.achievementId].title}</span>
+              <Link href={`/players/${u.playerId}`} className="truncate text-sm text-muted hover:text-text">
+                {lookups.players.get(u.playerId)?.name}
+              </Link>
+              <span className="ml-auto font-mono text-xs text-muted" suppressHydrationWarning>
+                {formatClock(u.at)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="space-y-4">
+        <SectionTitle index="04">{t.home.findMe}</SectionTitle>
+        <FindMe players={snapshot.players} />
       </section>
     </div>
   );
