@@ -161,6 +161,23 @@ export function markAuditUndone(tx: Tx, id: number): void {
   tx.update(s.auditLog).set({ undone: true }).where(eq(s.auditLog.id, id)).run();
 }
 
+/** Announcements about deleted demo games/players, and milestones the remaining results have not reached. */
+function deleteDemoAnnouncements(tx: Tx, sessionIds: Set<number>, playerIds: Set<number>): void {
+  const remainingResults = tx.select({ id: s.sessions.id }).from(s.sessions).where(eq(s.sessions.status, "done")).all().length;
+  const stale = tx
+    .select()
+    .from(s.announcements)
+    .all()
+    .filter((a) => {
+      const payload = a.payload;
+      if (a.type === "milestone") return typeof payload.count === "number" && payload.count > remainingResults;
+      if (typeof payload.sessionId === "number" && sessionIds.has(payload.sessionId)) return true;
+      return typeof payload.playerId === "number" && playerIds.has(payload.playerId);
+    })
+    .map((a) => a.id);
+  if (stale.length > 0) tx.delete(s.announcements).where(inArray(s.announcements.id, stale)).run();
+}
+
 export function deleteDemoData(tx: Tx): void {
   const demoIds = tx
     .select({ id: s.players.id })
@@ -182,9 +199,17 @@ export function deleteDemoData(tx: Tx): void {
     if (seatedElsewhere) throw new ServiceError("demo_player_in_use");
   }
 
+  const demoSessionIds = tx
+    .select({ id: s.sessions.id })
+    .from(s.sessions)
+    .where(eq(s.sessions.isDemo, true))
+    .all()
+    .map((r) => r.id);
+
   tx.delete(s.sessions).where(eq(s.sessions.isDemo, true)).run();
   if (demoIds.length > 0) {
     tx.delete(s.sessionPlayers).where(inArray(s.sessionPlayers.playerId, demoIds)).run();
     tx.delete(s.players).where(inArray(s.players.id, demoIds)).run();
   }
+  deleteDemoAnnouncements(tx, new Set(demoSessionIds), new Set(demoIds));
 }

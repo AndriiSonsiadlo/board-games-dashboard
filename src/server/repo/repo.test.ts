@@ -161,4 +161,30 @@ describe("version, announcements, audit, demo cleanup", () => {
     expect(facts.players.map((p) => p.name).sort()).toEqual(["Demo", "Real"]);
     expect(facts.sessions).toHaveLength(2);
   });
+
+  test("deleteDemoData also removes announcements about demo games or players and milestones past the remaining results", () => {
+    const now = Date.now();
+    const real = insertPlayer(ctx.db, { name: "Real", nickname: null, color: "#fff", source: "admin", createdAt: now });
+    const real2 = insertPlayer(ctx.db, { name: "Real 2", nickname: null, color: "#fff", source: "admin", createdAt: now });
+    const demo = insertPlayer(ctx.db, { name: "Demo", nickname: null, color: "#fff", source: "admin", isDemo: true, createdAt: now });
+    const demoGame = insertSession(ctx.db, { gameId: 1, status: "done", createdAt: now, isDemo: true }, [
+      { playerId: demo, seat: 0, jokerDeclared: false, placement: 1 },
+      { playerId: real, seat: 1, jokerDeclared: false, placement: 2 },
+    ]);
+    const realGame = insertSession(ctx.db, { gameId: 1, status: "done", createdAt: now, isDemo: false }, [
+      { playerId: real, seat: 0, jokerDeclared: false, placement: 1 },
+      { playerId: real2, seat: 1, jokerDeclared: false, placement: 2 },
+    ]);
+    const keepReveal = insertAnnouncement(ctx.db, { type: "result_reveal", payload: { sessionId: realGame } }, 1);
+    insertAnnouncement(ctx.db, { type: "result_reveal", payload: { sessionId: demoGame } }, 2);
+    insertAnnouncement(ctx.db, { type: "achievement", payload: { sessionId: demoGame, playerId: real, achievementId: "phoenix" } }, 3);
+    insertAnnouncement(ctx.db, { type: "achievement", payload: { sessionId: realGame + 100, playerId: demo, achievementId: "marathon" } }, 4);
+    const keepMilestone = insertAnnouncement(ctx.db, { type: "milestone", payload: { count: 1 } }, 5);
+    insertAnnouncement(ctx.db, { type: "milestone", payload: { count: 2 } }, 6);
+
+    deleteDemoData(ctx.db);
+
+    expect(loadFacts(ctx.db).announcements.map((a) => a.id).sort((a, b) => a - b)).toEqual([keepReveal, keepMilestone]);
+    expect(milestoneExists(ctx.db, 2)).toBe(false);
+  });
 });
