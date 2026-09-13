@@ -10,6 +10,8 @@ import { cn } from "@/lib/cn";
 import { usePublicLive } from "../live/LiveProvider";
 import { EASE } from "../motion/FadeRise";
 import { AnnouncementPlayer } from "./AnnouncementPlayer";
+import { FinaleStage } from "./finale/FinaleStage";
+import { lookupsFromSnapshot } from "./finale/lookups";
 import { availableScenes } from "./logic";
 import { SceneAchievements } from "./scenes/SceneAchievements";
 import { SceneContenders } from "./scenes/SceneContenders";
@@ -50,24 +52,36 @@ function ScreenInner({ snapshot }: { snapshot: PublicSnapshot }) {
   const paused = snapshot.event.screenControl.paused || announcing;
   const { scene, cycle } = useRotation(scenes, snapshot.event.sceneDurationSec * 1000, paused, snapshot.event.screenControl.skipNonce);
   const Scene = SCENES[scene];
+  const finale = snapshot.finale;
 
   return (
     <Stage>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${scene}-${cycle}`}
-          className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, filter: "blur(6px)" }}
-          transition={{ duration: 0.6, ease: EASE }}
-        >
-          <Scene snapshot={snapshot} />
-        </motion.div>
-      </AnimatePresence>
+      {finale ? (
+        <FinaleStage
+          current={finale.current}
+          step={finale.step}
+          lookups={lookupsFromSnapshot(snapshot)}
+          event={{ city: snapshot.event.city, year: snapshot.event.year }}
+        />
+      ) : (
+        <>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${scene}-${cycle}`}
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, filter: "blur(6px)" }}
+              transition={{ duration: 0.6, ease: EASE }}
+            >
+              <Scene snapshot={snapshot} />
+            </motion.div>
+          </AnimatePresence>
 
-      <ScreenFooter snapshot={snapshot} scenes={scenes} scene={scene} cycle={cycle} paused={paused} />
-      <AnnouncementPlayer snapshot={snapshot} onActiveChange={onActiveChange} />
+          <ScreenFooter snapshot={snapshot} scenes={scenes} scene={scene} cycle={cycle} paused={paused} />
+          <AnnouncementPlayer snapshot={snapshot} onActiveChange={onActiveChange} />
+        </>
+      )}
 
       <button
         type="button"
