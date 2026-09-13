@@ -2,6 +2,9 @@ import { describe, expect, test } from "vitest";
 import { makeDoneSession, makeGame, makePlayer, makeSettings, makeTable } from "./fixtures";
 import { replay } from "./replay";
 import {
+  bestJoker,
+  biggestComeback,
+  buildFinaleStats,
   buildPublicStats,
   busiestTable,
   commonTableSize,
@@ -10,8 +13,10 @@ import {
   heatmap,
   hotStreaks,
   longestResult,
+  mostGamesPlayed,
   mostPlayedGame,
   popularity,
+  rankRace,
   rivals,
 } from "./stats";
 
@@ -165,5 +170,54 @@ describe("public event stats", () => {
       { playerId: 3, streak: 3 },
       { playerId: 2, streak: 2 },
     ]);
+  });
+});
+
+describe("finale stats", () => {
+  const four = [1, 2, 3, 4].map((id) => makePlayer(id, `P${id}`));
+  const finaleGames = [makeGame(1, 10), makeGame(2, 8)];
+  // weights 10 and 8, three players, floor 0: 1st = W, 2nd = W/2, 3rd = 0
+  // totals after each result: s1 P1 10, P2 5, P3 0 | s2 P2 11, P1 10, P4 8, P3 0
+  // s3 P1 17.5, P2 11, P3 10, P4 8 | s4 P4 18, P1 17.5, P2 16, P3 10
+  const rp = replay(
+    {
+      players: four,
+      games: finaleGames,
+      sessions: [
+        makeDoneSession(1, 1, 1 * MIN, [[1, 1], [2, 2], [3, 3]]),
+        makeDoneSession(2, 2, 2 * MIN, [[4, 1], [2, 2, true], [3, 3]]),
+        makeDoneSession(3, 1, 3 * MIN, [[3, 1], [1, 2, true], [4, 3]]),
+        makeDoneSession(4, 1, 4 * MIN, [[4, 1], [2, 2], [3, 3]]),
+      ],
+    },
+    makeSettings(),
+  );
+
+  test("biggest single-result rise", () => {
+    expect(biggestComeback(rp)).toEqual({ playerId: 4, sessionId: 4, from: 4, to: 1 });
+  });
+
+  test("best Joker is the largest bonus", () => {
+    expect(bestJoker(rp.results)).toEqual({ playerId: 1, sessionId: 3, gameId: 1, bonus: 2.5 });
+  });
+
+  test("most games played", () => {
+    expect(mostGamesPlayed(rp.standings)).toEqual({ playerIds: [3], count: 4 });
+  });
+
+  test("rank race follows the final top players through every result", () => {
+    expect(rankRace(rp)).toEqual([
+      { playerId: 4, ranks: [null, 3, 4, 1] },
+      { playerId: 1, ranks: [1, 2, 1, 2] },
+      { playerId: 2, ranks: [2, 1, 2, 3] },
+      { playerId: 3, ranks: [3, 4, 3, 4] },
+    ]);
+    expect(rankRace(rp, 2).map((s) => s.playerId)).toEqual([4, 1]);
+  });
+
+  test("buildFinaleStats on an empty evening", () => {
+    const empty = replay({ players: four, games: finaleGames, sessions: [] }, makeSettings());
+    expect(buildFinaleStats(empty)).toEqual({ comeback: null, bestJoker: null, mostGames: null, race: [] });
+    expect(buildFinaleStats(rp).race).toHaveLength(4);
   });
 });

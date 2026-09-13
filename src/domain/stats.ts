@@ -1,4 +1,5 @@
 import type { PlayerResult, Replay, ReplayResult } from "./replay";
+import type { StandingRow } from "./standings";
 import type { Facts, GameFact, TableFact } from "./types";
 
 export interface GameCount {
@@ -213,5 +214,91 @@ export function buildPublicStats(facts: Pick<Facts, "games" | "tables">, rp: Pic
     fastest: fastestResult(results),
     rivals: rivals(results),
     heatmap: heatmap(results, facts.tables),
+  };
+}
+
+export const RACE_PLAYERS = 5;
+
+export interface Comeback {
+  playerId: number;
+  sessionId: number;
+  from: number;
+  to: number;
+}
+
+export interface BestJoker {
+  playerId: number;
+  sessionId: number;
+  gameId: number;
+  bonus: number;
+}
+
+export interface MostGames {
+  playerIds: number[];
+  count: number;
+}
+
+export interface RaceSeries {
+  playerId: number;
+  /** Rank after every result of the evening, null before the player's first result. */
+  ranks: Array<number | null>;
+}
+
+export interface FinaleStats {
+  comeback: Comeback | null;
+  bestJoker: BestJoker | null;
+  mostGames: MostGames | null;
+  race: RaceSeries[];
+}
+
+const rankIn = (rows: StandingRow[], playerId: number) => rows.find((r) => r.playerId === playerId)?.rank ?? null;
+
+/** Largest rank rise from one result, for players in that result. The earliest wins a tie. */
+export function biggestComeback(rp: Pick<Replay, "results" | "steps">): Comeback | null {
+  let best: Comeback | null = null;
+  for (let i = 0; i < rp.steps.length; i++) {
+    const step = rp.steps[i];
+    for (const p of rp.results[i].players) {
+      const from = rankIn(step.before, p.playerId);
+      const to = rankIn(step.after, p.playerId);
+      if (from === null || to === null || from - to < 1) continue;
+      if (!best || from - to > best.from - best.to) best = { playerId: p.playerId, sessionId: step.sessionId, from, to };
+    }
+  }
+  return best;
+}
+
+export function bestJoker(results: ReplayResult[]): BestJoker | null {
+  let best: BestJoker | null = null;
+  for (const r of results) {
+    for (const p of r.players) {
+      if (p.jokerBonus <= 0) continue;
+      if (!best || p.jokerBonus > best.bonus) {
+        best = { playerId: p.playerId, sessionId: r.sessionId, gameId: r.gameId, bonus: p.jokerBonus };
+      }
+    }
+  }
+  return best;
+}
+
+export function mostGamesPlayed(standings: StandingRow[]): MostGames | null {
+  const count = Math.max(0, ...standings.map((r) => r.gamesPlayed));
+  if (count === 0) return null;
+  return { playerIds: standings.filter((r) => r.gamesPlayed === count).map((r) => r.playerId), count };
+}
+
+export function rankRace(rp: Pick<Replay, "standings" | "steps">, limit = RACE_PLAYERS): RaceSeries[] {
+  return rp.standings
+    .filter((r) => r.rank !== null)
+    .slice(0, limit)
+    .map((r) => ({ playerId: r.playerId, ranks: rp.steps.map((step) => rankIn(step.after, r.playerId)) }));
+}
+
+export function buildFinaleStats(rp: Replay): FinaleStats {
+  return {
+    comeback: biggestComeback(rp),
+    bestJoker: bestJoker(rp.results),
+    mostGames: mostGamesPlayed(rp.standings),
+    race: rankRace(rp),
   };
 }
