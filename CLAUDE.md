@@ -4,17 +4,19 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-15-board-games-cup-design.md`
 **Tier 1 plan (shipped):** `docs/superpowers/plans/2026-09-15-board-games-cup-tier1.md`
-**Tier 2 plan (in progress):** `docs/superpowers/plans/2026-09-16-board-games-cup-tier2.md`
+**Tier 2 plan (shipped):** `docs/superpowers/plans/2026-09-16-board-games-cup-tier2.md`
 
 Tier 2 covers: result celebration reveal, achievements/unlock announcements, the
-finale ceremony, and player profiles. It is written as 13 TDD tasks (full code,
-no placeholders) using `superpowers:writing-plans` conventions — each task ends
-with `npm test && npm run typecheck && npm run lint` and its own commit.
-
-**Execution mode:** Inline (`superpowers:executing-plans`), not subagent-driven.
-When resuming this work, re-read the Tier 2 plan file and check its checkboxes
-(`- [ ]` / `- [x]`) to see which tasks are already done before continuing —
-don't assume anything from a prior session summary is still accurate.
+finale ceremony, and player profiles. It shipped as 13 TDD tasks (full code, no
+placeholders) using `superpowers:writing-plans` conventions, executed inline
+(`superpowers:executing-plans`) task-by-task, each ending with
+`npm test && npm run typecheck && npm run lint` and its own commit. All 13
+tasks are checked off in the plan file; the feature branch was rebased onto
+and fast-forward-merged into `master` (no merge commit) and deleted. The whole
+flow — home, `/achievements`, `/players/[id]`, admin control room, admin
+achievements/finale pages, `/screen` live scenes, and `/screen?rehearsal=1`'s
+full 9-beat finale ceremony — has been visually verified in a real browser
+(Playwright), not just via HTTP/HTML checks; no bugs found.
 
 ## Key design decisions baked into the Tier 2 plan
 
@@ -48,10 +50,36 @@ don't assume anything from a prior session summary is still accurate.
   state but never queues a card. Undoing/redoing a result *does* replay its
   cards — spec says played announcements are never retroactively removed.
 
-## Deferred to Tier 3 (not in this plan, don't add scope)
+## Environment notes for agent sessions
 
-`/stats`, `/timeline`, QR code flow, the `story` and `popular` screen scenes,
-the ticker, and removing demo announcements alongside demo data.
+- **Playwright browser tools work** — Chrome is installed at
+  `/opt/google/chrome/chrome`. The MCP `browser_click` tool takes a `target`
+  (exact ref or selector), not `ref`. Get refs from `browser_snapshot` output
+  and re-snapshot after any DOM change (refs go stale on re-render).
+- **The dev server can go stale across sandbox sessions**: `ps aux` may show a
+  `next-server` process from a previous session that looks alive but isn't
+  actually listening. Check with `ss -ltn | grep 3000` (not just `curl`, which
+  can hang against a dead listener) before trusting it; if nothing is
+  listening, kill the stale PIDs and restart with `npm run dev`.
+- **Admin login PIN** for the dev DB is `1234` (`ADMIN_PIN` in `.env`) — the
+  login screen auto-submits once 4+ digits are entered, no explicit confirm
+  click needed if the PIN is exactly 4 digits.
+- The projector's language (`/screen`) is a separate admin/event setting from
+  the public site's EN/RU toggle — seeing Russian on `/screen` while the
+  public site is in English is expected, not a bug.
+
+## Tier 3 (shipped via docs/superpowers/plans/2026-09-17-board-games-cup-tier3.md)
+
+- Stats, stories, streaks and timeline are derived in `src/domain/stats.ts`,
+  `stories.ts`, `timeline.ts` and ride on the **public** snapshot only.
+  `finaleStats` is null until `finaleRevealed`; sealed unlocks are filtered from
+  the timeline/stories before the reveal.
+- Migration 0003 is hand-written (like 0002) and appends `story`/`popular` to
+  existing `enabledScenes`; `availableScenes` always returns `ALL_SCENES` order.
+- `/admin/qr` sits outside the `(panel)` layout on purpose (prints without nav)
+  and calls `requireAdminPage()` itself.
+- `deleteDemoData` also removes announcements tied to demo sessions/players and
+  milestones above the remaining result count.
 
 ## Conventions recap (see AGENTS.md for the Next.js-specific parts)
 

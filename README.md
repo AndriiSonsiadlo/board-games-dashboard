@@ -19,9 +19,12 @@ npm run dev                   # http://localhost:3000
 | `/leaderboard` | Sealed until the finale |
 | `/achievements` | Achievements, rarity and who unlocked them (sealed ones hidden until the finale) |
 | `/players/<id>` | Player profile; standings part appears after the finale (or for the organizer) |
+| `/stats` | Game popularity, longest and fastest games, rivals, table-hour heatmap; finale stats after the reveal |
+| `/timeline` | Everything that happened, newest first |
 | `/screen` | Projector (always anonymous) |
 | `/screen?rehearsal=1` | Finale rehearsal with placeholder names (add `&lang=ru` for Russian) |
 | `/admin` | Organizer (PIN) |
+| `/admin/qr` | Printable QR codes for the site, check-in, screen and admin (Settings → Network) |
 
 ## Event night on Windows
 
@@ -37,7 +40,7 @@ npm run dev                   # http://localhost:3000
    ```
    `npm run event` builds once and starts the production server on port 3000. The build downloads fonts, so run it while online.
 4. Allow inbound connections: run `scripts\windows-firewall.ps1` in an elevated PowerShell, and set the Wi-Fi network profile to Private.
-5. Open `http://localhost:3000/admin`, log in, go to Settings → Network and press Use next to the Wi-Fi address (for example `http://192.168.100.7:3000`). Ignore VPN or `vEthernet` addresses.
+5. Open `http://localhost:3000/admin`, log in, go to Settings → Network and press Use next to the Wi-Fi address (for example `http://192.168.100.7:3000`). Ignore VPN or `vEthernet` addresses, then Settings → Network → Print QR codes.
 6. From a phone on the same Wi-Fi, open that address. If it does not load, the venue Wi-Fi probably isolates clients: turn on Windows Mobile Hotspot and connect phones to it.
 7. Projector: connect via HDMI as an extended display, open `http://localhost:3000/screen` in Chrome, press Fullscreen (or run Chrome with `--kiosk`).
 8. Disable sleep on the laptop and keep it plugged in.
@@ -116,11 +119,11 @@ Standings are secret until the finale. The server builds two different snapshots
 
 `/screen` always requests the public snapshot, even in a browser logged in as admin. A unit test asserts no forbidden fields exist in the public snapshot. Optional exceptions, both controlled in Settings: per-game points inside a result reveal, and the Contenders scene (top five in alphabetical order, no ranks).
 
-Achievements are recomputed from results like points, so a correction or undo also corrects them. Public achievements are announced on the projector a few seconds after a result (after its reveal, if you press "Show on screen"). Five achievements are sealed (Comeback, Underdog, Giant Slayer, Joker Master, Risk Taker): until the finale only their total count is public.
+Achievements are recomputed from results like points, so a correction or undo also corrects them. Public achievements are announced on the projector a few seconds after a result (after its reveal, if you press "Show on screen"). Five achievements are sealed (Comeback, Underdog, Giant Slayer, Joker Master, Risk Taker): until the finale only their total count is public. Stats, stories, the timeline and hot-streak markers only use facts visible in the room; biggest comeback, best Joker, most games played and the rank race stay hidden until the finale.
 
 ## Projector mode
 
-`/screen` renders a fixed 1920×1080 stage scaled to any display. Scenes rotate (Title, Live room, Recent results, Event stats, Achievements, optional Contenders) with a configurable duration. The control room's Projector bar pauses, resumes or skips scenes and replays the last result. "Show on screen" after a result queues a reveal: game title, places from last to second, then the winner, then a podium hold. Milestones play at 10, 25, 50, 75 and 100 games. Achievement unlocks play as their own cards a few seconds later, holding back until any reveal of the same game has played first.
+`/screen` renders a fixed 1920×1080 stage scaled to any display. Scenes rotate (Title, Live room, Recent results, Event stats, Achievements, Stories, Popular games, optional Contenders) with a configurable duration. A ticker above the footer cycles through the latest timeline items. The control room's Projector bar pauses, resumes or skips scenes and replays the last result. "Show on screen" after a result queues a reveal: game title, places from last to second, then the winner, then a podium hold. Milestones play at 10, 25, 50, 75 and 100 games. Achievement unlocks play as their own cards a few seconds later, holding back until any reveal of the same game has played first.
 
 ## Finale
 
@@ -148,7 +151,8 @@ Achievements are recomputed from results like points, so a correction or undo al
 - `npm run db:reset` fails with a locked file: stop the server first.
 - Forgot the PIN: set `ADMIN_PIN` in `.env` and run `npm run pin:reset` (event data is kept).
 - Port 3000 busy: `npx next start -H 0.0.0.0 -p 3001` and select the matching address in Settings.
+- Demo announcements or milestones reappear after going live: they are removed together with demo data; if a result was entered on demo players by hand, clear demo data again from Settings → Data.
 
 ## Roadmap
 
-- Tier 3: statistics page, event timeline, QR code sheet, hot-streak markers.
+- All tiers shipped. Out of scope: sound effects, in-game raw scores, player accounts, websockets.
