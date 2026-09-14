@@ -1,16 +1,21 @@
 import { ANNOUNCEMENT_WINDOW_MS, type PublicSnapshot, type ScreenAnnouncement } from "@/domain/snapshot";
-import type { SceneId } from "@/domain/types";
+import type { PublicStats } from "@/domain/stats";
+import { ALL_SCENES, type SceneId } from "@/domain/types";
 
 export function availableScenes(
   enabled: SceneId[],
-  snapshot: Pick<PublicSnapshot, "recentResults" | "contenders" | "achievements">,
+  snapshot: Pick<PublicSnapshot, "recentResults" | "contenders" | "achievements" | "stories"> & {
+    stats: Pick<PublicStats, "popularity">;
+  },
 ): SceneId[] {
-  const scenes = enabled.filter((scene) => {
+  const scenes = ALL_SCENES.filter((scene) => enabled.includes(scene)).filter((scene) => {
     if (scene === "recent") return snapshot.recentResults.length > 0;
     if (scene === "contenders") return (snapshot.contenders?.length ?? 0) > 0;
     if (scene === "achievements") {
       return snapshot.achievements.unlocks.length > 0 || snapshot.achievements.sealedUnlockCount > 0;
     }
+    if (scene === "story") return snapshot.stories.length > 0;
+    if (scene === "popular") return snapshot.stats.popularity.length > 0;
     return true;
   });
   return scenes.length > 0 ? scenes : ["title"];

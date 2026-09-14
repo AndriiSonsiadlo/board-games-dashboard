@@ -6,22 +6,23 @@ const result = { sessionId: 1, gameId: 1, tableId: 1, startedAt: 0, finishedAt: 
 
 const noAchievements = { enabled: [], unlocks: [], sealedUnlockCount: 0, eligiblePlayers: 0 };
 
-test("availableScenes drops empty scenes and never returns an empty list", () => {
+const empty = { recentResults: [], contenders: null, achievements: noAchievements, stories: [], stats: { popularity: [] } };
+
+test("availableScenes drops empty scenes, keeps canonical order and never returns an empty list", () => {
+  expect(availableScenes(["title", "recent", "contenders", "room", "achievements", "story", "popular"], empty)).toEqual([
+    "title",
+    "room",
+  ]);
   expect(
-    availableScenes(["title", "recent", "contenders", "room", "achievements"], {
-      recentResults: [],
-      contenders: null,
-      achievements: noAchievements,
-    }),
-  ).toEqual(["title", "room"]);
-  expect(
-    availableScenes(["recent", "contenders", "achievements"], {
+    availableScenes(["popular", "story", "recent", "contenders", "achievements"], {
       recentResults: [result],
       contenders: [3],
       achievements: { ...noAchievements, sealedUnlockCount: 1 },
+      stories: [{ kind: "milestone", next: 10, remaining: 1 }],
+      stats: { popularity: [{ family: "uno", gameId: 1, count: 1 }] },
     }),
-  ).toEqual(["recent", "contenders", "achievements"]);
-  expect(availableScenes(["recent"], { recentResults: [], contenders: [], achievements: noAchievements })).toEqual(["title"]);
+  ).toEqual(["recent", "achievements", "story", "popular", "contenders"]);
+  expect(availableScenes(["recent"], { ...empty, contenders: [] })).toEqual(["title"]);
 });
 
 test("nextAnnouncements keeps unseen, recent announcements in id order", () => {

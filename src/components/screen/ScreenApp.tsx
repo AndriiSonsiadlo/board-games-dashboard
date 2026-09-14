@@ -16,10 +16,13 @@ import { availableScenes } from "./logic";
 import { SceneAchievements } from "./scenes/SceneAchievements";
 import { SceneContenders } from "./scenes/SceneContenders";
 import { SceneCounters } from "./scenes/SceneCounters";
+import { ScenePopular } from "./scenes/ScenePopular";
 import { SceneRecent } from "./scenes/SceneRecent";
 import { SceneRoom } from "./scenes/SceneRoom";
+import { SceneStory } from "./scenes/SceneStory";
 import { SceneTitle } from "./scenes/SceneTitle";
 import { ScreenFooter } from "./ScreenFooter";
+import { ScreenTicker } from "./ScreenTicker";
 import { Stage } from "./Stage";
 import { useRotation } from "./useRotation";
 import { useScreenChrome } from "./useScreenChrome";
@@ -30,6 +33,8 @@ const SCENES: Record<SceneId, (props: { snapshot: PublicSnapshot }) => React.Rea
   recent: SceneRecent,
   counters: SceneCounters,
   achievements: SceneAchievements,
+  story: SceneStory,
+  popular: ScenePopular,
   contenders: SceneContenders,
 };
 
@@ -79,6 +84,7 @@ function ScreenInner({ snapshot }: { snapshot: PublicSnapshot }) {
           </AnimatePresence>
 
           <ScreenFooter snapshot={snapshot} scenes={scenes} scene={scene} cycle={cycle} paused={paused} />
+          <ScreenTicker snapshot={snapshot} />
           <AnnouncementPlayer snapshot={snapshot} onActiveChange={onActiveChange} />
         </>
       )}

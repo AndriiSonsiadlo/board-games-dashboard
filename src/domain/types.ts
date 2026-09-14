@@ -1,12 +1,12 @@
 export type EventStatus = "draft" | "live" | "finished";
 export type ScoringStrategy = "total" | "bestN";
 export type SessionStatus = "setup" | "playing" | "pending" | "done" | "cancelled";
-export type SceneId = "title" | "room" | "recent" | "counters" | "achievements" | "contenders";
+export type SceneId = "title" | "room" | "recent" | "counters" | "achievements" | "story" | "popular" | "contenders";
 export type Lang = "en" | "ru";
 export type PlayerSource = "admin" | "checkin";
 
-export const ALL_SCENES: SceneId[] = ["title", "room", "recent", "counters", "achievements", "contenders"];
-export const DEFAULT_SCENES: SceneId[] = ["title", "room", "recent", "counters", "achievements"];
+export const ALL_SCENES: SceneId[] = ["title", "room", "recent", "counters", "achievements", "story", "popular", "contenders"];
+export const DEFAULT_SCENES: SceneId[] = ["title", "room", "recent", "counters", "achievements", "story", "popular"];
 export const MILESTONES = [10, 25, 50, 75, 100] as const;
 
 export interface ScoringSettings {
