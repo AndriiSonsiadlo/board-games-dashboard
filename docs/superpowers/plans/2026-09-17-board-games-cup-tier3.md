@@ -81,7 +81,7 @@ README.md, CLAUDE.md              MODIFY
   - `t.stories.{streak, streakKicker, milestone, milestoneKicker, rivals, rivalsKicker, collector, collectorKicker, popular, popularKicker, longest, longestKicker}` (templates use `{count}` = number plus plural word)
   - `t.qr.{title, print, back, noBaseUrl, site, siteHint, checkin, checkinHint, screen, screenHint, admin, adminHint}`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `src/i18n/i18n.test.ts` (inside `describe("dictionaries", ...)`):
 
@@ -96,12 +96,12 @@ Append to `src/i18n/i18n.test.ts` (inside `describe("dictionaries", ...)`):
   });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/i18n/i18n.test.ts`
 Expected: FAIL — `Cannot read properties of undefined` (no `wins` plural, no `timeline` section).
 
-- [ ] **Step 3: Add English strings to `src/i18n/en.ts`**
+- [x] **Step 3: Add English strings to `src/i18n/en.ts`**
 
 In `plurals`, after `sealedUnlocks: { one: "sealed unlock", other: "sealed unlocks" } as PluralForms,` add:
 
@@ -210,7 +210,7 @@ After the closing `},` of `profile` (the last section, just before `};` and `exp
   },
 ```
 
-- [ ] **Step 4: Add Russian strings to `src/i18n/ru.ts`**
+- [x] **Step 4: Add Russian strings to `src/i18n/ru.ts`**
 
 In `plurals`, after the `sealedUnlocks` line add:
 
@@ -319,12 +319,12 @@ After the closing `},` of `profile` add:
   },
 ```
 
-- [ ] **Step 5: Run tests and checks**
+- [x] **Step 5: Run tests and checks**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: PASS (the key-parity and no-emoji tests also cover the new sections).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/i18n/en.ts src/i18n/ru.ts src/i18n/i18n.test.ts
@@ -349,12 +349,12 @@ git commit -m "feat(i18n): add stats, timeline, stories, QR and scene strings in
   - `qrSvg(url: string): Promise<string>`
   - Route `/admin/qr`.
 
-- [ ] **Step 1: Install the dependency**
+- [x] **Step 1: Install the dependency**
 
 Run: `npm install qrcode@^1.5.4 && npm install -D @types/qrcode@^1.5.6`
 Expected: both added to `package.json`.
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 Create `src/server/qr.test.ts`:
 
@@ -385,12 +385,12 @@ test("qrSvg renders a standalone svg", async () => {
 });
 ```
 
-- [ ] **Step 3: Run test to verify it fails**
+- [x] **Step 3: Run test to verify it fails**
 
 Run: `npx vitest run src/server/qr.test.ts`
 Expected: FAIL — `Cannot find module './qr'`.
 
-- [ ] **Step 4: Implement `src/server/qr.ts`**
+- [x] **Step 4: Implement `src/server/qr.ts`**
 
 ```ts
 import QRCode from "qrcode";
@@ -421,12 +421,12 @@ export function qrSvg(url: string): Promise<string> {
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run src/server/qr.test.ts`
 Expected: PASS (3 tests).
 
-- [ ] **Step 6: Create `src/components/admin/PrintButton.tsx`**
+- [x] **Step 6: Create `src/components/admin/PrintButton.tsx`**
 
 ```tsx
 "use client";
@@ -447,7 +447,7 @@ export function PrintButton({ label }: { label: string }) {
 }
 ```
 
-- [ ] **Step 7: Create `src/app/admin/qr/page.tsx`**
+- [x] **Step 7: Create `src/app/admin/qr/page.tsx`**
 
 It lives outside `(panel)` so the sheet prints without the admin navigation; it checks the cookie itself.
 
@@ -517,7 +517,7 @@ export default async function QrSheetPage() {
 }
 ```
 
-- [ ] **Step 8: Print background in `src/app/globals.css`**
+- [x] **Step 8: Print background in `src/app/globals.css`**
 
 Append at the end of the file:
 
@@ -531,7 +531,7 @@ Append at the end of the file:
 }
 ```
 
-- [ ] **Step 9: Link from Settings**
+- [x] **Step 9: Link from Settings**
 
 In `src/components/admin/SettingsView.tsx`, change the lucide import `import { Download } from "lucide-react";` to `import { Download, QrCode } from "lucide-react";`, then replace
 
@@ -552,11 +552,11 @@ with
         </Link>
 ```
 
-- [ ] **Step 10: Verify in the browser**
+- [x] **Step 10: Verify in the browser**
 
 Check the dev server (`ss -ltn | grep 3000`; restart with `npm run dev` if nothing listens — see CLAUDE.md). Log into `/admin` (PIN `1234`), open Settings → Network → "Print QR codes". Expected: white page, four QR codes with labels and URLs; the header buttons and base-URL warning disappear in print preview (Playwright: `page.emulateMedia({ media: "print" })` then screenshot). Scan one code from a phone if available, or decode the screenshot, to confirm the URL. Opening `/admin/qr` in a context without the cookie redirects to `/admin/login`.
 
-- [ ] **Step 11: Run checks and commit**
+- [x] **Step 11: Run checks and commit**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: PASS.
@@ -578,7 +578,7 @@ git commit -m "feat(admin): add printable QR sheet for site, check-in, screen an
 - Consumes: `deleteDemoData(tx)`, `insertAnnouncement`, `insertSession`, `insertPlayer`, `loadFacts`.
 - Produces: `deleteDemoData` additionally deletes announcements whose `payload.sessionId` is a deleted demo session, whose `payload.playerId` is a deleted demo player, and milestone announcements whose `count` exceeds the number of remaining `done` sessions (so real milestones can fire again). Signature unchanged.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 In `src/server/repo/repo.test.ts`, inside `describe("version, announcements, audit, demo cleanup", ...)`, add:
 
@@ -610,12 +610,12 @@ In `src/server/repo/repo.test.ts`, inside `describe("version, announcements, aud
   });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/server/repo/repo.test.ts -t "announcements about demo"`
 Expected: FAIL — received ids include the four stale announcements.
 
-- [ ] **Step 3: Implement in `src/server/repo/writes.ts`**
+- [x] **Step 3: Implement in `src/server/repo/writes.ts`**
 
 Replace the whole `deleteDemoData` function with:
 
@@ -676,12 +676,12 @@ export function deleteDemoData(tx: Tx): void {
 
 If TypeScript reports `payload.count` as not indexable, the column's `$type` is narrower than `Record<string, unknown>`; cast once: `const payload = a.payload as Record<string, unknown>;`.
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `npx vitest run src/server/repo/repo.test.ts src/server/seed/demo.test.ts src/server/services/core.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Run checks and commit**
+- [x] **Step 5: Run checks and commit**
 
 Run: `npm test && npm run typecheck && npm run lint`
 
@@ -711,7 +711,7 @@ git commit -m "fix(server): remove demo announcements and unreached milestones w
   - `interface PublicStats { gamesCompleted: number; distinctGames: number; popularity: FamilyCount[]; tableSize: SizeCount | null; longest: TimedResult | null; fastest: TimedResult | null; rivals: RivalPair | null; heatmap: Heatmap | null }`
   - `buildPublicStats(facts: Pick<Facts, "games" | "tables">, rp: Pick<Replay, "results">): PublicStats`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `src/domain/stats.test.ts`, change the imports to:
 
@@ -858,12 +858,12 @@ describe("public event stats", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/domain/stats.test.ts`
 Expected: FAIL — `buildPublicStats is not a function` (and the other new imports).
 
-- [ ] **Step 3: Implement in `src/domain/stats.ts`**
+- [x] **Step 3: Implement in `src/domain/stats.ts`**
 
 Change the first import line to:
 
@@ -1013,12 +1013,12 @@ export function buildPublicStats(facts: Pick<Facts, "games" | "tables">, rp: Pic
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/domain/stats.test.ts src/domain/finale.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Run checks and commit**
+- [x] **Step 5: Run checks and commit**
 
 Run: `npm test && npm run typecheck && npm run lint`
 
@@ -1046,7 +1046,7 @@ git commit -m "feat(domain): add game popularity, table size, fastest game, tabl
   - `interface FinaleStats { comeback: Comeback | null; bestJoker: BestJoker | null; mostGames: MostGames | null; race: RaceSeries[] }`
   - `biggestComeback(rp: Pick<Replay, "results" | "steps">): Comeback | null` (earliest wins ties), `bestJoker(results): BestJoker | null`, `mostGamesPlayed(standings: StandingRow[]): MostGames | null`, `rankRace(rp: Pick<Replay, "standings" | "steps">, limit = RACE_PLAYERS): RaceSeries[]`, `buildFinaleStats(rp: Replay): FinaleStats`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add `bestJoker, biggestComeback, buildFinaleStats, mostGamesPlayed, rankRace` to the `./stats` import in `src/domain/stats.test.ts`, then append:
 
@@ -1101,12 +1101,12 @@ describe("finale stats", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/domain/stats.test.ts -t "finale stats"`
 Expected: FAIL — `biggestComeback is not a function`.
 
-- [ ] **Step 3: Implement in `src/domain/stats.ts`**
+- [x] **Step 3: Implement in `src/domain/stats.ts`**
 
 Add below the existing imports:
 
@@ -1206,12 +1206,12 @@ export function buildFinaleStats(rp: Replay): FinaleStats {
 
 `replay.ts` pushes `results` and `steps` in the same loop iteration (both skip a malformed result), so `results[i]` belongs to `steps[i]`.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/domain/stats.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Run checks and commit**
+- [x] **Step 5: Run checks and commit**
 
 Run: `npm test && npm run typecheck && npm run lint`
 
@@ -1238,7 +1238,7 @@ git commit -m "feat(domain): add finale-only stats: biggest comeback, best Joker
   - `type TimelineItem = { kind: "started"; at; sessionId; gameId; tableId: number | null; playerIds: number[] } | { kind: "result"; at; sessionId; gameId; tableId: number | null; winnerIds: number[]; playerCount } | { kind: "unlock"; at; sessionId; achievementId: AchievementId; playerId } | { kind: "milestone"; at; count }`
   - `buildTimeline(facts: Pick<Facts, "sessions">, rp: Pick<Replay, "results" | "unlocks">, opts: { includeSealed: boolean; limit?: number }): TimelineItem[]` — newest first; at equal time: milestone, unlock, result, started
 
-- [ ] **Step 1: Write the failing stories test**
+- [x] **Step 1: Write the failing stories test**
 
 Create `src/domain/stories.test.ts`:
 
@@ -1303,7 +1303,7 @@ test("milestone story only when the next milestone is close", () => {
 });
 ```
 
-- [ ] **Step 2: Write the failing timeline test**
+- [x] **Step 2: Write the failing timeline test**
 
 Create `src/domain/timeline.test.ts`:
 
@@ -1369,12 +1369,12 @@ test("limit keeps the newest items", () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 Run: `npx vitest run src/domain/stories.test.ts src/domain/timeline.test.ts`
 Expected: FAIL — `Cannot find module './stories'` / `'./timeline'`.
 
-- [ ] **Step 4: Implement `src/domain/stories.ts`**
+- [x] **Step 4: Implement `src/domain/stories.ts`**
 
 ```ts
 import type { Unlock } from "./achievements";
@@ -1431,7 +1431,7 @@ export function buildStories(input: { streaks: Streak[]; stats: PublicStats; unl
 }
 ```
 
-- [ ] **Step 5: Implement `src/domain/timeline.ts`**
+- [x] **Step 5: Implement `src/domain/timeline.ts`**
 
 ```ts
 import { achievementDef, type AchievementId } from "./achievements";
@@ -1504,12 +1504,12 @@ export function buildTimeline(
 }
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `npx vitest run src/domain/stories.test.ts src/domain/timeline.test.ts`
 Expected: PASS. If `opening-move` is not among the unlocks, print `rp.unlocks` and check `src/domain/achievements.ts` — do not weaken the sealed-filter assertions.
 
-- [ ] **Step 7: Run checks and commit**
+- [x] **Step 7: Run checks and commit**
 
 Run: `npm test && npm run typecheck && npm run lint`
 
@@ -1536,7 +1536,7 @@ git commit -m "feat(domain): build featured stories and the event timeline from 
   - `timeline: TimelineItem[]` (newest first; sealed unlocks only after reveal)
   `AdminSnapshot` is unchanged.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `src/domain/snapshot.test.ts`:
 
@@ -1564,12 +1564,12 @@ describe("stats, streaks, stories and timeline", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/domain/snapshot.test.ts`
 Expected: FAIL — TypeScript/vitest reports `pub.stats` is undefined.
 
-- [ ] **Step 3: Implement in `src/domain/snapshot.ts`**
+- [x] **Step 3: Implement in `src/domain/snapshot.ts`**
 
 Add imports after the `./standings` import:
 
@@ -1638,12 +1638,12 @@ with
 export function buildAdminSnapshot
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/domain/snapshot.test.ts src/server/live.test.ts`
 Expected: PASS, including the existing "contains no standings, points or joker fields anywhere" test.
 
-- [ ] **Step 5: Run checks and commit**
+- [x] **Step 5: Run checks and commit**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: PASS. If `typecheck` fails in `src/components/screen/logic.test.ts` or elsewhere because a hand-built object is typed as a full `PublicSnapshot`, add the five new fields to that object (`stats` from `buildPublicStats({ games: [], tables: [] }, { results: [] })`, the others `null`/`[]`).
@@ -1670,7 +1670,7 @@ git commit -m "feat(domain): expose stats, hot streaks, stories, timeline and fi
   - `timelineKey(item: TimelineItem): string` — stable React key
   - `interface StoryText { kicker: string; line: string }`, `storyText(story: Story, t: Dict, lang: Lang, names: NameLookup): StoryText`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/components/common/timelineText.test.ts`:
 
@@ -1756,12 +1756,12 @@ test("russian plurals", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/components/common/timelineText.test.ts src/components/screen/storyText.test.ts`
 Expected: FAIL — modules not found.
 
-- [ ] **Step 3: Implement `src/components/common/timelineText.ts`**
+- [x] **Step 3: Implement `src/components/common/timelineText.ts`**
 
 ```ts
 import type { PublicSnapshot } from "@/domain/snapshot";
@@ -1818,7 +1818,7 @@ export function timelineKey(item: TimelineItem): string {
 }
 ```
 
-- [ ] **Step 4: Implement `src/components/screen/storyText.ts`**
+- [x] **Step 4: Implement `src/components/screen/storyText.ts`**
 
 ```ts
 import type { Story } from "@/domain/stories";
@@ -1873,12 +1873,12 @@ export function storyText(story: Story, t: Dict, lang: Lang, names: NameLookup):
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/components/common/timelineText.test.ts src/components/screen/storyText.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Run checks and commit**
+- [x] **Step 6: Run checks and commit**
 
 Run: `npm test && npm run typecheck && npm run lint`
 
@@ -1902,7 +1902,7 @@ git commit -m "feat(ui): localize timeline items and stories for phones and the 
   - `availableScenes(enabled, snapshot: Pick<PublicSnapshot, "recentResults" | "contenders" | "achievements" | "stories"> & { stats: Pick<PublicStats, "popularity"> })` — result is in `ALL_SCENES` order; `story` needs ≥ 1 story, `popular` ≥ 1 popularity row.
   - `<SceneStory snapshot>`, `<ScenePopular snapshot>`, `<ScreenTicker snapshot>` (40 px strip directly above the footer; one timeline item every 6 s from the latest 8).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `src/components/screen/logic.test.ts`, replace the whole `test("availableScenes drops empty scenes and never returns an empty list", ...)` block with:
 
@@ -1939,12 +1939,12 @@ to
     expect(facts.event.enabledScenes).toEqual(["title", "room", "recent", "counters", "achievements", "story", "popular"]);
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/components/screen/logic.test.ts src/server/repo/repo.test.ts`
 Expected: FAIL — order `["popular","story",...]` is returned as given and seed lacks `story`/`popular`.
 
-- [ ] **Step 3: Register the scenes in `src/domain/types.ts`**
+- [x] **Step 3: Register the scenes in `src/domain/types.ts`**
 
 Replace the `SceneId`, `ALL_SCENES` and `DEFAULT_SCENES` lines with:
 
@@ -1957,7 +1957,7 @@ export const ALL_SCENES: SceneId[] = ["title", "room", "recent", "counters", "ac
 export const DEFAULT_SCENES: SceneId[] = ["title", "room", "recent", "counters", "achievements", "story", "popular"];
 ```
 
-- [ ] **Step 4: Migrate existing databases**
+- [x] **Step 4: Migrate existing databases**
 
 Run: `npx drizzle-kit generate --custom --name enable_story_popular_scenes`
 Expected: creates an empty `drizzle/0003_enable_story_popular_scenes.sql`, a journal entry and a snapshot. Put this single statement into the file (below the generated comment):
@@ -1970,7 +1970,7 @@ WHERE NOT EXISTS (SELECT 1 FROM json_each(`event`.`enabledScenes`) WHERE json_ea
 
 Do not touch the `enabledScenes` default in `src/server/db/schema.ts`.
 
-- [ ] **Step 5: Update `availableScenes` in `src/components/screen/logic.ts`**
+- [x] **Step 5: Update `availableScenes` in `src/components/screen/logic.ts`**
 
 Change the imports to:
 
@@ -2003,12 +2003,12 @@ export function availableScenes(
 }
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `npx vitest run src/components/screen/logic.test.ts src/server/repo/repo.test.ts`
 Expected: PASS.
 
-- [ ] **Step 7: Create `src/components/screen/scenes/SceneStory.tsx`**
+- [x] **Step 7: Create `src/components/screen/scenes/SceneStory.tsx`**
 
 ```tsx
 "use client";
@@ -2077,7 +2077,7 @@ export function SceneStory({ snapshot }: { snapshot: PublicSnapshot }) {
 }
 ```
 
-- [ ] **Step 8: Create `src/components/screen/scenes/ScenePopular.tsx`**
+- [x] **Step 8: Create `src/components/screen/scenes/ScenePopular.tsx`**
 
 ```tsx
 "use client";
@@ -2130,7 +2130,7 @@ export function ScenePopular({ snapshot }: { snapshot: PublicSnapshot }) {
 }
 ```
 
-- [ ] **Step 9: Create `src/components/screen/ScreenTicker.tsx`**
+- [x] **Step 9: Create `src/components/screen/ScreenTicker.tsx`**
 
 ```tsx
 "use client";
@@ -2189,7 +2189,7 @@ export function ScreenTicker({ snapshot }: { snapshot: PublicSnapshot }) {
 }
 ```
 
-- [ ] **Step 10: Wire into `src/components/screen/ScreenApp.tsx`**
+- [x] **Step 10: Wire into `src/components/screen/ScreenApp.tsx`**
 
 Add imports (keep alphabetical order with the others):
 
@@ -2221,12 +2221,12 @@ with
 
 In `src/components/screen/scenes/SceneContenders.tsx` change `index="05"` to `index="07"`.
 
-- [ ] **Step 11: Run checks**
+- [x] **Step 11: Run checks**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: PASS.
 
-- [ ] **Step 12: Verify on the projector**
+- [x] **Step 12: Verify on the projector**
 
 Restart the dev server so the cached DB handle runs migration 0003 (`ss -ltn | grep 3000`; kill stale `next-server` PIDs; `npm run dev`). If the dev DB has no demo data run `npm run db:seed:demo` first. With Playwright at 1920×1080 open `/screen`:
 1. `/admin/settings` → Projector lists "Stories" and "Popular games" switched on (dev DB migrated).
@@ -2234,7 +2234,7 @@ Restart the dev server so the cached DB handle runs migration 0003 (`ss -ltn | g
 3. The ticker changes item every 6 s.
 4. Switch the screen language to Russian in Settings; the story lines use Russian plural forms.
 
-- [ ] **Step 13: Commit**
+- [x] **Step 13: Commit**
 
 ```bash
 git add src/domain/types.ts drizzle/ src/server/repo/repo.test.ts src/components/screen/
@@ -2256,7 +2256,7 @@ git commit -m "feat(screen): add story and popular scenes and a timeline ticker"
   - `<SectionTitle index children>` (moved out of `HomeView.tsx`).
   - `<Heatmap data: Heatmap>`, `<RaceChart race: RaceSeries[] colorOf: (playerId) => string>`, `<StatsView>`, route `/stats`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `src/components/public/rankChart.test.ts`:
 
@@ -2268,12 +2268,12 @@ test("a fixed max rank shares the scale between series", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/components/public/rankChart.test.ts`
 Expected: FAIL — `maxRank` is 2.
 
-- [ ] **Step 3: Implement in `src/components/public/rankChart.ts`**
+- [x] **Step 3: Implement in `src/components/public/rankChart.ts`**
 
 Change the signature and the `maxRank` line:
 
@@ -2291,12 +2291,12 @@ export function rankChart(
 
 (the rest of the function is unchanged).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/components/public/rankChart.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Extract `SectionTitle`**
+- [x] **Step 5: Extract `SectionTitle`**
 
 Create `src/components/public/SectionTitle.tsx`:
 
@@ -2313,7 +2313,7 @@ export function SectionTitle({ index, children }: { index: string; children: Rea
 
 In `src/components/public/HomeView.tsx` delete the local `function SectionTitle(...) { ... }` block (the 8 lines right after the imports) and add `import { SectionTitle } from "./SectionTitle";` after `import { FindMe } from "./FindMe";`.
 
-- [ ] **Step 6: Create `src/components/public/Heatmap.tsx`**
+- [x] **Step 6: Create `src/components/public/Heatmap.tsx`**
 
 ```tsx
 "use client";
@@ -2358,7 +2358,7 @@ export function Heatmap({ data }: { data: HeatmapData }) {
 }
 ```
 
-- [ ] **Step 7: Create `src/components/public/RaceChart.tsx`**
+- [x] **Step 7: Create `src/components/public/RaceChart.tsx`**
 
 ```tsx
 import type { RaceSeries } from "@/domain/stats";
@@ -2403,7 +2403,7 @@ export function RaceChart({ race, colorOf }: { race: RaceSeries[]; colorOf: (pla
 }
 ```
 
-- [ ] **Step 8: Create `src/components/public/StatsView.tsx`**
+- [x] **Step 8: Create `src/components/public/StatsView.tsx`**
 
 ```tsx
 "use client";
@@ -2601,7 +2601,7 @@ export function StatsView() {
 }
 ```
 
-- [ ] **Step 9: Create `src/app/(public)/stats/page.tsx`**
+- [x] **Step 9: Create `src/app/(public)/stats/page.tsx`**
 
 ```tsx
 import { StatsView } from "@/components/public/StatsView";
@@ -2611,16 +2611,16 @@ export default function StatsPage() {
 }
 ```
 
-- [ ] **Step 10: Run checks**
+- [x] **Step 10: Run checks**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: PASS.
 
-- [ ] **Step 11: Verify in the browser**
+- [x] **Step 11: Verify in the browser**
 
 With demo data loaded and the dev server running, open `/stats` at 390×844 in a context without the admin cookie. Expected: three figures, popularity bars, longest/fastest/rivals rows, the heatmap fits the width without horizontal scrolling, and the finale section shows the locked line. In the console, `fetch('/api/live').then(r => r.json()).then(d => d.snapshot.finaleStats)` returns `null`. Then in admin: Settings → Finish event (cancel open demo tables first) → Finale remote → Standings public switch on; reload `/stats` and confirm the finale rows and race chart render. Switch standings public off again and reopen the event. Screenshot both states. Toggle RU and check the page.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add src/components/public/ "src/app/(public)/stats/page.tsx"
@@ -2642,7 +2642,7 @@ git commit -m "feat(public): add stats page with popularity, highlights, table-h
   - `<StreakMark streak: number | undefined className?>` — renders nothing when `streak` is falsy.
   - `<TimelineView>`, route `/timeline`; home links to `/stats` and `/timeline`.
 
-- [ ] **Step 1: Add streaks to public lookups**
+- [x] **Step 1: Add streaks to public lookups**
 
 In `src/components/common/lookups.ts`, inside `usePublicLookups`, after the `tables:` line add:
 
@@ -2650,7 +2650,7 @@ In `src/components/common/lookups.ts`, inside `usePublicLookups`, after the `tab
       streaks: new Map(s.streaks.map((x) => [x.playerId, x.streak])),
 ```
 
-- [ ] **Step 2: Create `src/components/common/StreakMark.tsx`**
+- [x] **Step 2: Create `src/components/common/StreakMark.tsx`**
 
 ```tsx
 "use client";
@@ -2673,7 +2673,7 @@ export function StreakMark({ streak, className }: { streak: number | undefined; 
 }
 ```
 
-- [ ] **Step 3: Create `src/components/public/TimelineView.tsx`**
+- [x] **Step 3: Create `src/components/public/TimelineView.tsx`**
 
 ```tsx
 "use client";
@@ -2731,7 +2731,7 @@ export function TimelineView() {
 }
 ```
 
-- [ ] **Step 4: Create `src/app/(public)/timeline/page.tsx`**
+- [x] **Step 4: Create `src/app/(public)/timeline/page.tsx`**
 
 ```tsx
 import { TimelineView } from "@/components/public/TimelineView";
@@ -2741,7 +2741,7 @@ export default function TimelinePage() {
 }
 ```
 
-- [ ] **Step 5: Home links and streak marks in `src/components/public/HomeView.tsx`**
+- [x] **Step 5: Home links and streak marks in `src/components/public/HomeView.tsx`**
 
 Change the lucide import to:
 
@@ -2792,7 +2792,7 @@ with
                   </p>
 ```
 
-- [ ] **Step 6: Streak mark on the profile in `src/components/public/ProfileView.tsx`**
+- [x] **Step 6: Streak mark on the profile in `src/components/public/ProfileView.tsx`**
 
 Add `import { StreakMark } from "../common/StreakMark";` after the `GameIcon` import. Replace
 
@@ -2809,12 +2809,12 @@ with
           </div>
 ```
 
-- [ ] **Step 7: Run checks**
+- [x] **Step 7: Run checks**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: PASS.
 
-- [ ] **Step 8: Verify in the browser**
+- [x] **Step 8: Verify in the browser**
 
 At 390×844 without the admin cookie:
 1. `/` shows Stats and Timeline buttons (they wrap cleanly under Check in / Standings / Achievements).
@@ -2822,7 +2822,7 @@ At 390×844 without the admin cookie:
 3. Create a hot streak: in admin enter two consecutive direct results won by the same player, then seat that player at a table. Home live tables show the flame mark with `2` next to the name; the player's profile shows it too; `/screen` Stories scene shows "On fire".
 4. Undo those results (admin Results → Undo twice) and confirm the mark disappears.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/components/common/lookups.ts src/components/common/StreakMark.tsx src/components/public/TimelineView.tsx src/components/public/HomeView.tsx src/components/public/ProfileView.tsx "src/app/(public)/timeline/page.tsx"
@@ -2840,7 +2840,7 @@ git commit -m "feat(public): add timeline page, hot-streak markers and home link
 - Consumes: everything above.
 - Produces: documentation only.
 
-- [ ] **Step 1: Update `README.md`**
+- [x] **Step 1: Update `README.md`**
 
 1. In the URL table (the one with the `/achievements` row) add:
 
@@ -2860,7 +2860,7 @@ git commit -m "feat(public): add timeline page, hot-streak markers and home link
 
 6. Replace the Roadmap section body with: `- All tiers shipped. Out of scope: sound effects, in-game raw scores, player accounts, websockets.`
 
-- [ ] **Step 2: Update `CLAUDE.md`**
+- [x] **Step 2: Update `CLAUDE.md`**
 
 Replace the `## Deferred to Tier 3 (not in this plan, don't add scope)` section with:
 
@@ -2881,12 +2881,12 @@ Replace the `## Deferred to Tier 3 (not in this plan, don't add scope)` section 
 
 Keep the user's other uncommitted edits in `CLAUDE.md` intact; only swap this section.
 
-- [ ] **Step 3: Full automated check**
+- [x] **Step 3: Full automated check**
 
 Run: `npm test && npm run typecheck && npm run lint && npm run build`
 Expected: all pass; `next build` completes without type or prerender errors.
 
-- [ ] **Step 4: End-to-end run with Playwright (390×844 and 1920×1080)**
+- [x] **Step 4: End-to-end run with Playwright (390×844 and 1920×1080)**
 
 Start fresh: `npm run db:reset && npm run db:seed:demo && npm run dev`.
 
@@ -2899,7 +2899,7 @@ Start fresh: `npm run db:reset && npm run db:seed:demo && npm run dev`.
 
 Record any defect as its own fix commit (use superpowers:systematic-debugging); do not mark this task complete with a known failure.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add README.md CLAUDE.md
