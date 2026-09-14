@@ -20,7 +20,7 @@ export function LeaderboardView() {
           {scoring.strategy === "bestN" ? fmt(t.standings.strategyBestN, { n: scoring.bestN }) : t.standings.strategyTotal}
         </p>
       </header>
-      <Leaderboard rows={snapshot.leaderboard} players={players} showJoker />
+      <Leaderboard rows={snapshot.leaderboard} players={players} showJoker playerHref={(id) => `/players/${id}?view=admin`} />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { ArrowDown, ArrowUp, Crown, Minus, Spade } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { formatPoints } from "@/domain/scoring";
 import type { LeaderboardRow, PlayerView } from "@/domain/snapshot";
@@ -64,10 +65,12 @@ export function Leaderboard({
   rows,
   players,
   showJoker = false,
+  playerHref,
 }: {
   rows: LeaderboardRow[];
   players: Map<number, PlayerView>;
   showJoker?: boolean;
+  playerHref?: (playerId: number) => string;
 }) {
   const { t, lang } = useI18n();
   const { changed, newLeader } = useStandingsChanges(rows);
@@ -124,7 +127,13 @@ export function Leaderboard({
                 {player ? <Avatar name={player.name} color={player.color} /> : null}
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="truncate font-display text-lg uppercase tracking-wide">{player?.name}</span>
+                    {playerHref ? (
+                      <Link href={playerHref(row.playerId)} className="truncate font-display text-lg uppercase tracking-wide hover:text-accent">
+                        {player?.name}
+                      </Link>
+                    ) : (
+                      <span className="truncate font-display text-lg uppercase tracking-wide">{player?.name}</span>
+                    )}
                     {showJoker && row.jokerUsed ? <Spade className="size-3.5 shrink-0 text-accent" strokeWidth={1.75} /> : null}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted md:hidden">

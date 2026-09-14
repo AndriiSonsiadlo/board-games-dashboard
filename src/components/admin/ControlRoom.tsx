@@ -147,7 +147,7 @@ function TableRow({
             {session.notes ? <p className="mt-1 text-xs text-muted">{session.notes}</p> : null}
           </>
         ) : (
-          <span className="text-sm text-muted">{table.label ?? t.tableState.available}</span>
+          table.label ? <span className="text-sm text-muted">{table.label}</span> : null
         )}
       </div>
 
