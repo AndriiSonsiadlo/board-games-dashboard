@@ -13,6 +13,7 @@ import {
   goLive,
   reopenEvent,
   screenCommand,
+  updateBranding,
   updateEventInfo,
   updateScoring,
   updateScreenSettings,
@@ -128,6 +129,21 @@ describe("settings", () => {
     });
     expectCode(() => updateEventInfo(ctx.db, { accentColor: "gold" }), "invalid_value");
     expectCode(() => updateEventInfo(ctx.db, { publicBaseUrl: "ftp://x" }), "invalid_value");
+  });
+
+  test("branding trims, stores blanks as unset, validates length and works after finish", () => {
+    updateBranding(ctx.db, { brandTopRu: "  HIS^ ", brandMainRu: "ВЕЧЕР НАСТОЛОК", brandTopEn: "   " });
+    expect(facts().event.brandFields).toEqual({
+      brandTopEn: null,
+      brandMainEn: null,
+      brandTopRu: "HIS^",
+      brandMainRu: "ВЕЧЕР НАСТОЛОК",
+    });
+    expectCode(() => updateBranding(ctx.db, { brandMainEn: "x".repeat(41) }), "invalid_value");
+    goLive(ctx.db, { clearDemo: false });
+    finishEvent(ctx.db);
+    updateBranding(ctx.db, { brandMainEn: "Night" });
+    expect(facts().event.brandFields.brandMainEn).toBe("Night");
   });
 
   test("screen commands", () => {

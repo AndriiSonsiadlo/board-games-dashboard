@@ -103,6 +103,7 @@ export function loadFacts(tx: Tx): Facts {
       screenLang: e.screenLang,
       accentColor: e.accentColor,
       publicBaseUrl: e.publicBaseUrl,
+      brandFields: { brandTopEn: e.brandTopEn, brandMainEn: e.brandMainEn, brandTopRu: e.brandTopRu, brandMainRu: e.brandMainRu },
       screenControl: e.screenControl,
       dataVersion: e.dataVersion,
     },

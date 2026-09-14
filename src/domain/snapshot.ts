@@ -1,4 +1,5 @@
 import { ACHIEVEMENTS, achievementDef, isAchievementId, type AchievementId, type Unlock } from "./achievements";
+import { resolveBrand, type Brand, type BrandFields } from "./brand";
 import { buildFinaleScript, clampStep, revealStepOf, type FinaleBeat } from "./finale";
 import type { Replay, ReplayResult } from "./replay";
 import type { StandingRow } from "./standings";
@@ -40,11 +41,13 @@ export interface PublicEventView {
   screenLang: Lang;
   accentColor: string;
   publicBaseUrl: string | null;
+  brand: Brand;
   screenControl: ScreenControl;
 }
 
 export interface AdminEventView extends PublicEventView {
   scoring: ScoringSettings;
+  brandFields: BrandFields;
 }
 
 export interface PlayerView {
@@ -206,6 +209,7 @@ function eventView(e: EventFact): PublicEventView {
     screenLang: e.screenLang,
     accentColor: e.accentColor,
     publicBaseUrl: e.publicBaseUrl,
+    brand: resolveBrand(e.brandFields),
     screenControl: e.screenControl,
   };
 }
@@ -427,7 +431,7 @@ export function buildAdminSnapshot(facts: Facts, rp: Replay, now: number): Admin
   return {
     audience: "admin",
     version: facts.event.dataVersion,
-    event: { ...eventView(facts.event), scoring: facts.event.scoring },
+    event: { ...eventView(facts.event), scoring: facts.event.scoring, brandFields: facts.event.brandFields },
     players: facts.players.map((p) => ({
       ...playerView(p),
       source: p.source,

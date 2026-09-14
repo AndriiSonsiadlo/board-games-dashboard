@@ -1,3 +1,4 @@
+import { BRAND_MAX_LENGTH, type BrandFields } from "@/domain/brand";
 import { ALL_SCENES, type Lang, type SceneId, type ScoringStrategy } from "@/domain/types";
 import { isOpenSession } from "@/domain/tables";
 import { hashPin, randomSecret, verifyPin } from "../auth/pin";
@@ -158,4 +159,18 @@ export function changePin(db: Db, input: { current: string; next: string }): voi
 
 export function clearDemoData(db: Db): void {
   mutate(db, (tx) => deleteDemoData(tx));
+}
+
+const BRAND_KEYS = ["brandTopEn", "brandMainEn", "brandTopRu", "brandMainRu"] as const satisfies readonly (keyof BrandFields)[];
+
+export function updateBranding(db: Db, patch: Partial<BrandFields>): void {
+  const next: Partial<BrandFields> = {};
+  for (const key of BRAND_KEYS) {
+    const value = patch[key];
+    if (value === undefined) continue;
+    const trimmed = value?.trim() ?? "";
+    check(trimmed.length <= BRAND_MAX_LENGTH);
+    next[key] = trimmed.length > 0 ? trimmed : null;
+  }
+  mutate(db, (tx) => updateEventRow(tx, next), { allowWhenFinished: true });
 }

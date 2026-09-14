@@ -91,6 +91,7 @@ export function makeEvent(overrides: Partial<EventFact> = {}): EventFact {
     screenLang: "en",
     accentColor: "#c9a45c",
     publicBaseUrl: null,
+    brandFields: { brandTopEn: null, brandMainEn: null, brandTopRu: null, brandMainRu: null },
     screenControl: { paused: false, skipNonce: 0, finaleStep: 0 },
     dataVersion: 1,
     ...overrides,

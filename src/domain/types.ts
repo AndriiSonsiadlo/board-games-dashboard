@@ -1,3 +1,5 @@
+import type { BrandFields } from "./brand";
+
 export type EventStatus = "draft" | "live" | "finished";
 export type ScoringStrategy = "total" | "bestN";
 export type SessionStatus = "setup" | "playing" | "pending" | "done" | "cancelled";
@@ -37,6 +39,7 @@ export interface EventFact {
   screenLang: Lang;
   accentColor: string;
   publicBaseUrl: string | null;
+  brandFields: BrandFields;
   screenControl: ScreenControl;
   dataVersion: number;
 }

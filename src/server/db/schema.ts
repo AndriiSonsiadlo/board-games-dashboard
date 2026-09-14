@@ -24,6 +24,10 @@ export const event = sqliteTable("event", {
   screenLang: text({ enum: ["en", "ru"] }).notNull().default("en"),
   accentColor: text().notNull().default("#c9a45c"),
   publicBaseUrl: text(),
+  brandTopEn: text(),
+  brandMainEn: text(),
+  brandTopRu: text(),
+  brandMainRu: text(),
   adminPinHash: text().notNull(),
   sessionSecret: text().notNull(),
   screenControl: text({ mode: "json" })

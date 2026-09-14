@@ -1,5 +1,6 @@
 "use server";
 
+import type { BrandFields } from "@/domain/brand";
 import type { AuditEntry } from "@/domain/types";
 import type { ActionResult } from "@/lib/action";
 import { listAudit } from "@/server/repo/facts";
@@ -13,6 +14,7 @@ import {
   goLive,
   reopenEvent,
   screenCommand,
+  updateBranding,
   updateEventInfo,
   updateScoring,
   updateScreenSettings,
@@ -162,6 +164,10 @@ export async function removeTableAction(id: number): Result<"deleted" | "deactiv
 }
 
 // Event and settings
+export async function updateBrandingAction(patch: Partial<BrandFields>): Result {
+  return runAdminAction((db) => updateBranding(db, patch));
+}
+
 export async function goLiveAction(clearDemo: boolean): Result {
   return runAdminAction((db) => goLive(db, { clearDemo }));
 }
