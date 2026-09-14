@@ -241,3 +241,25 @@ describe("finale views", () => {
     expect(pub.finale?.current?.kind).toBe("closing");
   });
 });
+
+describe("stats, streaks, stories and timeline", () => {
+  test("public before the reveal: stats and stories yes, finale stats and sealed timeline items no", () => {
+    const { pub } = build(facts());
+    expect(pub.stats.gamesCompleted).toBe(2);
+    expect(pub.stats.rivals).toEqual({ playerIds: [2, 3], count: 2 });
+    expect(pub.finaleStats).toBeNull();
+    expect(pub.streaks).toEqual([]);
+    expect(pub.stories.map((s) => s.kind)).toEqual(["rivals", "longest"]);
+    expect(pub.timeline.flatMap((i) => (i.kind === "started" ? [i.sessionId] : []))).toEqual([11, 10, 12]);
+    expect(pub.timeline.some((i) => i.kind === "unlock" && i.achievementId === "joker-master")).toBe(false);
+    expect(keysDeep(pub).filter(([key]) => FORBIDDEN_PUBLIC_KEYS.includes(key))).toEqual([]);
+  });
+
+  test("after the reveal: finale stats and sealed unlocks join the public views", () => {
+    const { pub } = build(facts({ status: "finished", finaleRevealed: true }));
+    expect(pub.finaleStats?.race.map((s) => s.playerId)).toEqual(
+      pub.leaderboard!.filter((r) => r.rank !== null).slice(0, 5).map((r) => r.playerId),
+    );
+    expect(pub.timeline.some((i) => i.kind === "unlock" && i.achievementId === "joker-master")).toBe(true);
+  });
+});

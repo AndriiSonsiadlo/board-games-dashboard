@@ -2,7 +2,10 @@ import { ACHIEVEMENTS, achievementDef, isAchievementId, type AchievementId, type
 import { buildFinaleScript, clampStep, revealStepOf, type FinaleBeat } from "./finale";
 import type { Replay, ReplayResult } from "./replay";
 import type { StandingRow } from "./standings";
+import { buildFinaleStats, buildPublicStats, hotStreaks, type FinaleStats, type PublicStats, type Streak } from "./stats";
+import { buildStories, type Story } from "./stories";
 import { isOpenSession, tableState, type TableState } from "./tables";
+import { buildTimeline, type TimelineItem } from "./timeline";
 import type {
   EventFact,
   EventStatus,
@@ -161,6 +164,13 @@ export interface PublicSnapshot {
   finale: FinaleView | null;
   contenders: number[] | null;
   leaderboard: LeaderboardRow[] | null;
+  stats: PublicStats;
+  /** Only after the finale reveal. */
+  finaleStats: FinaleStats | null;
+  streaks: Streak[];
+  stories: Story[];
+  /** Newest first. */
+  timeline: TimelineItem[];
 }
 
 export interface AdminSnapshot {
@@ -374,6 +384,9 @@ export function buildPublicSnapshot(facts: Facts, rp: Replay, now: number): Publ
     : null;
   const script = finaleScript(facts, rp);
   const finaleStep = facts.event.screenControl.finaleStep;
+  const achievements = achievementsView(facts, rp, revealed);
+  const stats = buildPublicStats(facts, rp);
+  const streaks = hotStreaks(rp.byPlayer);
 
   return {
     audience: "public",
@@ -391,10 +404,15 @@ export function buildPublicSnapshot(facts: Facts, rp: Replay, now: number): Publ
       withPoints: revealed || facts.event.showPointsInReveals,
       includeSealed: revealed,
     }),
-    achievements: achievementsView(facts, rp, revealed),
+    achievements,
     finale: script && finaleStep > 0 ? finaleView(script, finaleStep) : null,
     contenders,
     leaderboard: revealed ? leaderboard(facts, rp) : null,
+    stats,
+    finaleStats: revealed ? buildFinaleStats(rp) : null,
+    streaks,
+    stories: buildStories({ streaks, stats, unlocks: achievements.unlocks }),
+    timeline: buildTimeline(facts, rp, { includeSealed: revealed }),
   };
 }
 
