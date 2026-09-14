@@ -12,3 +12,9 @@ test("a single point is centered at the top", () => {
   expect(rankChart([{ rank: 1 }], 100, 50, 0).path).toBe("M50,0");
   expect(rankChart([], 100, 50).path).toBe("");
 });
+
+test("a fixed max rank shares the scale between series", () => {
+  const chart = rankChart([{ rank: 1 }, { rank: 2 }], 100, 100, 0, 4);
+  expect(chart.maxRank).toBe(4);
+  expect(chart.path).toBe("M0,0 L100,33.3");
+});

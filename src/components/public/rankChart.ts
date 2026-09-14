@@ -5,9 +5,10 @@ export function rankChart(
   width: number,
   height: number,
   pad = 12,
+  fixedMaxRank?: number,
 ): { path: string; points: { x: number; y: number; rank: number }[]; maxRank: number } {
   const ranks = history.flatMap((h) => (h.rank === null ? [] : [h.rank]));
-  const maxRank = Math.max(1, ...ranks);
+  const maxRank = fixedMaxRank ?? Math.max(1, ...ranks);
   const n = history.length;
   const innerW = width - pad * 2;
   const innerH = height - pad * 2;
