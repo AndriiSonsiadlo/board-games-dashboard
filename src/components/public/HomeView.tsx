@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Award, Lock, UserPlus, UserRound } from "lucide-react";
+import { ArrowRight, Award, ChartColumn, History, Lock, UserPlus, UserRound } from "lucide-react";
 import Link from "next/link";
 import { ordinal, fmt } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
@@ -11,6 +11,7 @@ import { AchievementIcon } from "../common/AchievementIcon";
 import { ElapsedClock } from "../common/ElapsedClock";
 import { GameIcon } from "../common/GameIcon";
 import { StateLabel } from "../common/StateLabel";
+import { StreakMark } from "../common/StreakMark";
 import { usePublicLookups } from "../common/lookups";
 import { usePublicLive } from "../live/LiveProvider";
 import { FadeRise } from "../motion/FadeRise";
@@ -74,6 +75,20 @@ export function HomeView() {
             <Award className="size-4" />
             {t.home.achievements}
           </Link>
+          <Link
+            href="/stats"
+            className="inline-flex h-11 items-center gap-2 rounded-md border border-line-strong px-4 font-display text-sm uppercase tracking-[0.08em]"
+          >
+            <ChartColumn className="size-4" />
+            {t.home.stats}
+          </Link>
+          <Link
+            href="/timeline"
+            className="inline-flex h-11 items-center gap-2 rounded-md border border-line-strong px-4 font-display text-sm uppercase tracking-[0.08em]"
+          >
+            <History className="size-4" />
+            {t.home.timeline}
+          </Link>
         </div>
       </FadeRise>
 
@@ -110,8 +125,14 @@ export function HomeView() {
                       <ElapsedClock from={session.startedAt} to={session.finishedAt} className="ml-auto font-mono text-sm text-muted" />
                     ) : null}
                   </div>
-                  <p className="text-sm text-muted">
-                    {session?.players.map((p) => lookups.players.get(p.playerId)?.name).filter(Boolean).join(" · ")}
+                  <p className="flex flex-wrap gap-x-2 text-sm text-muted">
+                    {session?.players.map((p, i) => (
+                      <span key={p.playerId} className="inline-flex items-center gap-1">
+                        {i > 0 ? <span aria-hidden>·</span> : null}
+                        {lookups.players.get(p.playerId)?.name}
+                        <StreakMark streak={lookups.streaks.get(p.playerId)} className="text-xs" />
+                      </span>
+                    ))}
                   </p>
                 </div>
               </li>

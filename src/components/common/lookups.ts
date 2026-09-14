@@ -20,6 +20,7 @@ export function usePublicLookups(s: PublicSnapshot) {
       players: new Map(s.players.map((p) => [p.id, p])),
       games: new Map(s.games.map((g) => [g.id, g])),
       tables: new Map(s.tables.map((t) => [t.tableId, { id: t.tableId, number: t.number, label: t.label }])),
+      streaks: new Map(s.streaks.map((x) => [x.playerId, x.streak])),
     }),
     [s],
   );

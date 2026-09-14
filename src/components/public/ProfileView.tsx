@@ -13,6 +13,7 @@ import { formatClock } from "@/lib/format";
 import { AchievementIcon } from "../common/AchievementIcon";
 import { Avatar } from "../common/Avatar";
 import { GameIcon } from "../common/GameIcon";
+import { StreakMark } from "../common/StreakMark";
 import { usePublicLookups } from "../common/lookups";
 import { usePublicLive } from "../live/LiveProvider";
 import { FadeRise } from "../motion/FadeRise";
@@ -56,7 +57,10 @@ export function ProfileView({ profile }: { profile: PlayerProfile }) {
       <FadeRise className="flex items-center gap-4">
         <Avatar name={profile.player.name} color={profile.player.color} size="lg" />
         <div className="min-w-0">
-          <h1 className="truncate font-display text-4xl uppercase tracking-tight">{profile.player.name}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="truncate font-display text-4xl uppercase tracking-tight">{profile.player.name}</h1>
+            <StreakMark streak={lookups.streaks.get(profile.player.id)} className="text-lg" />
+          </div>
           {profile.player.nickname ? <p className="text-muted">{profile.player.nickname}</p> : null}
         </div>
         {s?.rank ? <span className="ml-auto font-display text-6xl leading-none text-accent tabular">{s.rank}</span> : null}
