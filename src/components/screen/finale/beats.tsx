@@ -2,12 +2,14 @@
 
 import { Lock } from "lucide-react";
 import { motion } from "motion/react";
+import { useBrand } from "@/components/brand/BrandProvider";
 import { AchievementIcon } from "@/components/common/AchievementIcon";
 import { GameIcon } from "@/components/common/GameIcon";
 import { EASE } from "@/components/motion/FadeRise";
 import { GoldDust } from "@/components/motion/GoldDust";
 import { MaskReveal } from "@/components/motion/MaskReveal";
 import { NumberRoll } from "@/components/motion/NumberRoll";
+import { brandTitle } from "@/domain/brand";
 import type { FinaleBeat } from "@/domain/finale";
 import { formatPoints } from "@/domain/scoring";
 import { fmt, ordinal, plural } from "@/i18n";
@@ -275,6 +277,7 @@ export function BeatClosing({
   event: { city: string; year: number };
 }) {
   const { t } = useI18n();
+  const brand = useBrand();
   const names = beat.championIds.map((id) => lookups.players.get(id)?.name).filter(Boolean).join(" · ");
   return (
     <div className="relative flex h-full flex-col items-center justify-center text-center">
@@ -285,7 +288,7 @@ export function BeatClosing({
         transition={{ duration: 1.6, ease: EASE }}
         className="font-display text-[56px] uppercase text-muted"
       >
-        {t.common.appName}
+        {brandTitle(brand)}
       </motion.div>
       <motion.div
         initial={{ opacity: 0 }}

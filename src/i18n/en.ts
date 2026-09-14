@@ -3,7 +3,6 @@ import type { PluralForms } from "./index";
 
 export const en = {
   common: {
-    appName: "Board Games Cup",
     table: "Table",
     tableN: "Table {n}",
     noTable: "No table",
@@ -271,6 +270,13 @@ export const en = {
       contendersHint: "Top 5 in alphabetical order, without ranks or points.",
       showPoints: "Show game points in result reveals",
       language: "Screen language",
+    },
+    branding: {
+      title: "Branding",
+      hint: "The name on the site, the projector and the QR sheet. An empty field uses the English line.",
+      top: "Top line",
+      main: "Main line",
+      ruPreset: "Use Вечер настолок",
     },
     network: {
       title: "Network",

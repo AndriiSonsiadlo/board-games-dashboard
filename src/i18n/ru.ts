@@ -2,7 +2,6 @@ import type { Dict } from "./en";
 
 export const ru: Dict = {
   common: {
-    appName: "Board Games Cup",
     table: "Стол",
     tableN: "Стол {n}",
     noTable: "Без стола",
@@ -270,6 +269,13 @@ export const ru: Dict = {
       contendersHint: "Топ-5 по алфавиту, без мест и очков.",
       showPoints: "Показывать очки за игру в объявлении результата",
       language: "Язык экрана",
+    },
+    branding: {
+      title: "Название",
+      hint: "Название на сайте, проекторе и листе с QR-кодами. Пустое поле берёт английскую строку.",
+      top: "Верхняя строка",
+      main: "Главная строка",
+      ruPreset: "Вставить «Вечер настолок»",
     },
     network: {
       title: "Сеть",

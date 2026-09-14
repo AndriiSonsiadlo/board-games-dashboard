@@ -6,6 +6,7 @@ import { ordinal, fmt } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
 import { formatClock, pad2 } from "@/lib/format";
+import { useBrand } from "../brand/BrandProvider";
 import { BrandMark } from "../brand/Wordmark";
 import { AchievementIcon } from "../common/AchievementIcon";
 import { ElapsedClock } from "../common/ElapsedClock";
@@ -21,6 +22,7 @@ import { useCheckedIn } from "./useCheckedIn";
 
 export function HomeView() {
   const { t, lang } = useI18n();
+  const brand = useBrand();
   const { snapshot } = usePublicLive();
   const lookups = usePublicLookups(snapshot);
   const { me } = useCheckedIn(snapshot.players);
@@ -37,8 +39,10 @@ export function HomeView() {
           </span>
         </div>
         <h1 className="font-display uppercase leading-[0.85] tracking-tight">
-          <span className="block text-2xl tracking-[0.3em] text-muted sm:text-3xl">Board Games</span>
-          <span className="block text-[5.5rem] sm:text-[8rem]">Cup</span>
+          <span className="block text-2xl tracking-[0.3em] text-muted sm:text-3xl">{brand.top}</span>
+          <span className={cn("block break-words", brand.main.length > 6 ? "text-[3.25rem] sm:text-[5.5rem]" : "text-[5.5rem] sm:text-[8rem]")}>
+            {brand.main}
+          </span>
         </h1>
         <p className="max-w-md text-muted">{t.home.subtitle}</p>
         <div className="flex flex-wrap gap-2">

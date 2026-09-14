@@ -9,15 +9,18 @@ import {
   finishEventAction,
   goLiveAction,
   reopenEventAction,
+  updateBrandingAction,
   updateEventInfoAction,
   updateScoringAction,
   updateScreenSettingsAction,
 } from "@/app/admin/actions";
+import { BRAND_MAX_LENGTH, DEFAULT_BRAND, RU_BRAND_PRESET, resolveBrand, type BrandFields } from "@/domain/brand";
 import { formatPoints, scoreResult } from "@/domain/scoring";
 import { ALL_SCENES, type Lang, type SceneId, type ScoringSettings } from "@/domain/types";
 import { fmt } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
+import { Wordmark } from "../brand/Wordmark";
 import { EventStatusBadge } from "../common/EventStatusBadge";
 import { useAdminLive } from "../live/LiveProvider";
 import { Button } from "../ui/Button";
@@ -91,6 +94,9 @@ export function SettingsView({ addresses, port }: { addresses: { name: string; a
       <Section title={t.settings.event.title}>
         <Lifecycle />
         <EventInfo />
+      </Section>
+      <Section title={t.settings.branding.title}>
+        <BrandingControls />
       </Section>
       <Section title={t.settings.scoring.title}>
         <ScoringControls key={snapshot.version} scoring={snapshot.event.scoring} />
@@ -475,6 +481,72 @@ function DataControls() {
           <span className="text-xs text-muted">{t.settings.data.clearDemoHint}</span>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+const BRAND_KEYS = {
+  en: { top: "brandTopEn", main: "brandMainEn" },
+  ru: { top: "brandTopRu", main: "brandMainRu" },
+} as const satisfies Record<Lang, { top: keyof BrandFields; main: keyof BrandFields }>;
+
+function BrandingControls() {
+  const { t } = useI18n();
+  const { snapshot } = useAdminLive();
+  const { run, pending } = useRunner();
+  const [fields, setFields] = useState<BrandFields>(snapshot.event.brandFields);
+  const preview = resolveBrand(fields);
+  const edit = (key: keyof BrandFields) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setFields((f) => ({ ...f, [key]: e.target.value }));
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted">{t.settings.branding.hint}</p>
+      {(["en", "ru"] as const).map((lang) => {
+        const keys = BRAND_KEYS[lang];
+        return (
+          <div key={lang} className="space-y-3 rounded-md border border-line bg-surface p-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className="label-caps">{lang.toUpperCase()}</span>
+              {lang === "ru" ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setFields((f) => ({ ...f, brandTopRu: RU_BRAND_PRESET.top, brandMainRu: RU_BRAND_PRESET.main }))}
+                >
+                  {t.settings.branding.ruPreset}
+                </Button>
+              ) : null}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label={t.settings.branding.top}>
+                <input
+                  value={fields[keys.top] ?? ""}
+                  onChange={edit(keys.top)}
+                  placeholder={lang === "en" ? DEFAULT_BRAND.top : preview.en.top}
+                  maxLength={BRAND_MAX_LENGTH}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label={t.settings.branding.main}>
+                <input
+                  value={fields[keys.main] ?? ""}
+                  onChange={edit(keys.main)}
+                  placeholder={lang === "en" ? DEFAULT_BRAND.main : preview.en.main}
+                  maxLength={BRAND_MAX_LENGTH}
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+            <div className="rounded-md border border-line bg-bg px-4 py-3">
+              <Wordmark size="sm" lines={preview[lang]} />
+            </div>
+          </div>
+        );
+      })}
+      <Button loading={pending} onClick={() => run(() => updateBrandingAction(fields), { success: t.common.saved })}>
+        {t.common.save}
+      </Button>
     </div>
   );
 }

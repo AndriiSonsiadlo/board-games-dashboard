@@ -1,6 +1,8 @@
 "use client";
 
+import { useBrand } from "@/components/brand/BrandProvider";
 import { BrandMark } from "@/components/brand/Wordmark";
+import { brandTitle } from "@/domain/brand";
 import type { PublicSnapshot } from "@/domain/snapshot";
 import type { SceneId } from "@/domain/types";
 import { useI18n } from "@/i18n/LangProvider";
@@ -20,6 +22,7 @@ export function ScreenFooter({
   paused: boolean;
 }) {
   const { t } = useI18n();
+  const brand = useBrand();
   const url = snapshot.event.publicBaseUrl?.replace(/^https?:\/\//, "");
 
   return (
@@ -33,7 +36,7 @@ export function ScreenFooter({
       ) : null}
       <div className="flex h-full items-center gap-8">
         <BrandMark className="size-[44px] text-text" />
-        <span className="font-display text-[26px] uppercase tracking-[0.3em]">{t.common.appName}</span>
+        <span className="font-display text-[26px] uppercase tracking-[0.3em]">{brandTitle(brand)}</span>
         <span className="font-display text-[22px] uppercase tracking-[0.3em] text-muted">
           {snapshot.event.city} · {snapshot.event.year}
         </span>

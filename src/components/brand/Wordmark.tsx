@@ -1,4 +1,8 @@
+"use client";
+
+import type { BrandLines } from "@/domain/brand";
 import { cn } from "@/lib/cn";
+import { useBrand } from "./BrandProvider";
 
 /** A game tile seen from above: two nested squares turned 45 degrees and a single accent pip. */
 export function BrandMark({ className }: { className?: string }) {
@@ -17,15 +21,17 @@ const sizes = {
   lg: { mark: "size-14", top: "text-sm tracking-[0.4em]", cup: "text-6xl md:text-7xl" },
 };
 
-export function Wordmark({ size = "md", subtitle }: { size?: keyof typeof sizes; subtitle?: string }) {
+export function Wordmark({ size = "md", subtitle, lines }: { size?: keyof typeof sizes; subtitle?: string; lines?: BrandLines }) {
   const s = sizes[size];
+  const brand = useBrand();
+  const { top, main } = lines ?? brand;
   return (
     <div className="flex items-center gap-3">
       <BrandMark className={cn(s.mark, "text-text")} />
-      <div className="leading-none">
-        <div className={cn("font-display uppercase text-muted", s.top)}>Board Games</div>
+      <div className="min-w-0 leading-none">
+        <div className={cn("font-display uppercase text-muted", s.top)}>{top}</div>
         <div className={cn("font-display font-semibold uppercase tracking-tight text-text", s.cup)}>
-          Cup
+          {main}
           {subtitle ? <span className="ml-3 align-middle text-[0.4em] font-normal tracking-[0.3em] text-accent">{subtitle}</span> : null}
         </div>
       </div>

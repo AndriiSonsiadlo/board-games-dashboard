@@ -7,6 +7,7 @@ import type { PublicSnapshot } from "@/domain/snapshot";
 import type { SceneId } from "@/domain/types";
 import { LangProvider, useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
+import { BrandProvider } from "../brand/BrandProvider";
 import { usePublicLive } from "../live/LiveProvider";
 import { EASE } from "../motion/FadeRise";
 import { AnnouncementPlayer } from "./AnnouncementPlayer";
@@ -42,7 +43,9 @@ export function ScreenApp() {
   const { snapshot } = usePublicLive();
   return (
     <LangProvider lang={snapshot.event.screenLang}>
-      <ScreenInner snapshot={snapshot} />
+      <BrandProvider brand={snapshot.event.brand}>
+        <ScreenInner snapshot={snapshot} />
+      </BrandProvider>
     </LangProvider>
   );
 }

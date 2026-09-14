@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
 
 export default async function QrSheetPage() {
   await requireAdminPage();
-  const t = getDict(await getLang());
+  const lang = await getLang();
+  const t = getDict(lang);
   const { event } = getAdminSnapshot(getDb());
   const base = resolveBaseUrl(event.publicBaseUrl, (await headers()).get("host"));
   const codes = await Promise.all(qrLinks(base).map(async (link) => ({ ...link, svg: await qrSvg(link.url) })));
@@ -40,7 +41,9 @@ export default async function QrSheetPage() {
         )}
         <header className="mb-8 flex items-end justify-between border-b-2 border-black pb-4">
           <div>
-            <div className="font-display text-4xl uppercase leading-none tracking-tight">{t.common.appName}</div>
+            <div className="font-display text-4xl uppercase leading-none tracking-tight">
+              {event.brand[lang].top} {event.brand[lang].main}
+            </div>
             <div className="mt-2 font-display text-sm uppercase tracking-[0.3em]">
               {event.city} · {event.year}
             </div>
