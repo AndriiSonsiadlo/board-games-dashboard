@@ -195,36 +195,47 @@ export function BeatChampion({ beat, lookups }: { beat: Beat<"champion">; lookup
   const { t } = useI18n();
   return (
     <div className="relative flex h-full flex-col items-center justify-center overflow-hidden text-center">
+      <div aria-hidden className="pointer-events-none absolute inset-0 grid place-items-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 2.6, ease: EASE, delay: 3 }}
+          className="h-[820px] w-[1600px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(closest-side, color-mix(in oklab, var(--color-accent) 20%, transparent), color-mix(in oklab, var(--color-accent) 7%, transparent) 55%, transparent)",
+          }}
+        />
+      </div>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 3.4 }}>
         <GoldDust count={40} />
       </motion.div>
-      <Label delay={0.4}>{beat.co ? t.finale.coChampions : t.finale.champion}</Label>
-      <motion.div
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 2.4, ease: "linear", delay: 0.8 }}
-        className="mt-10 h-px w-[900px] origin-left bg-accent/70"
-      />
-      <div className="relative mt-12 overflow-hidden">
-        {beat.playerIds.map((id, i) => (
-          <motion.div
-            key={id}
-            initial={{ opacity: 0, scale: 0.92, filter: "blur(12px)" }}
-            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-            transition={{ duration: 1.6, ease: EASE, delay: 3.4 + i * 0.6 }}
-            className={cn(
-              "font-display uppercase leading-[0.85] tracking-tight",
-              beat.playerIds.length > 1 ? "text-[200px]" : "text-[280px]",
-            )}
-          >
-            {lookups.players.get(id)?.name}
-          </motion.div>
-        ))}
-        <span
-          aria-hidden
-          className="animate-light-sweep pointer-events-none absolute inset-y-0 left-0 w-40 bg-accent/25 blur-2xl"
-          style={{ animationDelay: "4.2s" }}
+      <div className="relative z-10 flex flex-col items-center">
+        <Label delay={0.4}>{beat.co ? t.finale.coChampions : t.finale.champion}</Label>
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 2.4, ease: "linear", delay: 0.8 }}
+          className="mt-10 h-px w-[900px] origin-left bg-accent/70"
         />
+        <div className="mt-12">
+          {beat.playerIds.map((id, i) => (
+            <motion.div
+              key={id}
+              initial={{ opacity: 0, scale: 0.92, filter: "blur(12px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              transition={{ duration: 1.6, ease: EASE, delay: 3.4 + i * 0.6 }}
+              className={cn(
+                "font-display uppercase leading-[0.85] tracking-tight",
+                beat.playerIds.length > 1 ? "text-[200px]" : "text-[280px]",
+              )}
+            >
+              <span className="animate-text-shimmer" style={{ animationDelay: `${4.8 + i * 0.6}s` }}>
+                {lookups.players.get(id)?.name}
+              </span>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );

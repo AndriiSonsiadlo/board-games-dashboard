@@ -135,16 +135,16 @@ export function ResultReveal({
                 <div className="font-display text-[40px] uppercase tracking-[0.3em] text-accent">{t.screen.winner}</div>
                 {winners.map((w) => (
                   <div key={w.playerId} className="mt-2 flex items-baseline gap-10">
-                    <span className="font-display text-[190px] uppercase leading-none tracking-tight">{name(w.playerId)}</span>
+                    <span className="font-display text-[190px] uppercase leading-none tracking-tight">
+                      <span className="animate-text-shimmer" style={{ animationDelay: "0.9s" }}>
+                        {name(w.playerId)}
+                      </span>
+                    </span>
                     {w.points !== undefined ? (
                       <span className="font-mono text-[60px] text-accent">{formatPoints(w.points)}</span>
                     ) : null}
                   </div>
                 ))}
-                <span
-                  aria-hidden
-                  className="animate-light-sweep pointer-events-none absolute inset-y-0 left-0 w-24 bg-accent/25 blur-2xl"
-                />
               </motion.div>
             ) : null}
           </div>
