@@ -1,4 +1,4 @@
-import { achievementDef, type Unlock } from "./achievements";
+import { achievementDef, type AchievementId } from "./achievements";
 import type { Replay } from "./replay";
 import type { PlayerView } from "./snapshot";
 import { pointsEqual, type StandingRow } from "./standings";
@@ -16,7 +16,7 @@ export interface PodiumRow {
 export type FinaleBeat =
   | { kind: "complete"; games: number; minutes: number | null; players: number }
   | { kind: "numbers"; mostPlayed: GameCount | null; longest: LongestResult | null; busiestTable: TableCount | null; rivals: RivalPair | null }
-  | { kind: "sealed"; unlock: Unlock; order: number; total: number }
+  | { kind: "sealed"; achievementId: AchievementId; playerIds: number[]; order: number; total: number }
   | { kind: "place"; place: number; playerId: number }
   | { kind: "champion"; playerIds: number[]; co: boolean }
   | { kind: "podium"; championIds: number[]; rows: PodiumRow[] }
@@ -61,8 +61,14 @@ export function buildFinaleScript(facts: Facts, rp: Replay): FinaleBeat[] {
     },
   ];
 
-  const sealed = rp.unlocks.filter((u) => achievementDef(u.achievementId).sealed);
-  sealed.forEach((unlock, i) => beats.push({ kind: "sealed", unlock, order: i + 1, total: sealed.length }));
+  const holders = new Map<AchievementId, number[]>();
+  for (const u of rp.unlocks) {
+    if (!achievementDef(u.achievementId).sealed) continue;
+    holders.set(u.achievementId, [...(holders.get(u.achievementId) ?? []), u.playerId]);
+  }
+  [...holders].forEach(([achievementId, playerIds], i) =>
+    beats.push({ kind: "sealed", achievementId, playerIds, order: i + 1, total: holders.size }),
+  );
 
   const groups = podiumGroups(rp.standings);
   const firstPlaceAfterChampions = groups.champions.length + 1;
@@ -132,7 +138,6 @@ export function buildRehearsal(): RehearsalData {
     wins: Math.max(0, 4 - Math.floor(i / 2)),
     gamesPlayed: 5,
   }));
-  const at = 0;
   return {
     players,
     games: [game(1, "Catan", "Hexagon"), game(2, "Ticket to Ride", "TrainFront")],
@@ -148,8 +153,8 @@ export function buildRehearsal(): RehearsalData {
         busiestTable: { tableId: 1, count: 11 },
         rivals: { playerIds: [4, 7], count: 5 },
       },
-      { kind: "sealed", unlock: { achievementId: "giant-slayer", playerId: 6, sessionId: 1, at }, order: 1, total: 2 },
-      { kind: "sealed", unlock: { achievementId: "joker-master", playerId: 3, sessionId: 1, at }, order: 2, total: 2 },
+      { kind: "sealed", achievementId: "giant-slayer", playerIds: [6, 9], order: 1, total: 2 },
+      { kind: "sealed", achievementId: "joker-master", playerIds: [3], order: 2, total: 2 },
       { kind: "place", place: 3, playerId: 3 },
       { kind: "place", place: 2, playerId: 2 },
       { kind: "champion", playerIds: [1], co: false },

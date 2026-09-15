@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { achievementDef } from "./achievements";
 import { buildFinaleScript, buildRehearsal, clampStep, podiumGroups, revealStepOf, type FinaleBeat } from "./finale";
 import { makeDoneSession, makeEvent, makeGame, makePlayer, makeSettings } from "./fixtures";
 import { replay } from "./replay";
@@ -64,10 +65,10 @@ describe("buildFinaleScript", () => {
     makeDoneSession(3, 1, 180 * MIN, [[5, 1], [3, 2]]),
   ];
 
-  test("orders beats and puts one beat per sealed unlock", () => {
+  test("orders beats and puts one beat per sealed achievement", () => {
     const f = facts(sessions);
     const rp = replay(f, f.event.scoring);
-    const sealedCount = rp.unlocks.filter((u) => ["comeback", "underdog", "giant-slayer", "joker-master", "risk-taker"].includes(u.achievementId)).length;
+    const sealedCount = new Set(rp.unlocks.filter((u) => achievementDef(u.achievementId).sealed).map((u) => u.achievementId)).size;
     const beats = buildFinaleScript(f, rp);
     expect(sealedCount).toBeGreaterThan(0);
     expect(kinds(beats)).toEqual([
@@ -84,6 +85,17 @@ describe("buildFinaleScript", () => {
     const places = beats.filter((b): b is Extract<FinaleBeat, { kind: "place" }> => b.kind === "place");
     expect(places.map((b) => b.place)).toEqual([3, 2]);
     expect(revealStepOf(beats)).toBe(beats.findIndex((b) => b.kind === "podium") + 1);
+  });
+
+  test("holders of the same sealed achievement share one beat, in unlock order", () => {
+    const f = facts([
+      makeDoneSession(1, 1, MIN, [[2, 1, true], [1, 2]]),
+      makeDoneSession(2, 1, 2 * MIN, [[1, 1, true], [3, 2]]),
+    ]);
+    const sealed = buildFinaleScript(f, replay(f, f.event.scoring)).filter((b) => b.kind === "sealed");
+    const joker = sealed.find((b) => b.kind === "sealed" && b.achievementId === "joker-master");
+    expect(joker).toMatchObject({ kind: "sealed", achievementId: "joker-master", playerIds: [2, 1] });
+    expect(sealed.map((b) => (b.kind === "sealed" ? b.order : 0))).toEqual(sealed.map((_, i) => i + 1));
   });
 
   test("place and champion beats carry ids only; podium carries points", () => {

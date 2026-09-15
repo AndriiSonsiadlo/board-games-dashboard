@@ -11,7 +11,7 @@ test("labels name the beat and, where it helps the host, the player", () => {
   expect(labels).toEqual([
     "Event complete",
     "The evening in numbers",
-    "Sealed: Giant Slayer · #6",
+    "Sealed: Giant Slayer · #6, #9",
     "Sealed: Joker Master · #3",
     "3rd place · #3",
     "2nd place · #2",

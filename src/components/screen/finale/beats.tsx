@@ -126,7 +126,8 @@ export function BeatNumbers({ beat, lookups }: { beat: Beat<"numbers">; lookups:
 
 export function BeatSealed({ beat, lookups }: { beat: Beat<"sealed">; lookups: FinaleLookups }) {
   const { t } = useI18n();
-  const def = t.achievements.defs[beat.unlock.achievementId];
+  const def = t.achievements.defs[beat.achievementId];
+  const many = beat.playerIds.length > 3;
   return (
     <div className="flex h-full items-center px-[160px]">
       <div className="relative grid size-[380px] shrink-0 place-items-center rounded-md border border-accent/60">
@@ -138,12 +139,8 @@ export function BeatSealed({ beat, lookups }: { beat: Beat<"sealed">; lookups: F
         >
           <Lock className="size-[160px] text-muted" strokeWidth={1.25} />
         </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: EASE, delay: 1.5 }}
-        >
-          <AchievementIcon id={beat.unlock.achievementId} className="size-[200px] text-accent" />
+        <motion.div initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, ease: EASE, delay: 1.5 }}>
+          <AchievementIcon id={beat.achievementId} className="size-[200px] text-accent" />
         </motion.div>
       </div>
       <div className="ml-[100px] min-w-0">
@@ -153,22 +150,28 @@ export function BeatSealed({ beat, lookups }: { beat: Beat<"sealed">; lookups: F
         <MaskReveal delay={1.6} className="mt-4">
           <div className="font-display text-[150px] uppercase leading-[0.9] tracking-tight">{def.title}</div>
         </MaskReveal>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 2.2 }}
-          className="mt-6 text-[40px] text-muted"
-        >
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 2.2 }} className="mt-6 text-[40px] text-muted">
           {def.description}
         </motion.p>
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: EASE, delay: 3.2 }}
-          className="mt-12 border-t border-line pt-8 font-display text-[100px] uppercase leading-none tracking-tight"
-        >
-          {lookups.players.get(beat.unlock.playerId)?.name}
-        </motion.div>
+        <ul className="mt-12 flex flex-wrap gap-x-14 gap-y-6 border-t border-line pt-8">
+          {beat.playerIds.map((id, i) => {
+            const p = lookups.players.get(id);
+            return (
+              <motion.li
+                key={id}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: EASE, delay: 3.2 + Math.min(i, 10) * 0.25 }}
+                className="flex items-center gap-5"
+              >
+                <span className={cn("w-[6px] rounded-sm", many ? "h-[48px]" : "h-[76px]")} style={{ backgroundColor: p?.color }} />
+                <span className={cn("font-display uppercase leading-none tracking-tight", many ? "text-[64px]" : "text-[100px]")}>
+                  {p?.name}
+                </span>
+              </motion.li>
+            );
+          })}
+        </ul>
       </div>
     </div>
   );
