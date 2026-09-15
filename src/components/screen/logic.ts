@@ -61,6 +61,18 @@ export function podiumSlots(
   })).filter((slot) => slot.playerIds.length > 0);
 }
 
+/** Non-winning placements grouped by value, last place first; tied players share a group and appear together. */
+export function revealGroups<P extends { playerId: number; placement: number }>(placements: P[]): P[][] {
+  const groups = new Map<number, P[]>();
+  for (const p of placements) {
+    if (p.placement === 1) continue;
+    groups.set(p.placement, [...(groups.get(p.placement) ?? []), p]);
+  }
+  return [...groups.entries()]
+    .sort((a, b) => b[0] - a[0])
+    .map(([, group]) => [...group].sort((a, b) => a.playerId - b.playerId));
+}
+
 export const ACHIEVEMENT_HOLD_MS = 15_000;
 
 /**

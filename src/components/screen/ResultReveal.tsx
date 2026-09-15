@@ -12,7 +12,8 @@ import type { PublicPlacementView, PublicSnapshot, ResultView } from "@/domain/s
 import { fmt, ordinal } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
-import { podiumSlots, revealTimeline } from "./logic";
+import { AutoScroll } from "./AutoScroll";
+import { podiumSlots, revealGroups, revealTimeline } from "./logic";
 
 type Phase = "title" | "places" | "winner" | "podium";
 
@@ -32,28 +33,28 @@ export function ResultReveal({
   const game = lookups.games.get(result.gameId);
   const table = result.tableId !== null ? lookups.tables.get(result.tableId) : undefined;
   const winners = result.placements.filter((p) => p.placement === 1);
-  const others = result.placements.filter((p) => p.placement !== 1);
+  const groups = revealGroups(result.placements);
   const [phase, setPhase] = useState<Phase>("title");
   const [revealed, setRevealed] = useState(0);
   const name = (playerId: number) => lookups.players.get(playerId)?.name ?? "";
 
   useEffect(() => {
-    const timeline = revealTimeline(others.length);
+    const timeline = revealTimeline(groups.length);
     const timers = [
       setTimeout(() => setPhase("places"), timeline.titleMs),
-      ...others.map((_, i) => setTimeout(() => setRevealed(i + 1), timeline.firstPlaceMs + i * timeline.stepMs)),
+      ...groups.map((_, i) => setTimeout(() => setRevealed(i + 1), timeline.firstPlaceMs + i * timeline.stepMs)),
       setTimeout(() => setPhase("winner"), timeline.winnerMs),
       setTimeout(() => setPhase("podium"), timeline.podiumMs),
       setTimeout(onDone, timeline.doneMs),
     ];
     return () => timers.forEach(clearTimeout);
-    // `others` is derived fresh each render from `result.placements`; re-running on every
+    // `groups` is derived fresh each render from `result.placements`; re-running on every
     // reference change would restart the reveal timeline on each live-poll re-render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [others.length, onDone]);
+  }, [groups.length, onDone]);
 
-  const descending = [...others].sort((a, b) => b.placement - a.placement);
-  const visible = new Set(descending.slice(0, revealed).map((p) => p.playerId));
+  const visible = new Set(groups.slice(0, revealed).flat().map((p) => p.playerId));
+  const listTimeline = revealTimeline(groups.length);
 
   return (
     <motion.div
@@ -148,10 +149,12 @@ export function ResultReveal({
             ) : null}
           </div>
 
-          <div className="flex flex-col justify-center">
+          <div className="flex min-h-0 flex-col">
+            <AutoScroll from="bottom" startDelayMs={listTimeline.firstPlaceMs} windowMs={listTimeline.winnerMs}>
             <ol className="space-y-7">
-              {[...others]
-                .sort((a, b) => a.placement - b.placement)
+              {[...groups]
+                .reverse()
+                .flat()
                 .map((p) => {
                   const shown = phase !== "title" && visible.has(p.playerId);
                   return (
@@ -171,6 +174,7 @@ export function ResultReveal({
                   );
                 })}
             </ol>
+            </AutoScroll>
           </div>
         </div>
       )}

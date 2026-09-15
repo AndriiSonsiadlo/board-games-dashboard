@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import type { ScreenAnnouncement } from "@/domain/snapshot";
-import { availableScenes, nextAnnouncements, pickNext, podiumSlots, revealTimeline } from "./logic";
+import { availableScenes, nextAnnouncements, pickNext, podiumSlots, revealGroups, revealTimeline } from "./logic";
 
 const result = { sessionId: 1, gameId: 1, tableId: 1, startedAt: 0, finishedAt: 0, durationMin: null, placements: [] };
 
@@ -104,4 +104,12 @@ describe("pickNext", () => {
   test("other announcements are not blocked by a held achievement", () => {
     expect(pickNext([card(1, 5, 10_000), milestone], 11_000, 15_000)?.id).toBe(9);
   });
+});
+
+test("revealGroups: last place first, ties revealed together, winners excluded", () => {
+  const p = (playerId: number, placement: number) => ({ playerId, placement });
+  expect(revealGroups([p(1, 1), p(7, 2), p(3, 2), p(9, 4)])).toEqual([[p(9, 4)], [p(3, 2), p(7, 2)]]);
+  expect(revealGroups([p(1, 1), p(2, 2), p(3, 3)])).toEqual([[p(3, 3)], [p(2, 2)]]);
+  expect(revealGroups([p(1, 1), p(2, 1)])).toEqual([]);
+  expect(revealGroups([p(4, 3), p(1, 1), p(2, 1), p(5, 3)])).toEqual([[p(4, 3), p(5, 3)]]);
 });
