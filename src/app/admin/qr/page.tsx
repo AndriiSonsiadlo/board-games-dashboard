@@ -18,7 +18,7 @@ export default async function QrSheetPage() {
   const t = getDict(lang);
   const { event } = getAdminSnapshot(getDb());
   const base = resolveBaseUrl(event.publicBaseUrl, (await headers()).get("host"));
-  const codes = await Promise.all(qrLinks(base).map(async (link) => ({ ...link, svg: await qrSvg(link.url) })));
+  const codes = qrLinks(base).map((link) => ({ ...link, svg: qrSvg(link.url, "light") }));
   const labels: Record<QrTarget, [string, string]> = {
     site: [t.qr.site, t.qr.siteHint],
     checkin: [t.qr.checkin, t.qr.checkinHint],

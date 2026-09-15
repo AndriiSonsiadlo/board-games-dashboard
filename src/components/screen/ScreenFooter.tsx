@@ -46,9 +46,14 @@ export function ScreenFooter({
           ))}
         </div>
         {url ? (
-          <span className="text-[24px] text-muted">
-            {t.screen.follow} <span className="font-mono text-text">{url}</span>
-          </span>
+          <div className="flex items-center gap-5">
+            <span className="text-right text-[24px] leading-tight text-muted">
+              {t.screen.follow}
+              <span className="block font-mono text-text">{url}</span>
+            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element -- live SVG from /api/qr, no optimization wanted */}
+            <img src={`/api/qr?theme=dark&u=${encodeURIComponent(url)}`} alt="" className="size-[88px] rounded-[4px]" />
+          </div>
         ) : null}
       </div>
     </div>
