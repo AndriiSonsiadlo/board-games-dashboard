@@ -9,6 +9,7 @@ import { LangProvider, useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
 import { BrandProvider } from "../brand/BrandProvider";
 import { usePublicLive } from "../live/LiveProvider";
+import { SCENE_FRAME } from "./layout";
 import { EASE } from "../motion/FadeRise";
 import { AnnouncementPlayer } from "./AnnouncementPlayer";
 import { FinaleStage } from "./finale/FinaleStage";
@@ -76,7 +77,8 @@ function ScreenInner({ snapshot }: { snapshot: PublicSnapshot }) {
           <AnimatePresence mode="wait">
             <motion.div
               key={`${scene}-${cycle}`}
-              className="absolute inset-0"
+              className="absolute"
+              style={SCENE_FRAME}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, filter: "blur(6px)" }}

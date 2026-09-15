@@ -32,7 +32,7 @@ export function ScreenTicker({ snapshot }: { snapshot: PublicSnapshot }) {
   const Icon = ICONS[item.kind];
 
   return (
-    <div className="absolute inset-x-0 bottom-[110px] z-10 h-[40px] overflow-hidden">
+    <div data-screen-chrome className="absolute inset-x-0 bottom-[110px] z-10 h-[40px] overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={`${timelineKey(item)}-${tick}`}

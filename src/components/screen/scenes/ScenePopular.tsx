@@ -20,7 +20,7 @@ export function ScenePopular({ snapshot }: { snapshot: PublicSnapshot }) {
   const total = snapshot.stats.gamesCompleted;
 
   return (
-    <div className="flex h-full flex-col px-[120px] pt-[110px] pb-[150px]">
+    <div className="flex h-full flex-col">
       <SceneHeading index="06" title={t.screen.popular} note={`${total} ${plural(lang, total, t.plurals.games)}`} />
       <ul className="mt-12 flex flex-1 flex-col justify-center gap-7">
         {rows.map((row, i) => {

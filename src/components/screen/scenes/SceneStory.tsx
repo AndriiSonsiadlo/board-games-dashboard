@@ -29,7 +29,7 @@ export function SceneStory({ snapshot }: { snapshot: PublicSnapshot }) {
   const stories = snapshot.stories.slice(0, STORY_SLOTS);
 
   return (
-    <div className="flex h-full flex-col px-[120px] pt-[110px] pb-[150px]">
+    <div className="flex h-full flex-col">
       <SceneHeading index="05" title={t.screen.stories} />
       <ul className="flex flex-1 flex-col justify-center divide-y divide-line">
         {stories.map((story, i) => {

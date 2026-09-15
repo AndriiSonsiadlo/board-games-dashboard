@@ -16,7 +16,7 @@ export function SceneCounters({ snapshot }: { snapshot: PublicSnapshot }) {
   ];
 
   return (
-    <div className="flex h-full flex-col px-[120px] pt-[110px] pb-[150px]">
+    <div className="flex h-full flex-col">
       <SceneHeading index="03" title={t.screen.liveEvent} />
       <div className="grid flex-1 grid-cols-4 items-center divide-x divide-line">
         {items.map((item, i) => (

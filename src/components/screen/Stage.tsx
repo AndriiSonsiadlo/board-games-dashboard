@@ -16,6 +16,7 @@ export function Stage({ children }: { children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#070708]">
       <div
+        data-stage
         className="absolute top-1/2 left-1/2 h-[1080px] w-[1920px] overflow-hidden"
         style={{
           transform: `translate(-50%, -50%) scale(${scale})`,

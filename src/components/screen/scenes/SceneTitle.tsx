@@ -34,7 +34,7 @@ export function SceneTitle({ snapshot }: { snapshot: PublicSnapshot }) {
         transition={{ duration: 1.1, ease: EASE, delay: 0.45 }}
         className={cn(
           "font-display font-semibold uppercase leading-[0.82] tracking-tight",
-          brand.main.length > 6 ? "text-[200px]" : "text-[340px]",
+          brand.main.length > 6 ? "text-[150px]" : "text-[260px]",
         )}
       >
         {brand.main}

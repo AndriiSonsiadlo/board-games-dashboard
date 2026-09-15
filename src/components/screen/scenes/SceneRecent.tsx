@@ -16,7 +16,7 @@ export function SceneRecent({ snapshot }: { snapshot: PublicSnapshot }) {
   const results = snapshot.recentResults.slice(0, 3);
 
   return (
-    <div className="flex h-full flex-col px-[120px] pt-[110px] pb-[150px]">
+    <div className="flex h-full flex-col">
       <SceneHeading index="02" title={t.screen.recentResults} />
       <div className="mt-16 grid flex-1 grid-cols-3 gap-16">
         {results.map((r, i) => {

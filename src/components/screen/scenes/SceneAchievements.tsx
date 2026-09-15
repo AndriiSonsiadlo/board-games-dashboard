@@ -19,7 +19,7 @@ export function SceneAchievements({ snapshot }: { snapshot: PublicSnapshot }) {
   for (const u of unlocks) counts.set(u.achievementId, (counts.get(u.achievementId) ?? 0) + 1);
 
   return (
-    <div className="flex h-full flex-col px-[120px] pt-[110px] pb-[150px]">
+    <div className="flex h-full flex-col">
       <SceneHeading index="04" title={t.screen.achievements} />
       <div className="mt-14 grid flex-1 grid-cols-[520px_1fr] gap-24">
         <div className="flex flex-col justify-center gap-16">

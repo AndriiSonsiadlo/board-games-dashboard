@@ -19,7 +19,7 @@ export function SceneRoom({ snapshot }: { snapshot: PublicSnapshot }) {
   const dense = tables.length > 8;
 
   return (
-    <div className="flex h-full flex-col px-[120px] pt-[110px] pb-[150px]">
+    <div className="flex h-full flex-col">
       <SceneHeading index="01" title={t.screen.liveRoom} />
       <div className={cn("mt-14 grid flex-1 content-start gap-x-16", dense ? "grid-cols-3 gap-y-8" : "grid-cols-2 gap-y-10")}>
         {tables.map((table, i) => {

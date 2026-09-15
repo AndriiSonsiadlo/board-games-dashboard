@@ -12,7 +12,7 @@ export function SceneContenders({ snapshot }: { snapshot: PublicSnapshot }) {
   const lookups = usePublicLookups(snapshot);
 
   return (
-    <div className="flex h-full flex-col px-[120px] pt-[110px] pb-[150px]">
+    <div className="flex h-full flex-col">
       <SceneHeading index="07" title={t.screen.contenders} note={t.screen.contendersNote} />
       <div className="flex flex-1 flex-col justify-center gap-6">
         {(snapshot.contenders ?? []).map((id, i) => {
