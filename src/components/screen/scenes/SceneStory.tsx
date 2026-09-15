@@ -9,6 +9,7 @@ import type { PublicSnapshot } from "@/domain/snapshot";
 import type { Story } from "@/domain/stories";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
+import { AutoScroll } from "../AutoScroll";
 import { storyText } from "../storyText";
 import { SceneHeading } from "./SceneRoom";
 
@@ -31,7 +32,8 @@ export function SceneStory({ snapshot }: { snapshot: PublicSnapshot }) {
   return (
     <div className="flex h-full flex-col">
       <SceneHeading index="05" title={t.screen.stories} />
-      <ul className="flex flex-1 flex-col justify-center divide-y divide-line">
+      <AutoScroll startDelayMs={2000} windowMs={snapshot.event.sceneDurationSec * 1000}>
+      <ul className="flex flex-col divide-y divide-line">
         {stories.map((story, i) => {
           const Icon = ICONS[story.kind];
           const text = storyText(story, t, lang, names);
@@ -59,6 +61,7 @@ export function SceneStory({ snapshot }: { snapshot: PublicSnapshot }) {
           );
         })}
       </ul>
+      </AutoScroll>
     </div>
   );
 }
