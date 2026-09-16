@@ -151,6 +151,17 @@ describe("progress achievements", () => {
     expect(has(unlocksOf([...four, duel(5, 6, 50, 2, 1)]), "all-rounder", 1)).toBe(true);
   });
 
+  test("all-rounder counts families: a variant adds nothing, a new custom family does", () => {
+    const withCustom = [...games, makeGame(11, 10, { family: "catan" }), makeGame(12, 10, { family: "azul" })];
+    const unlocks = (gameIds: number[]) =>
+      replay(
+        { players, games: withCustom, sessions: gameIds.map((gameId, i) => duel(i + 1, gameId, (i + 1) * 10, 1, 2)) },
+        makeSettings(),
+      ).unlocks;
+    expect(has(unlocks([1, 2, 3, 4, 11]), "all-rounder", 1)).toBe(false);
+    expect(has(unlocks([1, 2, 3, 4, 12]), "all-rounder", 1)).toBe(true);
+  });
+
   test("table hopper: four different tables, direct results without table ignored", () => {
     const sessions = [1, 2, 3].map((tableId) => duel(tableId, 9, tableId * 10, 1, 2, { tableId }));
     const noTable = duel(4, 9, 40, 1, 2, { tableId: null });

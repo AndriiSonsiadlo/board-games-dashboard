@@ -56,6 +56,18 @@ export function updateGameRow(tx: Tx, id: number, patch: GamePatch): void {
   tx.update(s.games).set(patch).where(eq(s.games.id, id)).run();
 }
 
+export function insertGame(tx: Tx, values: Omit<typeof s.games.$inferInsert, "id">): number {
+  return tx.insert(s.games).values(values).returning({ id: s.games.id }).get().id;
+}
+
+export function deleteGameRow(tx: Tx, id: number): void {
+  tx.delete(s.games).where(eq(s.games.id, id)).run();
+}
+
+export function gameHasSessions(tx: Tx, gameId: number): boolean {
+  return Boolean(tx.select({ id: s.sessions.id }).from(s.sessions).where(eq(s.sessions.gameId, gameId)).get());
+}
+
 export function insertTable(tx: Tx, values: { number: number; label: string | null }): number {
   return tx.insert(s.tables).values(values).returning({ id: s.tables.id }).get().id;
 }

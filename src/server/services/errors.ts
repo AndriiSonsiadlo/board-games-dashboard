@@ -18,7 +18,8 @@ export type ErrorCode =
   | "open_sessions"
   | "wrong_pin"
   | "demo_player_in_use"
-  | "duplicate_name";
+  | "duplicate_name"
+  | "game_in_use";
 
 export class ServiceError extends Error {
   constructor(readonly code: ErrorCode) {

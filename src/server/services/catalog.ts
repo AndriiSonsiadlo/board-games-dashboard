@@ -1,12 +1,24 @@
+import { uniqueSlug } from "@/domain/games";
 import { isOpenSession } from "@/domain/tables";
-import type { Db } from "../db/client";
+import type { GameFact } from "@/domain/types";
+import type { Db, Tx } from "../db/client";
 import { loadFacts } from "../repo/facts";
-import { deleteTableRow, insertTable, tableHasSessions, updateGameRow, updateTableRow } from "../repo/writes";
+import {
+  deleteGameRow,
+  deleteTableRow,
+  gameHasSessions,
+  insertGame,
+  insertTable,
+  tableHasSessions,
+  updateGameRow,
+  updateTableRow,
+} from "../repo/writes";
 import { ServiceError } from "./errors";
 import { mutate } from "./mutate";
 
 export interface GamePatch {
   name?: string;
+  family?: string;
   weight?: number;
   minPlayers?: number;
   maxPlayers?: number;
@@ -19,19 +31,66 @@ export interface GamePatch {
   category?: string;
 }
 
+/** `family: null` puts the game in its own family (its slug). */
+export type NewGame = Omit<GameFact, "id" | "slug" | "family"> & { family: string | null };
+
 const invalid = () => new ServiceError("invalid_value");
+
+function normalized<T extends Partial<GameFact>>(g: T): T {
+  return {
+    ...g,
+    ...(g.name !== undefined ? { name: g.name.trim() } : {}),
+    ...(g.category !== undefined ? { category: g.category.trim().toLowerCase() } : {}),
+    ...(g.descriptionEn !== undefined ? { descriptionEn: g.descriptionEn.trim() } : {}),
+    ...(g.descriptionRu !== undefined ? { descriptionRu: g.descriptionRu.trim() } : {}),
+  };
+}
+
+function checkGame(g: GameFact, families: ReadonlySet<string>): void {
+  if (!(g.weight > 0 && g.weight <= 100)) throw invalid();
+  if (!Number.isInteger(g.minPlayers) || g.minPlayers < 2) throw invalid();
+  if (!Number.isInteger(g.maxPlayers) || g.maxPlayers < g.minPlayers || g.maxPlayers > 20) throw invalid();
+  if (!Number.isInteger(g.durationMin) || g.durationMin < 1 || g.durationMin > 600) throw invalid();
+  if (g.name.length === 0 || g.name.length > 40) throw invalid();
+  if (g.category.length === 0 || g.category.length > 30) throw invalid();
+  if (g.descriptionEn.length > 300 || g.descriptionRu.length > 300) throw invalid();
+  if (!/^[A-Z][A-Za-z0-9]{1,40}$/.test(g.icon)) throw invalid();
+  // A family is the game's own slug or one that another game already uses.
+  if (g.family !== g.slug && !families.has(g.family)) throw invalid();
+}
+
+const familiesOf = (games: GameFact[], exceptId: number | null) =>
+  new Set(games.filter((g) => g.id !== exceptId).map((g) => g.family));
+
+export function createGame(db: Db, input: NewGame): number {
+  return mutate(db, (tx) => {
+    const games = loadFacts(tx).games;
+    const { family, ...fields } = input;
+    const base = normalized({ ...fields, id: 0 });
+    const slug = uniqueSlug(base.name, games.map((g) => g.slug));
+    const game: GameFact = { ...base, slug, family: family ?? slug };
+    checkGame(game, familiesOf(games, null));
+    const { id: _id, ...values } = game;
+    return insertGame(tx, values);
+  });
+}
 
 export function updateGame(db: Db, id: number, patch: GamePatch): void {
   mutate(db, (tx) => {
-    const game = loadFacts(tx).games.find((g) => g.id === id);
+    const games = loadFacts(tx).games;
+    const game = games.find((g) => g.id === id);
     if (!game) throw new ServiceError("not_found");
-    const next = { ...game, ...patch };
-    if (!(next.weight > 0 && next.weight <= 100)) throw invalid();
-    if (!Number.isInteger(next.minPlayers) || next.minPlayers < 2) throw invalid();
-    if (!Number.isInteger(next.maxPlayers) || next.maxPlayers < next.minPlayers || next.maxPlayers > 20) throw invalid();
-    if (!Number.isInteger(next.durationMin) || next.durationMin < 1 || next.durationMin > 600) throw invalid();
-    if (next.name.trim().length === 0) throw invalid();
-    updateGameRow(tx, id, { ...patch, name: patch.name?.trim() });
+    const clean = normalized(patch);
+    checkGame({ ...game, ...clean }, familiesOf(games, id));
+    updateGameRow(tx, id, clean);
+  });
+}
+
+export function deleteGame(db: Db, id: number): void {
+  mutate(db, (tx: Tx) => {
+    if (!loadFacts(tx).games.some((g) => g.id === id)) throw new ServiceError("not_found");
+    if (gameHasSessions(tx, id)) throw new ServiceError("game_in_use");
+    deleteGameRow(tx, id);
   });
 }
 

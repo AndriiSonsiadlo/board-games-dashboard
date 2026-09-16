@@ -6,7 +6,16 @@ import type { ActionResult } from "@/lib/action";
 import { listAudit } from "@/server/repo/facts";
 import { runAdminAction } from "@/server/runAction";
 import { setAchievementEnabled } from "@/server/services/achievements";
-import { addTable, removeTable, updateGame, updateTable, type GamePatch } from "@/server/services/catalog";
+import {
+  addTable,
+  createGame,
+  deleteGame,
+  removeTable,
+  updateGame,
+  updateTable,
+  type GamePatch,
+  type NewGame,
+} from "@/server/services/catalog";
 import {
   changePin,
   clearDemoData,
@@ -149,6 +158,14 @@ export async function mergePlayersAction(input: { keepId: number; removeId: numb
 // Catalog
 export async function updateGameAction(id: number, patch: GamePatch): Result {
   return runAdminAction((db) => updateGame(db, id, patch));
+}
+
+export async function createGameAction(input: NewGame): Result<number> {
+  return runAdminAction((db) => createGame(db, input));
+}
+
+export async function deleteGameAction(id: number): Result {
+  return runAdminAction((db) => deleteGame(db, id));
 }
 
 export async function addTableAction(label?: string | null): Result<number> {

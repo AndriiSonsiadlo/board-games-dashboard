@@ -34,6 +34,7 @@ export const en = {
     player_busy: "A player is already at another table.",
     table_busy: "This table already has a game.",
     table_in_use: "Finish or cancel the game at this table first.",
+    game_in_use: "This game has been played. Deactivate it instead.",
     joker_used: "That player has already used their Joker.",
     too_few_players: "At least 2 players are needed.",
     too_many_players: "Too many players for this game.",

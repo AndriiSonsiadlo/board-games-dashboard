@@ -4,7 +4,7 @@ import { signToken, verifyToken } from "../auth/token";
 import { getDataVersion, loadFacts, loadSecrets } from "../repo/facts";
 import { insertPlayer, insertSession } from "../repo/writes";
 import { createTestDb } from "../testDb";
-import { addTable, removeTable, updateGame, updateTable } from "./catalog";
+import { addTable, createGame, deleteGame, removeTable, updateGame, updateTable } from "./catalog";
 import { ServiceError } from "./errors";
 import {
   changePin,
@@ -277,5 +277,62 @@ describe("catalog", () => {
     insertSession(ctx.db, { tableId: 2, gameId: 1, status: "done", createdAt: 1, finishedAt: 2 }, []);
     expect(removeTable(ctx.db, 2)).toBe("deactivated");
     expect(facts().tables.find((t) => t.id === 2)?.active).toBe(false);
+  });
+});
+
+describe("custom games", () => {
+  const azul = {
+    name: "Azul",
+    descriptionEn: "Draft tiles, score patterns.",
+    descriptionRu: "Набирайте плитки и собирайте узоры.",
+    icon: "Gem",
+    category: "abstract",
+    durationMin: 40,
+    weight: 7,
+    minPlayers: 2,
+    maxPlayers: 4,
+    allowTies: false,
+    active: true,
+    family: null,
+  };
+  const game = (id: number) => facts().games.find((g) => g.id === id);
+
+  test("create trims the name and gives a unique slug that is also its family", () => {
+    const a = createGame(ctx.db, azul);
+    const b = createGame(ctx.db, { ...azul, name: "  Azul " });
+    expect(game(a)).toMatchObject({ name: "Azul", slug: "azul", family: "azul", icon: "Gem", weight: 7 });
+    expect(game(b)).toMatchObject({ name: "Azul", slug: "azul-2", family: "azul-2" });
+  });
+
+  test("a variant joins an existing family; bad input is rejected", () => {
+    const seafarers = createGame(ctx.db, { ...azul, name: "Catan: Seafarers", family: "catan" });
+    expect(game(seafarers)?.family).toBe("catan");
+    expectCode(() => createGame(ctx.db, { ...azul, family: "nope" }), "invalid_value");
+    expectCode(() => createGame(ctx.db, { ...azul, minPlayers: 5, maxPlayers: 4 }), "invalid_value");
+    expectCode(() => createGame(ctx.db, { ...azul, icon: "<svg>" }), "invalid_value");
+    expectCode(() => createGame(ctx.db, { ...azul, name: "   " }), "invalid_value");
+    expectCode(() => createGame(ctx.db, { ...azul, category: "" }), "invalid_value");
+  });
+
+  test("update renames, re-icons and moves between families but never changes the slug", () => {
+    const id = createGame(ctx.db, azul);
+    updateGame(ctx.db, id, { name: "Azul Duel", icon: "Crown", family: "catan", descriptionRu: "Дуэль" });
+    expect(game(id)).toMatchObject({ name: "Azul Duel", icon: "Crown", family: "catan", slug: "azul", descriptionRu: "Дуэль" });
+    updateGame(ctx.db, id, { family: "azul" });
+    expect(game(id)?.family).toBe("azul");
+    expectCode(() => updateGame(ctx.db, id, { family: "nope" }), "invalid_value");
+  });
+
+  test("only games that were never used can be deleted", () => {
+    const unused = createGame(ctx.db, azul);
+    deleteGame(ctx.db, unused);
+    expect(game(unused)).toBeUndefined();
+    const used = createGame(ctx.db, { ...azul, name: "Used" });
+    const p = insertPlayer(ctx.db, { name: "A", nickname: null, color: "#fff", source: "admin", createdAt: 1 });
+    insertSession(ctx.db, { tableId: null, gameId: used, status: "cancelled", createdAt: 1 }, [
+      { playerId: p, seat: 0, jokerDeclared: false, placement: null },
+    ]);
+    expectCode(() => deleteGame(ctx.db, used), "game_in_use");
+    expectCode(() => deleteGame(ctx.db, 999), "not_found");
   });
 });

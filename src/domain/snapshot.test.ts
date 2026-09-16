@@ -164,6 +164,12 @@ describe("admin snapshot", () => {
     expect(admin.players.find((p) => p.id === 6)).toMatchObject({ active: false, jokerUsed: false });
     expect(admin.allTables.map((t) => t.number)).toEqual([1, 2, 3, 4]);
   });
+
+  test("admin snapshot lists games that have any session; the public one does not", () => {
+    const { pub, admin } = build(facts());
+    expect(admin.playedGameIds).toEqual([1, 2]);
+    expect("playedGameIds" in pub).toBe(false);
+  });
 });
 
 const achievementAnnouncement = (id: number, achievementId: string, playerId: number): AnnouncementFact => ({
