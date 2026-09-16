@@ -1,17 +1,7 @@
-import { Castle, Dices, Gem, Hexagon, Landmark, Layers, Music, Rat, Spade, TrainFront, type LucideIcon } from "lucide-react";
+import { Dices } from "lucide-react";
+import { GAME_ICONS } from "./gameIcons";
 
-export const GAME_ICONS: Record<string, LucideIcon> = {
-  Castle,
-  Dices,
-  Gem,
-  Hexagon,
-  Landmark,
-  Layers,
-  Music,
-  Rat,
-  Spade,
-  TrainFront,
-};
+export { GAME_ICONS };
 
 export function GameIcon({ name, className }: { name: string; className?: string }) {
   const Icon = GAME_ICONS[name] ?? Dices;
