@@ -370,6 +370,7 @@ export const en = {
     achievementUnlocked: "Achievement unlocked",
     achievements: "Achievements",
     sealedUntilFinale: "Sealed until the finale",
+    moreHolders: "+{n} more",
     achievementsUnlocked: "Achievements",
     podium: "Podium",
     stories: "Stories of the night",

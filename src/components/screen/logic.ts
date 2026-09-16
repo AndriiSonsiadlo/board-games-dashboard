@@ -1,3 +1,4 @@
+import type { AchievementId, Unlock } from "@/domain/achievements";
 import { ANNOUNCEMENT_WINDOW_MS, type PublicSnapshot, type ScreenAnnouncement } from "@/domain/snapshot";
 import type { PublicStats } from "@/domain/stats";
 import { ALL_SCENES, type SceneId } from "@/domain/types";
@@ -59,6 +60,24 @@ export function podiumSlots(
     placement,
     playerIds: placements.filter((p) => p.placement === placement).map((p) => p.playerId),
   })).filter((slot) => slot.playerIds.length > 0);
+}
+
+export interface AchievementHolders {
+  achievementId: AchievementId;
+  playerIds: number[];
+  latestAt: number;
+}
+
+/** Unlocks grouped per achievement: the most recently unlocked achievement first, holders in unlock order. */
+export function holdersByAchievement(unlocks: Unlock[]): AchievementHolders[] {
+  const groups = new Map<AchievementId, AchievementHolders>();
+  for (const u of [...unlocks].sort((a, b) => a.at - b.at)) {
+    const group = groups.get(u.achievementId) ?? { achievementId: u.achievementId, playerIds: [], latestAt: u.at };
+    group.playerIds.push(u.playerId);
+    group.latestAt = Math.max(group.latestAt, u.at);
+    groups.set(u.achievementId, group);
+  }
+  return [...groups.values()].sort((a, b) => b.latestAt - a.latestAt);
 }
 
 /** Non-winning placements grouped by value, last place first; tied players share a group and appear together. */

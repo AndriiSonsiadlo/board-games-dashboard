@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import type { ScreenAnnouncement } from "@/domain/snapshot";
-import { availableScenes, nextAnnouncements, pickNext, podiumSlots, revealGroups, revealTimeline } from "./logic";
+import { availableScenes, holdersByAchievement, nextAnnouncements, pickNext, podiumSlots, revealGroups, revealTimeline } from "./logic";
 
 const result = { sessionId: 1, gameId: 1, tableId: 1, startedAt: 0, finishedAt: 0, durationMin: null, placements: [] };
 
@@ -104,6 +104,15 @@ describe("pickNext", () => {
   test("other announcements are not blocked by a held achievement", () => {
     expect(pickNext([card(1, 5, 10_000), milestone], 11_000, 15_000)?.id).toBe(9);
   });
+});
+
+test("holdersByAchievement groups unlocks, newest achievement first, holders in unlock order", () => {
+  const u = (achievementId: "phoenix" | "marathon", playerId: number, at: number) => ({ achievementId, playerId, sessionId: 1, at });
+  expect(holdersByAchievement([u("phoenix", 3, 50), u("marathon", 1, 40), u("phoenix", 2, 10)])).toEqual([
+    { achievementId: "phoenix", playerIds: [2, 3], latestAt: 50 },
+    { achievementId: "marathon", playerIds: [1], latestAt: 40 },
+  ]);
+  expect(holdersByAchievement([])).toEqual([]);
 });
 
 test("revealGroups: last place first, ties revealed together, winners excluded", () => {

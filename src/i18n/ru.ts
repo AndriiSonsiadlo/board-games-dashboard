@@ -369,6 +369,7 @@ export const ru: Dict = {
     achievementUnlocked: "Достижение открыто",
     achievements: "Достижения",
     sealedUntilFinale: "Скрыты до финала",
+    moreHolders: "ещё {n}",
     achievementsUnlocked: "Достижений",
     podium: "Пьедестал",
     stories: "Истории вечера",
