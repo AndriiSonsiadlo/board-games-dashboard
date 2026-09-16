@@ -5,7 +5,7 @@ import { loadFacts } from "../repo/facts";
 import { createTestDb } from "../testDb";
 import { ServiceError } from "./errors";
 import { finishEvent, goLive, reopenEvent } from "./event";
-import { finaleCommand, setFinaleRevealed } from "./finale";
+import { finaleCommand, finaleGoto, setFinaleRevealed } from "./finale";
 import { addPlayer } from "./players";
 import { recordDirectResult } from "./sessions";
 
@@ -67,4 +67,20 @@ test("the admin can toggle the reveal; reopening resets everything", () => {
   finaleCommand(ctx.db, "next");
   reopenEvent(ctx.db);
   expect(event()).toMatchObject({ finaleRevealed: false, screenControl: { finaleStep: 0 } });
+});
+
+test("goto jumps anywhere, reveals on or past the podium beat, never hides again and checks bounds", () => {
+  expect(() => finaleGoto(ctx.db, 1)).toThrow(ServiceError);
+  finishEvent(ctx.db);
+  const beats = script();
+  expect(finaleGoto(ctx.db, 2)).toEqual({ step: 2, total: beats.length });
+  expect(event().finaleRevealed).toBe(false);
+  expect(finaleGoto(ctx.db, beats.length).step).toBe(beats.length);
+  expect(event().finaleRevealed).toBe(true);
+  expect(finaleGoto(ctx.db, 1).step).toBe(1);
+  expect(event().finaleRevealed).toBe(true);
+  expect(() => finaleGoto(ctx.db, beats.length + 1)).toThrow(ServiceError);
+  expect(() => finaleGoto(ctx.db, -1)).toThrow(ServiceError);
+  expect(() => finaleGoto(ctx.db, 1.5)).toThrow(ServiceError);
+  expect(finaleGoto(ctx.db, 0).step).toBe(0);
 });

@@ -8,7 +8,7 @@ import { mutate } from "./mutate";
 
 export type FinaleCommand = "next" | "back" | "exit";
 
-export function finaleCommand(db: Db, command: FinaleCommand): { step: number; total: number } {
+function moveFinale(db: Db, pick: (current: number, total: number) => number): { step: number; total: number } {
   return mutate(
     db,
     (tx) => {
@@ -17,8 +17,7 @@ export function finaleCommand(db: Db, command: FinaleCommand): { step: number; t
       const facts = loadFacts(tx);
       const beats = buildFinaleScript(facts, replay(facts, facts.event.scoring));
       const current = clampStep(row.screenControl.finaleStep, beats);
-      const step =
-        command === "next" ? clampStep(current + 1, beats) : command === "back" ? clampStep(current - 1, beats) : 0;
+      const step = clampStep(pick(current, beats.length), beats);
       const reveal = step > 0 && step >= revealStepOf(beats);
       updateEventRow(tx, {
         screenControl: { ...row.screenControl, finaleStep: step },
@@ -28,6 +27,18 @@ export function finaleCommand(db: Db, command: FinaleCommand): { step: number; t
     },
     { allowWhenFinished: true },
   );
+}
+
+export function finaleCommand(db: Db, command: FinaleCommand): { step: number; total: number } {
+  return moveFinale(db, (current) => (command === "next" ? current + 1 : command === "back" ? current - 1 : 0));
+}
+
+/** Jump straight to a step (0 = back to scenes). Landing on or past the podium beat makes standings public. */
+export function finaleGoto(db: Db, step: number): { step: number; total: number } {
+  return moveFinale(db, (_current, total) => {
+    if (!Number.isInteger(step) || step < 0 || step > total) throw new ServiceError("invalid_value");
+    return step;
+  });
 }
 
 export function setFinaleRevealed(db: Db, revealed: boolean): void {

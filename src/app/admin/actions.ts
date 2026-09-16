@@ -22,7 +22,7 @@ import {
   type ScoringPatch,
   type ScreenPatch,
 } from "@/server/services/event";
-import { finaleCommand, setFinaleRevealed, type FinaleCommand } from "@/server/services/finale";
+import { finaleCommand, finaleGoto, setFinaleRevealed, type FinaleCommand } from "@/server/services/finale";
 import { addPlayer, bulkAddPlayers, mergePlayers, updatePlayer, type PlayerPatch } from "@/server/services/players";
 import {
   cancelSession,
@@ -207,6 +207,10 @@ export async function setAchievementEnabledAction(input: { achievementId: string
 
 export async function finaleCommandAction(command: FinaleCommand): Result<{ step: number; total: number }> {
   return runAdminAction((db) => finaleCommand(db, command));
+}
+
+export async function finaleGotoAction(step: number): Result<{ step: number; total: number }> {
+  return runAdminAction((db) => finaleGoto(db, step));
 }
 
 export async function setFinaleRevealedAction(revealed: boolean): Result {

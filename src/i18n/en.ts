@@ -449,6 +449,8 @@ export const en = {
     upNext: "Up next",
     revealed: "Standings public",
     revealedHint: "Phones and the leaderboard show points and ranks.",
+    jumpHint: "Tap a step to jump to it.",
+    confirmReveal: "Tap again: this shows final points",
     rehearsal: "Open rehearsal",
     rehearsalHint: "Plays the ceremony with placeholder names. Real data is not touched.",
     beat: {
