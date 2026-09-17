@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Lock } from "lucide-react";
 import Link from "next/link";
-import { achievementVisibility, rarityOf } from "@/domain/achievements";
+import { achievementVisibility, rarityOf, rarityRank } from "@/domain/achievements";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
 import { formatClock } from "@/lib/format";
@@ -18,6 +18,13 @@ export function AchievementsView() {
   const { enabled, unlocks, sealedUnlockCount, eligiblePlayers } = snapshot.achievements;
   const revealed = snapshot.event.finaleRevealed;
   const sealed = new Set(snapshot.achievements.sealed);
+  const holderCounts = new Map<string, number>();
+  for (const u of unlocks) holderCounts.set(u.achievementId, (holderCounts.get(u.achievementId) ?? 0) + 1);
+  const orderedIds = [...enabled].sort(
+    (a, b) =>
+      rarityRank(rarityOf(holderCounts.get(a) ?? 0, eligiblePlayers)) -
+      rarityRank(rarityOf(holderCounts.get(b) ?? 0, eligiblePlayers)),
+  );
 
   return (
     <div className="space-y-8 pt-10">
@@ -37,7 +44,7 @@ export function AchievementsView() {
       </FadeRise>
 
       <ul className="divide-y divide-line border-y border-line">
-        {enabled.map((id) => {
+        {orderedIds.map((id) => {
           const titleOnly = achievementVisibility(sealed.has(id), revealed) === "titleOnly";
           const holders = unlocks.filter((u) => u.achievementId === id).reverse();
           const rarity = rarityOf(holders.length, eligiblePlayers);

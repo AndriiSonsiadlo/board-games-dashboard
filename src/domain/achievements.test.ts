@@ -8,6 +8,7 @@ import {
   isSealed,
   newUnlocks,
   rarityOf,
+  rarityRank,
   type AchievementId,
   type Unlock,
 } from "./achievements";
@@ -279,6 +280,13 @@ describe("settings, rarity and diffs", () => {
     expect(rarityOf(3, 20)).toBe("rare");
     expect(rarityOf(8, 20)).toBe("rare");
     expect(rarityOf(9, 20)).toBe("common");
+  });
+
+  test("rarityRank orders still-locked first, then rarest to most common", () => {
+    expect(rarityRank(null)).toBeLessThan(rarityRank("legendary"));
+    expect(rarityRank("legendary")).toBeLessThan(rarityRank("epic"));
+    expect(rarityRank("epic")).toBeLessThan(rarityRank("rare"));
+    expect(rarityRank("rare")).toBeLessThan(rarityRank("common"));
   });
 
   test("newUnlocks returns every new unlock, sealed ones included", () => {

@@ -227,6 +227,13 @@ export function rarityOf(count: number, eligiblePlayers: number): Rarity | null 
   return "common";
 }
 
+const RARITY_RANK: Record<Rarity, number> = { legendary: 1, epic: 2, rare: 3, common: 4 };
+
+/** Sort key for surfacing the rarest achievements first, with still-locked ones (nobody's earned it yet) leading. */
+export function rarityRank(rarity: Rarity | null): number {
+  return rarity === null ? 0 : RARITY_RANK[rarity];
+}
+
 export function newUnlocks(before: Unlock[], after: Unlock[]): Unlock[] {
   const known = new Set(before.map(unlockKey));
   return after.filter((u) => !known.has(unlockKey(u)));
