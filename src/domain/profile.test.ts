@@ -19,6 +19,7 @@ function facts(event: Partial<EventFact> = {}): Facts {
     ],
     announcements: [],
     disabledAchievements: [],
+    sealedOverrides: {},
   };
 }
 

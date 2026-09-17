@@ -174,6 +174,11 @@ export function isAchievementId(value: unknown): value is AchievementId {
   return typeof value === "string" && byId.has(value as AchievementId);
 }
 
+/** The admin's per-achievement choice wins over the built-in default. */
+export function isSealed(id: AchievementId, overrides: Readonly<Record<string, boolean>>): boolean {
+  return overrides[id] ?? achievementDef(id).sealed;
+}
+
 export const unlockKey = (u: Pick<Unlock, "achievementId" | "playerId">) => `${u.achievementId}:${u.playerId}`;
 
 /** Walks the replay in order; the first result where a check passes records the unlock. */
@@ -222,7 +227,11 @@ export function rarityOf(count: number, eligiblePlayers: number): Rarity | null 
   return "common";
 }
 
-export function newPublicUnlocks(before: Unlock[], after: Unlock[]): Unlock[] {
+export function newPublicUnlocks(
+  before: Unlock[],
+  after: Unlock[],
+  overrides: Readonly<Record<string, boolean>>,
+): Unlock[] {
   const known = new Set(before.map(unlockKey));
-  return after.filter((u) => !known.has(unlockKey(u)) && !achievementDef(u.achievementId).sealed);
+  return after.filter((u) => !known.has(unlockKey(u)) && !isSealed(u.achievementId, overrides));
 }

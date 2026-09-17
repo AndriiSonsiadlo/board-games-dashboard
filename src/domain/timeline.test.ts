@@ -20,7 +20,7 @@ const sessions = [
   makeOpenSession(20, 2, 1, "playing", [[3]], 1050 * MIN),
   makeOpenSession(21, 3, 1, "setup", [[3]]),
 ];
-const facts = { sessions };
+const facts = { sessions, sealedOverrides: {} };
 const rp = replay({ players, games, sessions }, makeSettings());
 
 test("newest first with started, result, unlock and milestone items", () => {

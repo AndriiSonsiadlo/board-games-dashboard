@@ -3,7 +3,7 @@ import { replay } from "@/domain/replay";
 import { loadFacts } from "../repo/facts";
 import { seedDemo } from "../seed/demo";
 import { createTestDb } from "../testDb";
-import { setAchievementEnabled } from "./achievements";
+import { setAchievementEnabled, setAchievementSealed } from "./achievements";
 import { ServiceError } from "./errors";
 import { finishEvent, goLive } from "./event";
 import { addPlayer } from "./players";
@@ -62,6 +62,27 @@ test("disabled achievements are not announced; toggling is allowed after finish"
 
 test("unknown achievement ids are rejected", () => {
   expect(() => setAchievementEnabled(ctx.db, { achievementId: "nope", enabled: false })).toThrow(ServiceError);
+});
+
+test("sealed can be switched per achievement; only choices that differ from the default are stored", () => {
+  setAchievementSealed(ctx.db, { achievementId: "comeback", sealed: false });
+  setAchievementSealed(ctx.db, { achievementId: "phoenix", sealed: true });
+  setAchievementEnabled(ctx.db, { achievementId: "phoenix", enabled: false });
+  expect(loadFacts(ctx.db).sealedOverrides).toEqual({ comeback: false, phoenix: true });
+  expect(loadFacts(ctx.db).disabledAchievements).toEqual(["phoenix"]);
+  setAchievementSealed(ctx.db, { achievementId: "comeback", sealed: true });
+  expect(loadFacts(ctx.db).sealedOverrides).toEqual({ phoenix: true });
+  expect(() => setAchievementSealed(ctx.db, { achievementId: "nope", sealed: true })).toThrow(ServiceError);
+});
+
+test("switching sealed never queues or removes cards, and works after finish", () => {
+  recordDirectResult(ctx.db, { gameId: catan, tableId: null, placements: placements(ids) });
+  const before = achievementAnnouncements();
+  setAchievementSealed(ctx.db, { achievementId: "opening-move", sealed: true });
+  expect(achievementAnnouncements()).toEqual(before);
+  finishEvent(ctx.db);
+  setAchievementSealed(ctx.db, { achievementId: "opening-move", sealed: false });
+  expect(loadFacts(ctx.db).sealedOverrides).toEqual({});
 });
 
 test("demo data unlocks several achievements", () => {

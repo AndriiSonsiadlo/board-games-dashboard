@@ -98,10 +98,10 @@ describe("version, announcements, audit, demo cleanup", () => {
 
   test("achievement settings: only disabled ids are reported, upsert toggles", () => {
     expect(loadFacts(ctx.db).disabledAchievements).toEqual([]);
-    upsertAchievementSetting(ctx.db, "marathon", false);
-    upsertAchievementSetting(ctx.db, "phoenix", false);
+    upsertAchievementSetting(ctx.db, "marathon", { enabled: false });
+    upsertAchievementSetting(ctx.db, "phoenix", { enabled: false });
     expect(loadFacts(ctx.db).disabledAchievements.sort()).toEqual(["marathon", "phoenix"]);
-    upsertAchievementSetting(ctx.db, "marathon", true);
+    upsertAchievementSetting(ctx.db, "marathon", { enabled: true });
     expect(loadFacts(ctx.db).disabledAchievements).toEqual(["phoenix"]);
   });
 

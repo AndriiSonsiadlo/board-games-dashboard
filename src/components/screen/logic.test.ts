@@ -4,7 +4,7 @@ import { availableScenes, holdersByAchievement, nextAnnouncements, pickNext, pod
 
 const result = { sessionId: 1, gameId: 1, tableId: 1, startedAt: 0, finishedAt: 0, durationMin: null, placements: [] };
 
-const noAchievements = { enabled: [], unlocks: [], sealedUnlockCount: 0, eligiblePlayers: 0 };
+const noAchievements = { enabled: [], sealed: [], unlocks: [], sealedUnlockCount: 0, eligiblePlayers: 0 };
 
 const empty = { recentResults: [], contenders: null, achievements: noAchievements, stories: [], stats: { popularity: [] } };
 

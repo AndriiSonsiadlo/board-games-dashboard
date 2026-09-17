@@ -17,6 +17,7 @@ function facts(sessions: SessionFact[], playerCount = 5): Facts {
     sessions,
     announcements: [],
     disabledAchievements: [],
+    sealedOverrides: {},
   };
 }
 
@@ -85,6 +86,16 @@ describe("buildFinaleScript", () => {
     const places = beats.filter((b): b is Extract<FinaleBeat, { kind: "place" }> => b.kind === "place");
     expect(places.map((b) => b.place)).toEqual([3, 2]);
     expect(revealStepOf(beats)).toBe(beats.findIndex((b) => b.kind === "podium") + 1);
+  });
+
+  test("an achievement the admin unsealed gets no finale beat", () => {
+    const sessions = [makeDoneSession(1, 1, MIN, [[1, 1, true], [2, 2]])];
+    const beatsWith = (overrides: Record<string, boolean>) => {
+      const f = { ...facts(sessions), sealedOverrides: overrides };
+      return buildFinaleScript(f, replay(f, f.event.scoring)).filter((b) => b.kind === "sealed");
+    };
+    expect(beatsWith({})).toHaveLength(1);
+    expect(beatsWith({ "joker-master": false })).toHaveLength(0);
   });
 
   test("holders of the same sealed achievement share one beat, in unlock order", () => {

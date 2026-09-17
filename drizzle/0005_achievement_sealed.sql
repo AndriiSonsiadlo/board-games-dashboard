@@ -1,0 +1,1 @@
+ALTER TABLE `achievement_settings` ADD `sealed` integer;

@@ -483,8 +483,9 @@ export const en = {
   },
   adminAchievements: {
     title: "Achievements",
-    hint: "Disabled achievements disappear everywhere and are not announced.",
+    hint: "Off hides an achievement everywhere. Sealed keeps its description secret until the finale.",
     sealed: "Sealed",
+    enabled: "On",
     unlockCount: "{n} unlocked",
     all: "All unlocks",
     none: "No unlocks yet.",

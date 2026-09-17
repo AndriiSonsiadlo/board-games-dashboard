@@ -1,4 +1,4 @@
-import { ACHIEVEMENTS, type AchievementId } from "./achievements";
+import { ACHIEVEMENTS, isSealed, type AchievementId } from "./achievements";
 import type { PlayerResult, Replay } from "./replay";
 import type { PlayerView } from "./snapshot";
 import type { Facts } from "./types";
@@ -100,9 +100,10 @@ export function buildProfile(
     ...(revealed ? { points: r.points, counted: countedIds.has(r.sessionId) } : {}),
   }));
 
-  const achievements: ProfileAchievement[] = ACHIEVEMENTS.filter((d) => !disabled.has(d.id) && (revealed || !d.sealed)).map((d) => ({
+  const sealed = (id: AchievementId) => isSealed(id, facts.sealedOverrides);
+  const achievements: ProfileAchievement[] = ACHIEVEMENTS.filter((d) => !disabled.has(d.id) && (revealed || !sealed(d.id))).map((d) => ({
     id: d.id,
-    sealed: d.sealed,
+    sealed: sealed(d.id),
     unlockedAt: unlockedAt.get(d.id) ?? null,
     progress: d.progress ? d.progress(history) : null,
   }));

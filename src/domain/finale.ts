@@ -1,4 +1,4 @@
-import { achievementDef, type AchievementId } from "./achievements";
+import { isSealed, type AchievementId } from "./achievements";
 import type { Replay } from "./replay";
 import type { PlayerView } from "./snapshot";
 import { pointsEqual, type StandingRow } from "./standings";
@@ -63,7 +63,7 @@ export function buildFinaleScript(facts: Facts, rp: Replay): FinaleBeat[] {
 
   const holders = new Map<AchievementId, number[]>();
   for (const u of rp.unlocks) {
-    if (!achievementDef(u.achievementId).sealed) continue;
+    if (!isSealed(u.achievementId, facts.sealedOverrides)) continue;
     holders.set(u.achievementId, [...(holders.get(u.achievementId) ?? []), u.playerId]);
   }
   [...holders].forEach(([achievementId, playerIds], i) =>

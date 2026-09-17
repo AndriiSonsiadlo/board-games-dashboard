@@ -122,4 +122,6 @@ export const auditLog = sqliteTable("audit_log", {
 export const achievementSettings = sqliteTable("achievement_settings", {
   achievementId: text().primaryKey(),
   enabled: integer({ mode: "boolean" }).notNull().default(true),
+  /** null = the achievement's built-in default. */
+  sealed: integer({ mode: "boolean" }),
 });

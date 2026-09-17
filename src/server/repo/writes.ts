@@ -144,10 +144,14 @@ export function milestoneExists(tx: Tx, count: number): boolean {
     .some((a) => a.payload.count === count);
 }
 
-export function upsertAchievementSetting(tx: Tx, achievementId: string, enabled: boolean): void {
+export function upsertAchievementSetting(
+  tx: Tx,
+  achievementId: string,
+  patch: { enabled?: boolean; sealed?: boolean | null },
+): void {
   tx.insert(s.achievementSettings)
-    .values({ achievementId, enabled })
-    .onConflictDoUpdate({ target: s.achievementSettings.achievementId, set: { enabled } })
+    .values({ achievementId, enabled: patch.enabled ?? true, sealed: patch.sealed ?? null })
+    .onConflictDoUpdate({ target: s.achievementSettings.achievementId, set: patch })
     .run();
 }
 

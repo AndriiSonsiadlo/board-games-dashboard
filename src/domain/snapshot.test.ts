@@ -44,6 +44,7 @@ function facts(event: Partial<EventFact> = {}, announcements: AnnouncementFact[]
     ],
     announcements,
     disabledAchievements: [],
+    sealedOverrides: {},
   };
 }
 
@@ -222,6 +223,14 @@ describe("achievements in snapshots", () => {
       { id: 1, createdAt: NOW - 5_000, type: "achievement", achievementId: "opening-move", playerId: 1, sessionId: 10 },
     ]);
     expect(admin.announcements.map((a) => a.id)).toEqual([1, 2]);
+  });
+
+  test("sealed overrides decide which unlocks stay hidden before the reveal and are listed in the view", () => {
+    const { pub } = build({ ...facts(), sealedOverrides: { "joker-master": false, phoenix: true } });
+    expect(pub.achievements.sealed).toContain("phoenix");
+    expect(pub.achievements.sealed).toContain("underdog");
+    expect(pub.achievements.sealed).not.toContain("joker-master");
+    expect(pub.achievements.unlocks.some((u) => u.achievementId === "joker-master")).toBe(true);
   });
 });
 

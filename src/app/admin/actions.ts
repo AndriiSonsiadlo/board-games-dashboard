@@ -5,7 +5,7 @@ import type { AuditEntry } from "@/domain/types";
 import type { ActionResult } from "@/lib/action";
 import { listAudit } from "@/server/repo/facts";
 import { runAdminAction } from "@/server/runAction";
-import { setAchievementEnabled } from "@/server/services/achievements";
+import { setAchievementEnabled, setAchievementSealed } from "@/server/services/achievements";
 import {
   addTable,
   createGame,
@@ -220,6 +220,10 @@ export async function clearDemoDataAction(): Result {
 // Achievements and finale
 export async function setAchievementEnabledAction(input: { achievementId: string; enabled: boolean }): Result {
   return runAdminAction((db) => setAchievementEnabled(db, input));
+}
+
+export async function setAchievementSealedAction(input: { achievementId: string; sealed: boolean }): Result {
+  return runAdminAction((db) => setAchievementSealed(db, input));
 }
 
 export async function finaleCommandAction(command: FinaleCommand): Result<{ step: number; total: number }> {

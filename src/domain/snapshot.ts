@@ -1,4 +1,4 @@
-import { ACHIEVEMENTS, achievementDef, isAchievementId, type AchievementId, type Unlock } from "./achievements";
+import { ACHIEVEMENTS, isAchievementId, isSealed, type AchievementId, type Unlock } from "./achievements";
 import { resolveBrand, type Brand, type BrandFields } from "./brand";
 import { buildFinaleScript, clampStep, revealStepOf, type FinaleBeat } from "./finale";
 import type { Replay, ReplayResult } from "./replay";
@@ -130,6 +130,7 @@ export interface Counters {
 
 export interface AchievementsView {
   enabled: AchievementId[];
+  sealed: AchievementId[];
   /** Newest first. */
   unlocks: Unlock[];
   sealedUnlockCount: number;
@@ -329,7 +330,7 @@ function announcements(
       if (a.type === "achievement") {
         const { achievementId, playerId, sessionId } = a.payload;
         if (!isAchievementId(achievementId)) return [];
-        if (achievementDef(achievementId).sealed && !opts.includeSealed) return [];
+        if (isSealed(achievementId, facts.sealedOverrides) && !opts.includeSealed) return [];
         if (!unlocked.has(`${achievementId}:${playerId}`)) return [];
         return [{ id: a.id, createdAt: a.createdAt, type: "achievement", achievementId, playerId, sessionId }];
       }
@@ -351,9 +352,10 @@ function leaderboard(facts: Facts, rp: Replay): LeaderboardRow[] {
 
 function achievementsView(facts: Facts, rp: Replay, includeSealed: boolean): AchievementsView {
   const disabled = new Set(facts.disabledAchievements);
-  const sealed = (u: Unlock) => achievementDef(u.achievementId).sealed;
+  const sealed = (u: Unlock) => isSealed(u.achievementId, facts.sealedOverrides);
   return {
     enabled: ACHIEVEMENTS.filter((d) => !disabled.has(d.id)).map((d) => d.id),
+    sealed: ACHIEVEMENTS.filter((d) => isSealed(d.id, facts.sealedOverrides)).map((d) => d.id),
     unlocks: rp.unlocks
       .filter((u) => includeSealed || !sealed(u))
       .map((u, i) => ({ u, i }))

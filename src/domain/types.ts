@@ -118,6 +118,8 @@ export interface Facts {
   announcements: AnnouncementFact[];
   /** Achievement ids switched off in admin; every other achievement is enabled. */
   disabledAchievements: string[];
+  /** Achievement ids whose sealed flag the admin changed, with the chosen value. */
+  sealedOverrides: Record<string, boolean>;
 }
 
 export type AuditAction =

@@ -118,6 +118,13 @@ export function loadFacts(tx: Tx): Facts {
       .where(eq(s.achievementSettings.enabled, false))
       .all()
       .map((r) => r.id),
+    sealedOverrides: Object.fromEntries(
+      tx
+        .select({ id: s.achievementSettings.achievementId, sealed: s.achievementSettings.sealed })
+        .from(s.achievementSettings)
+        .all()
+        .flatMap((r) => (r.sealed === null ? [] : [[r.id, r.sealed] as const])),
+    ),
   };
 }
 

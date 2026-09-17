@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Lock } from "lucide-react";
 import Link from "next/link";
-import { achievementDef, rarityOf } from "@/domain/achievements";
+import { rarityOf } from "@/domain/achievements";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
 import { formatClock } from "@/lib/format";
@@ -17,6 +17,7 @@ export function AchievementsView() {
   const lookups = usePublicLookups(snapshot);
   const { enabled, unlocks, sealedUnlockCount, eligiblePlayers } = snapshot.achievements;
   const revealed = snapshot.event.finaleRevealed;
+  const sealed = new Set(snapshot.achievements.sealed);
 
   return (
     <div className="space-y-8 pt-10">
@@ -37,7 +38,7 @@ export function AchievementsView() {
 
       <ul className="divide-y divide-line border-y border-line">
         {enabled.map((id) => {
-          const sealedHidden = achievementDef(id).sealed && !revealed;
+          const sealedHidden = sealed.has(id) && !revealed;
           const holders = unlocks.filter((u) => u.achievementId === id).reverse();
           const rarity = rarityOf(holders.length, eligiblePlayers);
           const text = t.achievements.defs[id];

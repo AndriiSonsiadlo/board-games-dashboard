@@ -4,6 +4,7 @@ import {
   ACHIEVEMENTS,
   achievementDef,
   isAchievementId,
+  isSealed,
   newPublicUnlocks,
   rarityOf,
   type AchievementId,
@@ -279,7 +280,15 @@ describe("settings, rarity and diffs", () => {
     const a: Unlock = { achievementId: "catan-lord", playerId: 1, sessionId: 1, at: 1 };
     const b: Unlock = { achievementId: "opening-move", playerId: 2, sessionId: 2, at: 2 };
     const sealed: Unlock = { achievementId: "underdog", playerId: 2, sessionId: 2, at: 2 };
-    expect(newPublicUnlocks([a], [a, b, sealed])).toEqual([b]);
-    expect(newPublicUnlocks([a, b], [b])).toEqual([]);
+    expect(newPublicUnlocks([a], [a, b, sealed], {})).toEqual([b]);
+    expect(newPublicUnlocks([a, b], [b], {})).toEqual([]);
+    expect(newPublicUnlocks([], [sealed], { underdog: false })).toEqual([sealed]);
+  });
+
+  test("isSealed prefers the admin override over the built-in default", () => {
+    expect(isSealed("comeback", {})).toBe(true);
+    expect(isSealed("comeback", { comeback: false })).toBe(false);
+    expect(isSealed("phoenix", {})).toBe(false);
+    expect(isSealed("phoenix", { phoenix: true })).toBe(true);
   });
 });
