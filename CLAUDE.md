@@ -81,6 +81,18 @@ full 9-beat finale ceremony — has been visually verified in a real browser
 - `deleteDemoData` also removes announcements tied to demo sessions/players and
   milestones above the remaining result count.
 
+## Tier 4 (shipped via docs/superpowers/plans/2026-09-17-board-games-cup-tier4.md)
+
+- Brand lines live in four nullable `event` columns; `resolveBrand` (`domain/brand.ts`) falls back per line to English, then `HIS^ BOARD GAMES` / `CUP`. Client code reads `useBrand()`; the projector wraps its own `BrandProvider` fed by the live snapshot.
+- `/players/[id]` always renders the public audience unless an admin adds `?view=admin` (the admin leaderboard links do). Don't bring back "admin cookie means admin view" on public pages.
+- Projector scenes render inside `SCENE_FRAME` (`components/screen/layout.ts`); never add per-scene bottom padding. Long lists go in `<AutoScroll>`; its timing lives in `scrollPlan.ts`. Keep those two file names distinct: the event laptop runs Windows (case-insensitive paths).
+- Sealed now means "description hidden until `finaleRevealed`": sealed unlocks are public, appear in the timeline and queue projector cards. The effective flag is `isSealed(id, facts.sealedOverrides)`; don't read `achievementDef(id).sealed` anywhere else. Descriptions ship in the client dictionary, so "hidden" is presentation, not secrecy.
+- The finale has one `sealed` beat per achievement (`playerIds`). `finaleGoto` shares the sticky reveal rule with next/back; the remote asks for a second tap before jumping onto or past the reveal step.
+- Comeback uses `priorFieldRise` (rank among players ranked before the result): ≥ 3 places with ≥ 8 such players. `biggestComeback` uses the same measure.
+- Games: `createGame` / `updateGame` / `deleteGame` in `services/catalog.ts`. A family is the game's own slug or an existing family; delete is refused (`game_in_use`) once any session references the game. Icons come from the curated `components/common/gameIcons.ts`.
+- Styled QR: `qrSvg(url, theme)` in `server/qr.ts`; the projector footer loads `/api/qr?theme=dark`. The QR test decodes a rasterized layout with `jsqr`.
+- Browser checks run against `DB_PATH=data/verify.db` on port 3100, never against `data/board-cup.db`.
+
 ## Conventions recap (see AGENTS.md for the Next.js-specific parts)
 
 - Layers: `domain/` pure, `repo/` is the only Drizzle access, `services/` does

@@ -1,6 +1,6 @@
 # Board Games Cup Tier 4 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Polish the projector and finale, make the brand configurable, add styled QR codes and a favicon, let the organizer create and edit games, and rework sealed achievements and the Comeback rule.
 
@@ -69,13 +69,13 @@
 **Interfaces:**
 - Produces: `profileAudience(isAdmin: boolean, view: string | string[] | undefined): "public" | "admin"`; URL contract `/players/{id}?view=admin` (used by Task 2).
 
-- [ ] **Step 0: Branch**
+- [x] **Step 0: Branch**
 
 ```bash
 git checkout master && git checkout -b tier4
 ```
 
-- [ ] **Step 1: Write the failing test** — `src/server/profileAudience.test.ts`
+- [x] **Step 1: Write the failing test** — `src/server/profileAudience.test.ts`
 
 ```ts
 import { expect, test } from "vitest";
@@ -90,12 +90,12 @@ test("the admin view needs both an admin session and an explicit ?view=admin", (
 });
 ```
 
-- [ ] **Step 2: Run it to see it fail**
+- [x] **Step 2: Run it to see it fail**
 
 Run: `npx vitest run src/server/profileAudience.test.ts`
 Expected: FAIL — cannot resolve `./profileAudience`.
 
-- [ ] **Step 3: Implement** — `src/server/profileAudience.ts`
+- [x] **Step 3: Implement** — `src/server/profileAudience.ts`
 
 ```ts
 /**
@@ -107,7 +107,7 @@ export function profileAudience(isAdmin: boolean, view: string | string[] | unde
 }
 ```
 
-- [ ] **Step 4: Use it in the page** — replace `src/app/(public)/players/[id]/page.tsx` with:
+- [x] **Step 4: Use it in the page** — replace `src/app/(public)/players/[id]/page.tsx` with:
 
 ```tsx
 import { notFound } from "next/navigation";
@@ -136,12 +136,12 @@ export default async function PlayerPage({
 }
 ```
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/server/profileAudience.ts src/server/profileAudience.test.ts "src/app/(public)/players/[id]/page.tsx"
@@ -163,7 +163,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 - Consumes: `/players/{id}?view=admin` (Task 1).
 - Produces: `Leaderboard` prop `playerHref?: (playerId: number) => string`.
 
-- [ ] **Step 1: Add the optional link to `Leaderboard`**
+- [x] **Step 1: Add the optional link to `Leaderboard`**
 
 In `src/components/common/Leaderboard.tsx` add `import Link from "next/link";` to the imports, extend the props:
 
@@ -199,7 +199,7 @@ with
                     )}
 ```
 
-- [ ] **Step 2: Pass it from the admin view** — in `src/components/admin/LeaderboardView.tsx` replace
+- [x] **Step 2: Pass it from the admin view** — in `src/components/admin/LeaderboardView.tsx` replace
 
 ```tsx
       <Leaderboard rows={snapshot.leaderboard} players={players} showJoker />
@@ -211,7 +211,7 @@ with
       <Leaderboard rows={snapshot.leaderboard} players={players} showJoker playerHref={(id) => `/players/${id}?view=admin`} />
 ```
 
-- [ ] **Step 3: Remove the duplicate "Available"** — in `src/components/admin/ControlRoom.tsx` the state column already renders `<StateLabel state={table.state} />`. Replace
+- [x] **Step 3: Remove the duplicate "Available"** — in `src/components/admin/ControlRoom.tsx` the state column already renders `<StateLabel state={table.state} />`. Replace
 
 ```tsx
           <span className="text-sm text-muted">{table.label ?? t.tableState.available}</span>
@@ -225,12 +225,12 @@ with
 
 (`SceneRoom` shows no state badge for free tables, so its fallback stays; `HomeView` shows a count, not a duplicate.)
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/common/Leaderboard.tsx src/components/admin/LeaderboardView.tsx src/components/admin/ControlRoom.tsx
@@ -257,7 +257,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   - `EventFact.brandFields: BrandFields`; `PublicEventView.brand: Brand`; `AdminEventView.brandFields: BrandFields`
   - `updateBranding(db: Db, patch: Partial<BrandFields>): void`; `updateBrandingAction(patch: Partial<BrandFields>)`
 
-- [ ] **Step 1: Write the failing domain test** — `src/domain/brand.test.ts`
+- [x] **Step 1: Write the failing domain test** — `src/domain/brand.test.ts`
 
 ```ts
 import { expect, test } from "vitest";
@@ -282,12 +282,12 @@ test("brandTitle joins the two lines", () => {
 });
 ```
 
-- [ ] **Step 2: Run it to see it fail**
+- [x] **Step 2: Run it to see it fail**
 
 Run: `npx vitest run src/domain/brand.test.ts`
 Expected: FAIL — cannot resolve `./brand`.
 
-- [ ] **Step 3: Implement** — `src/domain/brand.ts`
+- [x] **Step 3: Implement** — `src/domain/brand.ts`
 
 ```ts
 import type { Lang } from "./types";
@@ -322,12 +322,12 @@ export function resolveBrand(f: BrandFields): Brand {
 export const brandTitle = (b: BrandLines) => `${b.top} ${b.main}`;
 ```
 
-- [ ] **Step 4: Run the domain test**
+- [x] **Step 4: Run the domain test**
 
 Run: `npx vitest run src/domain/brand.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Schema columns + migration** — in `src/server/db/schema.ts`, inside `event`, after `publicBaseUrl: text(),` add:
+- [x] **Step 5: Schema columns + migration** — in `src/server/db/schema.ts`, inside `event`, after `publicBaseUrl: text(),` add:
 
 ```ts
   brandTopEn: text(),
@@ -339,7 +339,7 @@ Expected: PASS.
 Run: `npm run db:generate -- --name brand_columns`
 Expected: new `drizzle/0004_brand_columns.sql` containing exactly four `ALTER TABLE \`event\` ADD \`brand…\` text;` statements (no `__new_event`), plus updated `drizzle/meta/_journal.json` and `drizzle/meta/0004_snapshot.json`.
 
-- [ ] **Step 6: Carry the fields through facts** — `src/domain/types.ts`: add `import type { BrandFields } from "./brand";` at the top and, in `EventFact` after `publicBaseUrl: string | null;`, add `brandFields: BrandFields;`.
+- [x] **Step 6: Carry the fields through facts** — `src/domain/types.ts`: add `import type { BrandFields } from "./brand";` at the top and, in `EventFact` after `publicBaseUrl: string | null;`, add `brandFields: BrandFields;`.
 
 `src/domain/fixtures.ts` → in `makeEvent` after `publicBaseUrl: null,` add:
 
@@ -353,7 +353,7 @@ Expected: new `drizzle/0004_brand_columns.sql` containing exactly four `ALTER TA
       brandFields: { brandTopEn: e.brandTopEn, brandMainEn: e.brandMainEn, brandTopRu: e.brandTopRu, brandMainRu: e.brandMainRu },
 ```
 
-- [ ] **Step 7: Write the failing snapshot test** — append inside `src/domain/snapshot.test.ts` (top level):
+- [x] **Step 7: Write the failing snapshot test** — append inside `src/domain/snapshot.test.ts` (top level):
 
 ```ts
 test("public snapshot carries the resolved brand; only admin sees the raw fields", () => {
@@ -371,7 +371,7 @@ test("public snapshot carries the resolved brand; only admin sees the raw fields
 Run: `npx vitest run src/domain/snapshot.test.ts`
 Expected: FAIL — `brand` / `brandFields` missing on the views (typecheck-level errors are reported by vitest as undefined values).
 
-- [ ] **Step 8: Snapshot views** — `src/domain/snapshot.ts`:
+- [x] **Step 8: Snapshot views** — `src/domain/snapshot.ts`:
   - add `import { resolveBrand, type Brand, type BrandFields } from "./brand";`
   - in `PublicEventView` after `publicBaseUrl: string | null;` add `brand: Brand;`
   - change `AdminEventView` to:
@@ -393,7 +393,7 @@ export interface AdminEventView extends PublicEventView {
 Run: `npx vitest run src/domain/snapshot.test.ts`
 Expected: PASS.
 
-- [ ] **Step 9: Write the failing service test** — in `src/server/services/core.test.ts` add `updateBranding` to the `./event` import list and add inside `describe("settings", …)`:
+- [x] **Step 9: Write the failing service test** — in `src/server/services/core.test.ts` add `updateBranding` to the `./event` import list and add inside `describe("settings", …)`:
 
 ```ts
   test("branding trims, stores blanks as unset, validates length and works after finish", () => {
@@ -415,7 +415,7 @@ Expected: PASS.
 Run: `npx vitest run src/server/services/core.test.ts`
 Expected: FAIL — `updateBranding` is not exported.
 
-- [ ] **Step 10: Implement the service** — in `src/server/services/event.ts` add `import { BRAND_MAX_LENGTH, type BrandFields } from "@/domain/brand";` and append:
+- [x] **Step 10: Implement the service** — in `src/server/services/event.ts` add `import { BRAND_MAX_LENGTH, type BrandFields } from "@/domain/brand";` and append:
 
 ```ts
 const BRAND_KEYS = ["brandTopEn", "brandMainEn", "brandTopRu", "brandMainRu"] as const satisfies readonly (keyof BrandFields)[];
@@ -441,12 +441,12 @@ export async function updateBrandingAction(patch: Partial<BrandFields>): Result 
 }
 ```
 
-- [ ] **Step 11: Verify**
+- [x] **Step 11: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add src/domain/brand.ts src/domain/brand.test.ts src/server/db/schema.ts drizzle src/domain/types.ts src/domain/fixtures.ts src/server/repo/facts.ts src/domain/snapshot.ts src/domain/snapshot.test.ts src/server/services/event.ts src/server/services/core.test.ts src/app/admin/actions.ts
@@ -467,12 +467,12 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 - Consumes: `resolveBrand`, `brandTitle`, `DEFAULT_BRAND`, `RU_BRAND_PRESET`, `BRAND_MAX_LENGTH`, `snapshot.event.brand`, `snapshot.event.brandFields`, `updateBrandingAction` (Task 3).
 - Produces: `BrandProvider({ brand, children })`, `useBrand(): BrandLines`; `Wordmark` accepts optional `lines?: BrandLines`; i18n `settings.branding.{title,hint,top,main,ruPreset}`; `common.appName` removed.
 
-- [ ] **Step 1: Read the Next docs this task touches**
+- [x] **Step 1: Read the Next docs this task touches**
 
 Run: `sed -n 1,80p node_modules/next/dist/docs/01-app/03-api-reference/04-functions/generate-metadata.md`
 Expected: confirms `export async function generateMetadata(): Promise<Metadata>` in a layout replaces `export const metadata`.
 
-- [ ] **Step 2: Brand context** — `src/components/brand/BrandProvider.tsx`
+- [x] **Step 2: Brand context** — `src/components/brand/BrandProvider.tsx`
 
 ```tsx
 "use client";
@@ -494,7 +494,7 @@ export function useBrand(): BrandLines {
 }
 ```
 
-- [ ] **Step 3: Root layout** — replace `src/app/layout.tsx` with:
+- [x] **Step 3: Root layout** — replace `src/app/layout.tsx` with:
 
 ```tsx
 import type { Metadata, Viewport } from "next";
@@ -538,7 +538,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 }
 ```
 
-- [ ] **Step 4: Wordmark** — replace `src/components/brand/Wordmark.tsx` with:
+- [x] **Step 4: Wordmark** — replace `src/components/brand/Wordmark.tsx` with:
 
 ```tsx
 "use client";
@@ -583,7 +583,7 @@ export function Wordmark({ size = "md", subtitle, lines }: { size?: keyof typeof
 }
 ```
 
-- [ ] **Step 5: Home hero** — in `src/components/public/HomeView.tsx` add `import { useBrand } from "../brand/BrandProvider";`, add `const brand = useBrand();` next to the other hooks at the top of `HomeView`, and replace
+- [x] **Step 5: Home hero** — in `src/components/public/HomeView.tsx` add `import { useBrand } from "../brand/BrandProvider";`, add `const brand = useBrand();` next to the other hooks at the top of `HomeView`, and replace
 
 ```tsx
           <span className="block text-2xl tracking-[0.3em] text-muted sm:text-3xl">Board Games</span>
@@ -601,9 +601,9 @@ with
 
 (`cn` is already imported in `HomeView.tsx`; if the linter reports it missing, add `import { cn } from "@/lib/cn";`.)
 
-- [ ] **Step 6: Public header** — in `src/components/public/PublicHeader.tsx` add `import { brandTitle } from "@/domain/brand";` and `import { useBrand } from "../brand/BrandProvider";`, add `const brand = brandTitle(useBrand());` after `const { snapshot } = usePublicLive();`, and replace both `t.common.appName` occurrences with `brand`. `appName` was the header's only dictionary use, so also delete `const { t } = useI18n();` and the `useI18n` import.
+- [x] **Step 6: Public header** — in `src/components/public/PublicHeader.tsx` add `import { brandTitle } from "@/domain/brand";` and `import { useBrand } from "../brand/BrandProvider";`, add `const brand = brandTitle(useBrand());` after `const { snapshot } = usePublicLive();`, and replace both `t.common.appName` occurrences with `brand`. `appName` was the header's only dictionary use, so also delete `const { t } = useI18n();` and the `useI18n` import.
 
-- [ ] **Step 7: Projector** — `src/components/screen/ScreenApp.tsx`: add `import { BrandProvider } from "../brand/BrandProvider";` and change `ScreenApp` to:
+- [x] **Step 7: Projector** — `src/components/screen/ScreenApp.tsx`: add `import { BrandProvider } from "../brand/BrandProvider";` and change `ScreenApp` to:
 
 ```tsx
 export function ScreenApp() {
@@ -643,7 +643,7 @@ with
 
 `src/components/screen/finale/beats.tsx`: add `import { useBrand } from "@/components/brand/BrandProvider";` and `import { brandTitle } from "@/domain/brand";`; in `BeatClosing` add `const brand = useBrand();` after `useI18n()` and replace `{t.common.appName}` with `{brandTitle(brand)}`.
 
-- [ ] **Step 8: QR sheet header** — in `src/app/admin/qr/page.tsx` replace
+- [x] **Step 8: QR sheet header** — in `src/app/admin/qr/page.tsx` replace
 
 ```tsx
   const t = getDict(await getLang());
@@ -658,7 +658,7 @@ with
 
 and replace `{t.common.appName}` with `{event.brand[lang].top} {event.brand[lang].main}`.
 
-- [ ] **Step 9: Dictionaries** — remove `appName: "Board Games Cup",` from `common` in both `src/i18n/en.ts` and `src/i18n/ru.ts`. In `en.ts` `settings`, after the `screen: { … },` block add:
+- [x] **Step 9: Dictionaries** — remove `appName: "Board Games Cup",` from `common` in both `src/i18n/en.ts` and `src/i18n/ru.ts`. In `en.ts` `settings`, after the `screen: { … },` block add:
 
 ```ts
     branding: {
@@ -682,7 +682,7 @@ and in `ru.ts` at the same place:
     },
 ```
 
-- [ ] **Step 10: Settings section** — in `src/components/admin/SettingsView.tsx`:
+- [x] **Step 10: Settings section** — in `src/components/admin/SettingsView.tsx`:
   - add `updateBrandingAction` to the actions import, `import { BRAND_MAX_LENGTH, DEFAULT_BRAND, RU_BRAND_PRESET, resolveBrand, type BrandFields } from "@/domain/brand";` and `import { Wordmark } from "../brand/Wordmark";`
   - after the `<Section title={t.settings.event.title}>…</Section>` block insert:
 
@@ -762,7 +762,7 @@ function BrandingControls() {
 }
 ```
 
-- [ ] **Step 11: Verify no leftovers**
+- [x] **Step 11: Verify no leftovers**
 
 Run: `grep -rn "appName" src || echo "none"`
 Expected: `none`.
@@ -770,7 +770,7 @@ Expected: `none`.
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add src/components/brand src/app/layout.tsx src/components/public/HomeView.tsx src/components/public/PublicHeader.tsx src/components/screen src/app/admin/qr/page.tsx src/components/admin/SettingsView.tsx src/i18n
@@ -789,13 +789,13 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 **Interfaces:** none (Next.js file conventions, see `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/01-metadata/app-icons.md`).
 
-- [ ] **Step 1: Remove the stock icon**
+- [x] **Step 1: Remove the stock icon**
 
 ```bash
 git rm src/app/favicon.ico
 ```
 
-- [ ] **Step 2: SVG icon** — `src/app/icon.svg`
+- [x] **Step 2: SVG icon** — `src/app/icon.svg`
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
@@ -808,7 +808,7 @@ git rm src/app/favicon.ico
 </svg>
 ```
 
-- [ ] **Step 3: Apple touch icon** — `src/app/apple-icon.tsx`
+- [x] **Step 3: Apple touch icon** — `src/app/apple-icon.tsx`
 
 ```tsx
 import { ImageResponse } from "next/og";
@@ -832,7 +832,7 @@ export default function AppleIcon() {
 }
 ```
 
-- [ ] **Step 4: Verify in the running dev server** (any port serving this checkout; see Task 20 for the verify server)
+- [x] **Step 4: Verify in the running dev server** (any port serving this checkout; see Task 20 for the verify server)
 
 Run: `curl -s -o /dev/null -w "%{http_code} %{content_type}\n" http://localhost:3000/icon.svg && curl -s -o /dev/null -w "%{http_code} %{content_type}\n" http://localhost:3000/apple-icon`
 Expected: `200 image/svg+xml` and `200 image/png`. Then `curl -s http://localhost:3000/ | grep -o '<link rel="icon"[^>]*>'` shows the `/icon.svg` link.
@@ -840,7 +840,7 @@ Expected: `200 image/svg+xml` and `200 image/png`. Then `curl -s http://localhos
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/app/icon.svg src/app/apple-icon.tsx
@@ -865,12 +865,12 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   - `qrSvg(url: string, theme?: QrTheme): string` (now synchronous; default `"light"`)
   - `GET /api/qr?theme=dark|light` → `image/svg+xml` of `${publicBaseUrl}/`, 404 when no public address.
 
-- [ ] **Step 1: Dev dependency**
+- [x] **Step 1: Dev dependency**
 
 Run: `npm install -D jsqr`
 Expected: `jsqr` added to `devDependencies`.
 
-- [ ] **Step 2: Write the failing tests** — replace the last test in `src/server/qr.test.ts` (`qrSvg renders a standalone svg`) and add imports so the file reads:
+- [x] **Step 2: Write the failing tests** — replace the last test in `src/server/qr.test.ts` (`qrSvg renders a standalone svg`) and add imports so the file reads:
 
 ```ts
 import jsQR from "jsqr";
@@ -952,12 +952,12 @@ test("qrSvg draws themed, standalone svgs", () => {
 });
 ```
 
-- [ ] **Step 3: Run to see it fail**
+- [x] **Step 3: Run to see it fail**
 
 Run: `npx vitest run src/server/qr.test.ts`
 Expected: FAIL — `qrLayout` is not exported.
 
-- [ ] **Step 4: Implement** — replace `qrSvg` in `src/server/qr.ts` (keep `QR_TARGETS`, `PATHS`, `resolveBaseUrl`, `qrLinks` unchanged) with:
+- [x] **Step 4: Implement** — replace `qrSvg` in `src/server/qr.ts` (keep `QR_TARGETS`, `PATHS`, `resolveBaseUrl`, `qrLinks` unchanged) with:
 
 ```ts
 export type QrTheme = "dark" | "light";
@@ -1034,12 +1034,12 @@ export function qrSvg(url: string, theme: QrTheme = "light"): string {
 }
 ```
 
-- [ ] **Step 5: Run the QR tests**
+- [x] **Step 5: Run the QR tests**
 
 Run: `npx vitest run src/server/qr.test.ts`
 Expected: PASS (all four tests).
 
-- [ ] **Step 6: Print sheet uses the light theme** — in `src/app/admin/qr/page.tsx` replace
+- [x] **Step 6: Print sheet uses the light theme** — in `src/app/admin/qr/page.tsx` replace
 
 ```tsx
   const codes = await Promise.all(qrLinks(base).map(async (link) => ({ ...link, svg: await qrSvg(link.url) })));
@@ -1051,7 +1051,7 @@ with
   const codes = qrLinks(base).map((link) => ({ ...link, svg: qrSvg(link.url, "light") }));
 ```
 
-- [ ] **Step 7: Route for the projector** — `src/app/api/qr/route.ts`
+- [x] **Step 7: Route for the projector** — `src/app/api/qr/route.ts`
 
 ```ts
 import { NextResponse, type NextRequest } from "next/server";
@@ -1072,7 +1072,7 @@ export function GET(request: NextRequest) {
 }
 ```
 
-- [ ] **Step 8: Footer QR** — in `src/components/screen/ScreenFooter.tsx` replace
+- [x] **Step 8: Footer QR** — in `src/components/screen/ScreenFooter.tsx` replace
 
 ```tsx
         {url ? (
@@ -1099,12 +1099,12 @@ with
 
 (The `u` parameter only busts the browser cache when the address changes.)
 
-- [ ] **Step 9: Verify**
+- [x] **Step 9: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass. With a dev server and a public address set: `curl -s http://localhost:3000/api/qr | head -c 80` starts with `<svg`.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add package.json package-lock.json src/server/qr.ts src/server/qr.test.ts src/app/admin/qr/page.tsx src/app/api/qr/route.ts src/components/screen/ScreenFooter.tsx
@@ -1165,7 +1165,7 @@ Step through scenes with the "Next scene" button on `/admin` (projector remote) 
 **Interfaces:**
 - Produces: `FOOTER_HEIGHT = 110`, `TICKER_HEIGHT = 40`, `SCENE_FRAME = { top: 100, left: 120, right: 120, bottom: 190 }`; DOM markers `data-stage`, `data-screen-chrome` (and `data-autoscroll` from Task 8) used by the browser check.
 
-- [ ] **Step 1: Geometry** — `src/components/screen/layout.ts`
+- [x] **Step 1: Geometry** — `src/components/screen/layout.ts`
 
 ```ts
 /** Projector geometry in px on the 1920x1080 stage. */
@@ -1176,7 +1176,7 @@ export const TICKER_HEIGHT = 40;
 export const SCENE_FRAME = { top: 100, left: 120, right: 120, bottom: FOOTER_HEIGHT + TICKER_HEIGHT + 40 } as const;
 ```
 
-- [ ] **Step 2: Frame the scene** — in `src/components/screen/ScreenApp.tsx` add `import { SCENE_FRAME } from "./layout";` and in the scene `motion.div` replace
+- [x] **Step 2: Frame the scene** — in `src/components/screen/ScreenApp.tsx` add `import { SCENE_FRAME } from "./layout";` and in the scene `motion.div` replace
 
 ```tsx
               className="absolute inset-0"
@@ -1189,9 +1189,9 @@ with
               style={SCENE_FRAME}
 ```
 
-- [ ] **Step 3: Markers** — `src/components/screen/Stage.tsx`: on the inner canvas `div` (the one with `h-[1080px] w-[1920px]`) add the attribute `data-stage`. `src/components/screen/ScreenFooter.tsx`: add `data-screen-chrome` to the outer `div` (`absolute inset-x-0 bottom-0 z-10 h-[110px] …`). `src/components/screen/ScreenTicker.tsx`: add `data-screen-chrome` to the outer `div` (`absolute inset-x-0 bottom-[110px] …`).
+- [x] **Step 3: Markers** — `src/components/screen/Stage.tsx`: on the inner canvas `div` (the one with `h-[1080px] w-[1920px]`) add the attribute `data-stage`. `src/components/screen/ScreenFooter.tsx`: add `data-screen-chrome` to the outer `div` (`absolute inset-x-0 bottom-0 z-10 h-[110px] …`). `src/components/screen/ScreenTicker.tsx`: add `data-screen-chrome` to the outer `div` (`absolute inset-x-0 bottom-[110px] …`).
 
-- [ ] **Step 4: Scenes drop their own padding**
+- [x] **Step 4: Scenes drop their own padding**
 
 ```bash
 sed -i 's/flex h-full flex-col px-\[120px\] pt-\[110px\] pb-\[150px\]/flex h-full flex-col/' src/components/screen/scenes/*.tsx
@@ -1200,12 +1200,12 @@ grep -rn "pb-\[150px\]" src/components/screen/scenes || echo "clean"
 
 Expected: `clean`. (`SceneTitle` never had that padding and stays centered inside the frame.)
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass. Browser check (see "Browser checks"): open `http://localhost:3100/screen`, step through every enabled scene, the snippet returns `[]` for Recent, Counters, Story and Title; Live room / Achievements / Popular / In contention may still report rows until Task 8 — note them, they are fixed there.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/components/screen
@@ -1229,7 +1229,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   - `autoScrollPlan(o: { viewport: number; content: number; from: "top" | "bottom"; startDelayMs: number; windowMs?: number }): ScrollPlan | null`
   - `<AutoScroll from? startDelayMs? windowMs? align? className?>` — fills its flex parent (`flex-1 min-h-0`), renders `data-autoscroll`.
 
-- [ ] **Step 1: Write the failing test** — `src/components/screen/scrollPlan.test.ts`
+- [x] **Step 1: Write the failing test** — `src/components/screen/scrollPlan.test.ts`
 
 ```ts
 import { expect, test } from "vitest";
@@ -1265,12 +1265,12 @@ test("speed stays readable when the window is too short, too long or unknown", (
 });
 ```
 
-- [ ] **Step 2: Run to see it fail**
+- [x] **Step 2: Run to see it fail**
 
 Run: `npx vitest run src/components/screen/scrollPlan.test.ts`
 Expected: FAIL — cannot resolve `./scrollPlan`.
 
-- [ ] **Step 3: Implement the plan** — `src/components/screen/scrollPlan.ts`
+- [x] **Step 3: Implement the plan** — `src/components/screen/scrollPlan.ts`
 
 ```ts
 export const HOLD_MS = 1500;
@@ -1322,12 +1322,12 @@ export function autoScrollPlan(o: {
 }
 ```
 
-- [ ] **Step 4: Run the test**
+- [x] **Step 4: Run the test**
 
 Run: `npx vitest run src/components/screen/scrollPlan.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: The wrapper** — `src/components/screen/AutoScroll.tsx`
+- [x] **Step 5: The wrapper** — `src/components/screen/AutoScroll.tsx`
 
 ```tsx
 "use client";
@@ -1401,7 +1401,7 @@ export function AutoScroll({
 }
 ```
 
-- [ ] **Step 6: Live room** — replace the `SceneRoom` function in `src/components/screen/scenes/SceneRoom.tsx` (keep `SceneHeading` and the imports; add `import { AutoScroll } from "../AutoScroll";`) with:
+- [x] **Step 6: Live room** — replace the `SceneRoom` function in `src/components/screen/scenes/SceneRoom.tsx` (keep `SceneHeading` and the imports; add `import { AutoScroll } from "../AutoScroll";`) with:
 
 ```tsx
 export function SceneRoom({ snapshot }: { snapshot: PublicSnapshot }) {
@@ -1466,7 +1466,7 @@ export function SceneRoom({ snapshot }: { snapshot: PublicSnapshot }) {
 }
 ```
 
-- [ ] **Step 7: In contention** — replace `src/components/screen/scenes/SceneContenders.tsx` with:
+- [x] **Step 7: In contention** — replace `src/components/screen/scenes/SceneContenders.tsx` with:
 
 ```tsx
 "use client";
@@ -1510,7 +1510,7 @@ export function SceneContenders({ snapshot }: { snapshot: PublicSnapshot }) {
 }
 ```
 
-- [ ] **Step 8: Popular** — in `src/components/screen/scenes/ScenePopular.tsx` add `import { AutoScroll } from "../AutoScroll";` and replace
+- [x] **Step 8: Popular** — in `src/components/screen/scenes/ScenePopular.tsx` add `import { AutoScroll } from "../AutoScroll";` and replace
 
 ```tsx
       <ul className="mt-12 flex flex-1 flex-col justify-center gap-7">
@@ -1530,7 +1530,7 @@ and the matching closing `</ul>` (the last one in the file) with
       </AutoScroll>
 ```
 
-- [ ] **Step 9: Stories** — in `src/components/screen/scenes/SceneStory.tsx` add `import { AutoScroll } from "../AutoScroll";` and replace
+- [x] **Step 9: Stories** — in `src/components/screen/scenes/SceneStory.tsx` add `import { AutoScroll } from "../AutoScroll";` and replace
 
 ```tsx
       <ul className="flex flex-1 flex-col justify-center divide-y divide-line">
@@ -1552,12 +1552,12 @@ and the closing `</ul>` with
 
 Re-indent the wrapped `<ul>` blocks one level in both files (the project has no formatter and ESLint does not check indentation, so this is for readability only).
 
-- [ ] **Step 10: Verify**
+- [x] **Step 10: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass. Browser check on `http://localhost:3100/screen`: the overflow snippet returns `[]` for every scene. Add 10 tables in `/admin/tables` of the verify server and confirm the Live room glides down and back within the scene time; In contention's last name has clear space above the ticker.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add src/components/screen
@@ -1577,11 +1577,11 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 - Consumes: `AutoScroll` (Task 8), `revealTimeline(count)` (existing).
 - Produces: `revealGroups<P extends { playerId: number; placement: number }>(placements: P[]): P[][]` — non-winning placements grouped by value, last place first, tied players together in player-id order.
 
-- [ ] **Step 1: Reproduce first**
+- [x] **Step 1: Reproduce first**
 
 On the verify server, record a Hitster result (ties allowed) with placements 1, 2, 2, 4 (admin → a table → result sheet, mark the two middle players as tied), press "Show on screen", watch `/screen`. Write down the order the four names appear in. Expected after this task: 4th, then both 2nd places together, then the winner.
 
-- [ ] **Step 2: Write the failing test** — add `revealGroups` to the import in `src/components/screen/logic.test.ts` and append:
+- [x] **Step 2: Write the failing test** — add `revealGroups` to the import in `src/components/screen/logic.test.ts` and append:
 
 ```ts
 test("revealGroups: last place first, ties revealed together, winners excluded", () => {
@@ -1593,12 +1593,12 @@ test("revealGroups: last place first, ties revealed together, winners excluded",
 });
 ```
 
-- [ ] **Step 3: Run to see it fail**
+- [x] **Step 3: Run to see it fail**
 
 Run: `npx vitest run src/components/screen/logic.test.ts`
 Expected: FAIL — `revealGroups` is not exported.
 
-- [ ] **Step 4: Implement** — append to `src/components/screen/logic.ts`:
+- [x] **Step 4: Implement** — append to `src/components/screen/logic.ts`:
 
 ```ts
 /** Non-winning placements grouped by value, last place first; tied players share a group and appear together. */
@@ -1614,12 +1614,12 @@ export function revealGroups<P extends { playerId: number; placement: number }>(
 }
 ```
 
-- [ ] **Step 5: Run the test**
+- [x] **Step 5: Run the test**
 
 Run: `npx vitest run src/components/screen/logic.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Use it in the reveal** — in `src/components/screen/ResultReveal.tsx`:
+- [x] **Step 6: Use it in the reveal** — in `src/components/screen/ResultReveal.tsx`:
   - change the logic import to `import { podiumSlots, revealGroups, revealTimeline } from "./logic";` and add `import { AutoScroll } from "./AutoScroll";`
   - replace
 
@@ -1703,12 +1703,12 @@ and its closing
           </div>
 ```
 
-- [ ] **Step 7: Verify**
+- [x] **Step 7: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass. Repeat Step 1: order is 4th → the tied 2nd places together → winner. Record a 10-player Uno result: the list starts scrolled to the bottom and glides up as places appear.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/components/screen/logic.ts src/components/screen/logic.test.ts src/components/screen/ResultReveal.tsx
@@ -1727,7 +1727,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 **Interfaces:**
 - Produces: CSS utility `animate-text-shimmer` (text-clipped gradient, runs once, ends on plain text color). Removes `animate-light-sweep`.
 
-- [ ] **Step 1: CSS** — in `src/app/globals.css` delete the `@keyframes light-sweep { … }` block and the `@utility animate-light-sweep { … }` block, and add:
+- [x] **Step 1: CSS** — in `src/app/globals.css` delete the `@keyframes light-sweep { … }` block and the `@utility animate-light-sweep { … }` block, and add:
 
 ```css
 @keyframes text-shimmer {
@@ -1756,7 +1756,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 }
 ```
 
-- [ ] **Step 2: Champion beat** — replace the whole `BeatChampion` function in `src/components/screen/finale/beats.tsx` with:
+- [x] **Step 2: Champion beat** — replace the whole `BeatChampion` function in `src/components/screen/finale/beats.tsx` with:
 
 ```tsx
 export function BeatChampion({ beat, lookups }: { beat: Beat<"champion">; lookups: FinaleLookups }) {
@@ -1810,7 +1810,7 @@ export function BeatChampion({ beat, lookups }: { beat: Beat<"champion">; lookup
 }
 ```
 
-- [ ] **Step 3: Winner in the result reveal** — in `src/components/screen/ResultReveal.tsx` replace
+- [x] **Step 3: Winner in the result reveal** — in `src/components/screen/ResultReveal.tsx` replace
 
 ```tsx
                     <span className="font-display text-[190px] uppercase leading-none tracking-tight">{name(w.playerId)}</span>
@@ -1835,7 +1835,7 @@ and delete the parked sweep that followed the winners map:
                 />
 ```
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run: `grep -rn "light-sweep" src || echo "gone"`
 Expected: `gone`.
@@ -1843,7 +1843,7 @@ Expected: `gone`.
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass. Browser: `http://localhost:3100/screen?rehearsal=1`, step to the Champion beat (arrow keys). Take screenshots at ~4 s and ~9 s into the beat: a soft round gold glow behind the name, one light band crossing the letters, and at 9 s the name is plain cream text with no blurred block behind it. Particles unchanged.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/app/globals.css src/components/screen/finale/beats.tsx src/components/screen/ResultReveal.tsx
@@ -1862,7 +1862,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 **Interfaces:**
 - Produces: `FinaleBeat` variant `{ kind: "sealed"; achievementId: AchievementId; playerIds: number[]; order: number; total: number }` (replaces `unlock: Unlock`). Holders are in unlock order; beats are ordered by each achievement's first unlock.
 
-- [ ] **Step 1: Write the failing tests** — in `src/domain/finale.test.ts` add `import { achievementDef } from "./achievements";`, then in the test `"orders beats and puts one beat per sealed unlock"` rename it to `"orders beats and puts one beat per sealed achievement"` and replace
+- [x] **Step 1: Write the failing tests** — in `src/domain/finale.test.ts` add `import { achievementDef } from "./achievements";`, then in the test `"orders beats and puts one beat per sealed unlock"` rename it to `"orders beats and puts one beat per sealed achievement"` and replace
 
 ```ts
     const sealedCount = rp.unlocks.filter((u) => ["comeback", "underdog", "giant-slayer", "joker-master", "risk-taker"].includes(u.achievementId)).length;
@@ -1903,12 +1903,12 @@ with
     "Sealed: Joker Master · #3",
 ```
 
-- [ ] **Step 2: Run to see them fail**
+- [x] **Step 2: Run to see them fail**
 
 Run: `npx vitest run src/domain/finale.test.ts src/components/admin/finaleLabels.test.ts`
 Expected: FAIL — beats still carry `unlock`, labels show one name.
 
-- [ ] **Step 3: Domain** — in `src/domain/finale.ts` change the import to `import { achievementDef, type AchievementId } from "./achievements";`, change the sealed variant of `FinaleBeat` to
+- [x] **Step 3: Domain** — in `src/domain/finale.ts` change the import to `import { achievementDef, type AchievementId } from "./achievements";`, change the sealed variant of `FinaleBeat` to
 
 ```ts
   | { kind: "sealed"; achievementId: AchievementId; playerIds: number[]; order: number; total: number }
@@ -1943,13 +1943,13 @@ and in `buildRehearsal` replace the two sealed beats and the now-unused `const a
 
 (delete the `const at = 0;` line.)
 
-- [ ] **Step 4: Labels** — in `src/components/admin/finaleLabels.ts` replace the `case "sealed":` return with
+- [x] **Step 4: Labels** — in `src/components/admin/finaleLabels.ts` replace the `case "sealed":` return with
 
 ```ts
       return `${fmt(b.sealed, { title: t.achievements.defs[beat.achievementId].title })} · ${beat.playerIds.map(playerName).join(", ")}`;
 ```
 
-- [ ] **Step 5: Beat UI** — replace the whole `BeatSealed` function in `src/components/screen/finale/beats.tsx` with:
+- [x] **Step 5: Beat UI** — replace the whole `BeatSealed` function in `src/components/screen/finale/beats.tsx` with:
 
 ```tsx
 export function BeatSealed({ beat, lookups }: { beat: Beat<"sealed">; lookups: FinaleLookups }) {
@@ -2006,12 +2006,12 @@ export function BeatSealed({ beat, lookups }: { beat: Beat<"sealed">; lookups: F
 }
 ```
 
-- [ ] **Step 6: Verify**
+- [x] **Step 6: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass. Browser: `http://localhost:3100/screen?rehearsal=1` — the Giant Slayer slide shows two holders side by side; there are exactly 2 sealed slides.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/domain/finale.ts src/domain/finale.test.ts src/components/screen/finale/beats.tsx src/components/admin/finaleLabels.ts src/components/admin/finaleLabels.test.ts
@@ -2031,7 +2031,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 - Consumes: `AutoScroll` (Task 8).
 - Produces: `interface AchievementHolders { achievementId: AchievementId; playerIds: number[]; latestAt: number }`, `holdersByAchievement(unlocks: Unlock[]): AchievementHolders[]` (latest-unlocked achievement first, holders in unlock order); i18n `screen.moreHolders`.
 
-- [ ] **Step 1: Write the failing test** — add `holdersByAchievement` to the import in `src/components/screen/logic.test.ts` and append:
+- [x] **Step 1: Write the failing test** — add `holdersByAchievement` to the import in `src/components/screen/logic.test.ts` and append:
 
 ```ts
 test("holdersByAchievement groups unlocks, newest achievement first, holders in unlock order", () => {
@@ -2044,12 +2044,12 @@ test("holdersByAchievement groups unlocks, newest achievement first, holders in 
 });
 ```
 
-- [ ] **Step 2: Run to see it fail**
+- [x] **Step 2: Run to see it fail**
 
 Run: `npx vitest run src/components/screen/logic.test.ts`
 Expected: FAIL — `holdersByAchievement` is not exported.
 
-- [ ] **Step 3: Implement** — in `src/components/screen/logic.ts` add `import type { AchievementId, Unlock } from "@/domain/achievements";` and append:
+- [x] **Step 3: Implement** — in `src/components/screen/logic.ts` add `import type { AchievementId, Unlock } from "@/domain/achievements";` and append:
 
 ```ts
 export interface AchievementHolders {
@@ -2071,14 +2071,14 @@ export function holdersByAchievement(unlocks: Unlock[]): AchievementHolders[] {
 }
 ```
 
-- [ ] **Step 4: Run the test**
+- [x] **Step 4: Run the test**
 
 Run: `npx vitest run src/components/screen/logic.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Strings** — `src/i18n/en.ts` `screen`: add `moreHolders: "+{n} more",`. `src/i18n/ru.ts` `screen`: add `moreHolders: "ещё {n}",`.
+- [x] **Step 5: Strings** — `src/i18n/en.ts` `screen`: add `moreHolders: "+{n} more",`. `src/i18n/ru.ts` `screen`: add `moreHolders: "ещё {n}",`.
 
-- [ ] **Step 6: Scene** — replace `src/components/screen/scenes/SceneAchievements.tsx` with:
+- [x] **Step 6: Scene** — replace `src/components/screen/scenes/SceneAchievements.tsx` with:
 
 ```tsx
 "use client";
@@ -2170,12 +2170,12 @@ export function SceneAchievements({ snapshot }: { snapshot: PublicSnapshot }) {
 }
 ```
 
-- [ ] **Step 7: Verify**
+- [x] **Step 7: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass. Browser: the Achievements scene shows one row per achievement with several names where several players hold it; the overflow snippet returns `[]`.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/components/screen/logic.ts src/components/screen/logic.test.ts src/components/screen/scenes/SceneAchievements.tsx src/i18n
@@ -2194,7 +2194,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 **Interfaces:**
 - Produces: `finaleGoto(db: Db, step: number): { step: number; total: number }` (throws `invalid_value` unless `0 ≤ step ≤ total` and integer; sticky reveal as for `next`); `finaleGotoAction(step: number)`; i18n `finaleRemote.jumpHint`, `finaleRemote.confirmReveal`.
 
-- [ ] **Step 1: Write the failing test** — in `src/server/services/finale.test.ts` change the import to `import { finaleCommand, finaleGoto, setFinaleRevealed } from "./finale";` and append:
+- [x] **Step 1: Write the failing test** — in `src/server/services/finale.test.ts` change the import to `import { finaleCommand, finaleGoto, setFinaleRevealed } from "./finale";` and append:
 
 ```ts
 test("goto jumps anywhere, reveals on or past the podium beat, never hides again and checks bounds", () => {
@@ -2214,12 +2214,12 @@ test("goto jumps anywhere, reveals on or past the podium beat, never hides again
 });
 ```
 
-- [ ] **Step 2: Run to see it fail**
+- [x] **Step 2: Run to see it fail**
 
 Run: `npx vitest run src/server/services/finale.test.ts`
 Expected: FAIL — `finaleGoto` is not exported.
 
-- [ ] **Step 3: Implement** — replace `finaleCommand` in `src/server/services/finale.ts` with:
+- [x] **Step 3: Implement** — replace `finaleCommand` in `src/server/services/finale.ts` with:
 
 ```ts
 function moveFinale(db: Db, pick: (current: number, total: number) => number): { step: number; total: number } {
@@ -2256,12 +2256,12 @@ export function finaleGoto(db: Db, step: number): { step: number; total: number 
 }
 ```
 
-- [ ] **Step 4: Run the tests**
+- [x] **Step 4: Run the tests**
 
 Run: `npx vitest run src/server/services/finale.test.ts`
 Expected: PASS (existing next/back/exit tests included).
 
-- [ ] **Step 5: Action** — in `src/app/admin/actions.ts` change the finale import to `import { finaleCommand, finaleGoto, setFinaleRevealed, type FinaleCommand } from "@/server/services/finale";` and add after `finaleCommandAction`:
+- [x] **Step 5: Action** — in `src/app/admin/actions.ts` change the finale import to `import { finaleCommand, finaleGoto, setFinaleRevealed, type FinaleCommand } from "@/server/services/finale";` and add after `finaleCommandAction`:
 
 ```ts
 export async function finaleGotoAction(step: number): Result<{ step: number; total: number }> {
@@ -2269,9 +2269,9 @@ export async function finaleGotoAction(step: number): Result<{ step: number; tot
 }
 ```
 
-- [ ] **Step 6: Strings** — `en.ts` `finaleRemote`: add `jumpHint: "Tap a step to jump to it.",` and `confirmReveal: "Tap again: this shows final points",`. `ru.ts` `finaleRemote`: add `jumpHint: "Нажмите на шаг, чтобы перейти к нему.",` and `confirmReveal: "Нажмите ещё раз: откроются итоговые очки",`.
+- [x] **Step 6: Strings** — `en.ts` `finaleRemote`: add `jumpHint: "Tap a step to jump to it.",` and `confirmReveal: "Tap again: this shows final points",`. `ru.ts` `finaleRemote`: add `jumpHint: "Нажмите на шаг, чтобы перейти к нему.",` and `confirmReveal: "Нажмите ещё раз: откроются итоговые очки",`.
 
-- [ ] **Step 7: Remote UI** — in `src/components/admin/FinaleRemote.tsx`:
+- [x] **Step 7: Remote UI** — in `src/components/admin/FinaleRemote.tsx`:
   - change the actions import to `import { finaleCommandAction, finaleGotoAction, setFinaleRevealedAction } from "@/app/admin/actions";`
   - after `const [auto, setAuto] = useState(false);` add
 
@@ -2347,12 +2347,12 @@ with
       </ol>
 ```
 
-- [ ] **Step 8: Verify**
+- [x] **Step 8: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass. Browser (verify server): finish the event in Settings, open `/admin/finale` and `/screen` side by side; tap step 5 → projector shows beat 5 directly; tap the "Final standings" step → first tap shows the red confirmation, second tap jumps and "Standings public" turns on; tapping step 1 afterwards keeps standings public.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/server/services/finale.ts src/server/services/finale.test.ts src/app/admin/actions.ts src/components/admin/FinaleRemote.tsx src/i18n
@@ -2374,7 +2374,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 **Interfaces:**
 - Produces: `interface GameIconEntry { name: string; Icon: LucideIcon; keywords: string }`, `GAME_ICON_LIST: GameIconEntry[]`, `GAME_ICONS: Record<string, LucideIcon>`, `searchGameIcons(query: string): GameIconEntry[]`. `GameIcon.tsx` re-exports `GAME_ICONS` so existing imports keep working.
 
-- [ ] **Step 1: Write the failing test** — `src/components/common/gameIcons.test.ts`
+- [x] **Step 1: Write the failing test** — `src/components/common/gameIcons.test.ts`
 
 ```ts
 import * as lucide from "lucide-react";
@@ -2399,12 +2399,12 @@ test("search matches icon names and EN/RU keywords, case-insensitively", () => {
 });
 ```
 
-- [ ] **Step 2: Run to see it fail**
+- [x] **Step 2: Run to see it fail**
 
 Run: `npx vitest run src/components/common/gameIcons.test.ts`
 Expected: FAIL — cannot resolve `./gameIcons`.
 
-- [ ] **Step 3: Implement** — `src/components/common/gameIcons.ts`
+- [x] **Step 3: Implement** — `src/components/common/gameIcons.ts`
 
 ```ts
 import {
@@ -2649,7 +2649,7 @@ export function searchGameIcons(query: string): GameIconEntry[] {
 }
 ```
 
-- [ ] **Step 4: `GameIcon` uses the catalog** — replace `src/components/common/GameIcon.tsx` with:
+- [x] **Step 4: `GameIcon` uses the catalog** — replace `src/components/common/GameIcon.tsx` with:
 
 ```tsx
 import { Dices } from "lucide-react";
@@ -2663,12 +2663,12 @@ export function GameIcon({ name, className }: { name: string; className?: string
 }
 ```
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass (if `lucide-react` lacks one of the names the first test fails with that name — replace it with another icon from `node -e 'console.log(Object.keys(require("lucide-react")).filter(k=>/^[A-Z]/.test(k)).join(" "))'`).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/components/common/gameIcons.ts src/components/common/gameIcons.test.ts src/components/common/GameIcon.tsx
@@ -2695,7 +2695,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   - `ErrorCode` gains `"game_in_use"`; `AdminSnapshot.playedGameIds: number[]`
   - actions `createGameAction(input: NewGame): Result<number>`, `deleteGameAction(id: number): Result`
 
-- [ ] **Step 1: Write the failing slug test** — `src/domain/games.test.ts`
+- [x] **Step 1: Write the failing slug test** — `src/domain/games.test.ts`
 
 ```ts
 import { expect, test } from "vitest";
@@ -2714,12 +2714,12 @@ test("uniqueSlug appends the first free number", () => {
 });
 ```
 
-- [ ] **Step 2: Run to see it fail**
+- [x] **Step 2: Run to see it fail**
 
 Run: `npx vitest run src/domain/games.test.ts`
 Expected: FAIL — cannot resolve `./games`.
 
-- [ ] **Step 3: Implement** — `src/domain/games.ts`
+- [x] **Step 3: Implement** — `src/domain/games.ts`
 
 ```ts
 /** Stable internal id for a game; also the default family of a new game. */
@@ -2746,7 +2746,7 @@ export function uniqueSlug(name: string, taken: Iterable<string>): string {
 Run: `npx vitest run src/domain/games.test.ts`
 Expected: PASS.
 
-- [ ] **Step 4: Write the failing service tests** — in `src/server/services/core.test.ts` change the catalog import to `import { addTable, createGame, deleteGame, removeTable, updateGame, updateTable } from "./catalog";` and append:
+- [x] **Step 4: Write the failing service tests** — in `src/server/services/core.test.ts` change the catalog import to `import { addTable, createGame, deleteGame, removeTable, updateGame, updateTable } from "./catalog";` and append:
 
 ```ts
 describe("custom games", () => {
@@ -2822,12 +2822,12 @@ test("all-rounder counts families: a variant adds nothing, a new custom family d
 });
 ```
 
-- [ ] **Step 5: Run to see them fail**
+- [x] **Step 5: Run to see them fail**
 
 Run: `npx vitest run src/server/services/core.test.ts src/domain/achievements.test.ts`
 Expected: FAIL — `createGame` / `deleteGame` not exported (the all-rounder test already passes; it pins the family rule the UI relies on).
 
-- [ ] **Step 6: Repo writes** — append to `src/server/repo/writes.ts`:
+- [x] **Step 6: Repo writes** — append to `src/server/repo/writes.ts`:
 
 ```ts
 export function insertGame(tx: Tx, values: Omit<typeof s.games.$inferInsert, "id">): number {
@@ -2843,9 +2843,9 @@ export function gameHasSessions(tx: Tx, gameId: number): boolean {
 }
 ```
 
-- [ ] **Step 7: Error code** — `src/server/services/errors.ts`: add `| "game_in_use"` to `ErrorCode`. `src/i18n/en.ts` `errors`: add `game_in_use: "This game has been played. Deactivate it instead.",`. `src/i18n/ru.ts` `errors`: add `game_in_use: "В эту игру уже играли. Выключите её вместо удаления.",`.
+- [x] **Step 7: Error code** — `src/server/services/errors.ts`: add `| "game_in_use"` to `ErrorCode`. `src/i18n/en.ts` `errors`: add `game_in_use: "This game has been played. Deactivate it instead.",`. `src/i18n/ru.ts` `errors`: add `game_in_use: "В эту игру уже играли. Выключите её вместо удаления.",`.
 
-- [ ] **Step 8: Services** — replace the top of `src/server/services/catalog.ts` (imports, `GamePatch`, `invalid`, `updateGame`) with:
+- [x] **Step 8: Services** — replace the top of `src/server/services/catalog.ts` (imports, `GamePatch`, `invalid`, `updateGame`) with:
 
 ```ts
 import { uniqueSlug } from "@/domain/games";
@@ -2947,7 +2947,7 @@ export function deleteGame(db: Db, id: number): void {
 
 (Keep `addTable`, `hasOpenSession`, `updateTable`, `removeTable` below unchanged.)
 
-- [ ] **Step 9: Admin snapshot knows which games were used** — in `src/domain/snapshot.ts` add `playedGameIds: number[];` to `AdminSnapshot` after `games: GameFact[];`, and in `buildAdminSnapshot` after `games: facts.games,` add:
+- [x] **Step 9: Admin snapshot knows which games were used** — in `src/domain/snapshot.ts` add `playedGameIds: number[];` to `AdminSnapshot` after `games: GameFact[];`, and in `buildAdminSnapshot` after `games: facts.games,` add:
 
 ```ts
     playedGameIds: [...new Set(facts.sessions.map((s) => s.gameId))].sort((a, b) => a - b),
@@ -2963,7 +2963,7 @@ test("admin snapshot lists games that have any session; the public one does not"
 });
 ```
 
-- [ ] **Step 10: Actions** — in `src/app/admin/actions.ts` change the catalog import to
+- [x] **Step 10: Actions** — in `src/app/admin/actions.ts` change the catalog import to
 
 ```ts
 import { addTable, createGame, deleteGame, removeTable, updateGame, updateTable, type GamePatch, type NewGame } from "@/server/services/catalog";
@@ -2981,12 +2981,12 @@ export async function deleteGameAction(id: number): Result {
 }
 ```
 
-- [ ] **Step 11: Verify**
+- [x] **Step 11: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass, including the existing `catalog` tests in `core.test.ts`.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add src/domain/games.ts src/domain/games.test.ts src/server/repo/writes.ts src/server/services/catalog.ts src/server/services/errors.ts src/server/services/core.test.ts src/domain/achievements.test.ts src/domain/snapshot.ts src/domain/snapshot.test.ts src/app/admin/actions.ts src/i18n
@@ -3007,7 +3007,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 - Consumes: `searchGameIcons` (Task 14); `createGameAction`, `updateGameAction`, `deleteGameAction`, `NewGame`, `snapshot.playedGameIds` (Task 15).
 - Produces: `IconPicker({ value, onChange })`, `GameEditSheet({ game: GameFact | null, onClose })`; i18n `games.{add,edit,name,descriptionEn,descriptionRu,icon,iconSearch,iconNone,category,family,ownFamily,variantOf,delete,deleted,created,playedNoDelete}`.
 
-- [ ] **Step 1: Strings** — in `src/i18n/en.ts` replace the `games` block with:
+- [x] **Step 1: Strings** — in `src/i18n/en.ts` replace the `games` block with:
 
 ```ts
   games: {
@@ -3067,7 +3067,7 @@ and in `src/i18n/ru.ts`:
   },
 ```
 
-- [ ] **Step 2: Icon picker** — `src/components/admin/IconPicker.tsx`
+- [x] **Step 2: Icon picker** — `src/components/admin/IconPicker.tsx`
 
 ```tsx
 "use client";
@@ -3112,7 +3112,7 @@ export function IconPicker({ value, onChange }: { value: string; onChange: (name
 }
 ```
 
-- [ ] **Step 3: Edit sheet** — `src/components/admin/GameEditSheet.tsx`
+- [x] **Step 3: Edit sheet** — `src/components/admin/GameEditSheet.tsx`
 
 ```tsx
 "use client";
@@ -3304,7 +3304,7 @@ export function GameEditSheet({ game, onClose }: { game: GameFact | null; onClos
 }
 ```
 
-- [ ] **Step 4: Card grid** — replace `src/components/admin/GamesView.tsx` with:
+- [x] **Step 4: Card grid** — replace `src/components/admin/GamesView.tsx` with:
 
 ```tsx
 "use client";
@@ -3407,12 +3407,12 @@ function GameCard({ game, floor, onEdit }: { game: GameFact; floor: number; onEd
 }
 ```
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass. Browser (verify server, phone width 390×844 and desktop 1440×900): `/admin/games` shows aligned cards in 1 / 2 / 3 columns; "Add game" → name "Azul", search "кубик" and pick an icon, category "abstract", save → card appears; seat a table with Azul in `/admin`, record a result, the projector reveal shows Azul with its icon; open Azul again → Delete is replaced by the "already played" note; open an unused new game → Delete (two taps) removes it.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/components/admin/IconPicker.tsx src/components/admin/GameEditSheet.tsx src/components/admin/GamesView.tsx src/i18n
@@ -3443,7 +3443,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   - `setAchievementSealed(db, input: { achievementId: string; sealed: boolean }): void`; `setAchievementSealedAction(input)`
   - i18n `adminAchievements.enabled`
 
-- [ ] **Step 1: Write the failing domain test** — in `src/domain/achievements.test.ts` add `isSealed` to the `./achievements` import and append inside `describe("definitions", …)`:
+- [x] **Step 1: Write the failing domain test** — in `src/domain/achievements.test.ts` add `isSealed` to the `./achievements` import and append inside `describe("definitions", …)`:
 
 ```ts
   test("isSealed prefers the admin override over the built-in default", () => {
@@ -3465,7 +3465,7 @@ and change the existing `newPublicUnlocks` test calls to pass overrides:
 Run: `npx vitest run src/domain/achievements.test.ts`
 Expected: FAIL — `isSealed` is not exported.
 
-- [ ] **Step 2: Domain helper** — in `src/domain/achievements.ts` add after `achievementDef`:
+- [x] **Step 2: Domain helper** — in `src/domain/achievements.ts` add after `achievementDef`:
 
 ```ts
 /** The admin's per-achievement choice wins over the built-in default. */
@@ -3490,7 +3490,7 @@ export function newPublicUnlocks(
 Run: `npx vitest run src/domain/achievements.test.ts`
 Expected: PASS.
 
-- [ ] **Step 3: Facts field** — `src/domain/types.ts`, in `Facts` after `disabledAchievements: string[];`:
+- [x] **Step 3: Facts field** — `src/domain/types.ts`, in `Facts` after `disabledAchievements: string[];`:
 
 ```ts
   /** Achievement ids whose sealed flag the admin changed, with the chosen value. */
@@ -3503,7 +3503,7 @@ Add `sealedOverrides: {},` right after `disabledAchievements: [],` in the `facts
 const noAchievements = { enabled: [], sealed: [], unlocks: [], sealedUnlockCount: 0, eligiblePlayers: 0 };
 ```
 
-- [ ] **Step 4: Schema + migration** — in `src/server/db/schema.ts` change `achievementSettings` to:
+- [x] **Step 4: Schema + migration** — in `src/server/db/schema.ts` change `achievementSettings` to:
 
 ```ts
 export const achievementSettings = sqliteTable("achievement_settings", {
@@ -3517,7 +3517,7 @@ export const achievementSettings = sqliteTable("achievement_settings", {
 Run: `npm run db:generate -- --name achievement_sealed`
 Expected: `drizzle/0005_achievement_sealed.sql` with a single `ALTER TABLE \`achievement_settings\` ADD \`sealed\` integer;`.
 
-- [ ] **Step 5: Repo** — `src/server/repo/facts.ts`, in `loadFacts` after the `disabledAchievements` property add:
+- [x] **Step 5: Repo** — `src/server/repo/facts.ts`, in `loadFacts` after the `disabledAchievements` property add:
 
 ```ts
     sealedOverrides: Object.fromEntries(
@@ -3544,7 +3544,7 @@ export function upsertAchievementSetting(
 }
 ```
 
-- [ ] **Step 6: Write the failing service tests** — in `src/server/services/achievements.test.ts` change the import to `import { setAchievementEnabled, setAchievementSealed } from "./achievements";` and append:
+- [x] **Step 6: Write the failing service tests** — in `src/server/services/achievements.test.ts` change the import to `import { setAchievementEnabled, setAchievementSealed } from "./achievements";` and append:
 
 ```ts
 test("sealed can be switched per achievement; only choices that differ from the default are stored", () => {
@@ -3572,7 +3572,7 @@ test("switching sealed never queues or removes cards, and works after finish", (
 Run: `npx vitest run src/server/services/achievements.test.ts`
 Expected: FAIL — `setAchievementSealed` is not exported.
 
-- [ ] **Step 7: Service** — replace `src/server/services/achievements.ts` with:
+- [x] **Step 7: Service** — replace `src/server/services/achievements.ts` with:
 
 ```ts
 import { achievementDef, isAchievementId, newPublicUnlocks, type Unlock } from "@/domain/achievements";
@@ -3635,7 +3635,7 @@ export async function setAchievementSealedAction(input: { achievementId: string;
 Run: `npx vitest run src/server/services/achievements.test.ts`
 Expected: PASS.
 
-- [ ] **Step 8: Write the failing derived-state tests** — append to `src/domain/snapshot.test.ts`:
+- [x] **Step 8: Write the failing derived-state tests** — append to `src/domain/snapshot.test.ts`:
 
 ```ts
 test("sealed overrides decide which unlocks stay hidden before the reveal and are listed in the view", () => {
@@ -3664,7 +3664,7 @@ and inside the `buildFinaleScript` describe of `src/domain/finale.test.ts`:
 Run: `npx vitest run src/domain/snapshot.test.ts src/domain/finale.test.ts`
 Expected: FAIL — `sealed` missing from the view; the unsealed achievement still gets a beat.
 
-- [ ] **Step 9: Use `isSealed` everywhere**
+- [x] **Step 9: Use `isSealed` everywhere**
   - `src/domain/finale.ts`: import `{ isSealed, type AchievementId }` instead of `achievementDef`, and change `if (!achievementDef(u.achievementId).sealed) continue;` to `if (!isSealed(u.achievementId, facts.sealedOverrides)) continue;`.
   - `src/domain/snapshot.ts`: import `{ ACHIEVEMENTS, isAchievementId, isSealed, type AchievementId, type Unlock }` (drop `achievementDef`); add `sealed: AchievementId[];` to `AchievementsView` after `enabled`; in `announcements` change the sealed line to `if (isSealed(achievementId, facts.sealedOverrides) && !opts.includeSealed) return [];`; replace `achievementsView` with:
 
@@ -3702,7 +3702,7 @@ function achievementsView(facts: Facts, rp: Replay, includeSealed: boolean): Ach
 Run: `npx vitest run src/domain`
 Expected: PASS.
 
-- [ ] **Step 10: UI reads the effective flag**
+- [x] **Step 10: UI reads the effective flag**
   - `src/components/admin/UnlockFeed.tsx`: remove the `achievementDef` import, add `const sealed = new Set(snapshot.achievements.sealed);` after `lookups`, and change `achievementDef(u.achievementId).sealed ?` to `sealed.has(u.achievementId) ?`.
   - `src/components/public/AchievementsView.tsx`: change the import to `import { rarityOf } from "@/domain/achievements";`, add `const sealed = new Set(snapshot.achievements.sealed);` after `const revealed = …`, and change `const sealedHidden = achievementDef(id).sealed && !revealed;` to `const sealedHidden = sealed.has(id) && !revealed;`.
   - `src/i18n/en.ts` `adminAchievements`: set `hint: "Off hides an achievement everywhere. Sealed keeps its description secret until the finale.",` and add `enabled: "On",`. `src/i18n/ru.ts`: `hint: "Выключенное достижение пропадает везде. Скрытое держит описание в секрете до финала.",` and `enabled: "Вкл",`.
@@ -3743,7 +3743,7 @@ Expected: PASS.
 
   with `const sealed = sealedIds.has(def.id);` added next to `const on = enabled.has(def.id);`.
 
-- [ ] **Step 11: Verify no direct reads remain**
+- [x] **Step 11: Verify no direct reads remain**
 
 Run: `grep -rn "\.sealed\b" src --include='*.ts' --include='*.tsx' | grep "achievementDef" | grep -v "src/domain/achievements.ts" || echo "only isSealed reads the default"`
 Expected: `only isSealed reads the default` (tests in `achievements.test.ts` / `snapshot.test.ts` that read `ACHIEVEMENTS…sealed` for the built-in defaults are fine).
@@ -3751,7 +3751,7 @@ Expected: `only isSealed reads the default` (tests in `achievements.test.ts` / `
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add src/server/db/schema.ts drizzle src/domain src/server src/app/admin/actions.ts src/components/admin/AchievementsAdmin.tsx src/components/admin/UnlockFeed.tsx src/components/public/AchievementsView.tsx src/components/screen/logic.test.ts src/i18n
@@ -3778,7 +3778,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   - public snapshot: every unlock, every achievement announcement; profile lists sealed achievements before the reveal
   - i18n `screen.sealedUnlocked`
 
-- [ ] **Step 1: Update the tests to the new rule (they fail first)**
+- [x] **Step 1: Update the tests to the new rule (they fail first)**
 
 `src/domain/achievements.test.ts`: import `achievementVisibility` and `newUnlocks` instead of `newPublicUnlocks`; replace the `newPublicUnlocks` test with:
 
@@ -3848,7 +3848,7 @@ test("sealed unlocks are part of the timeline", () => {
 Run: `npm test`
 Expected: FAIL in the files above (old sealed filtering still active, `newUnlocks`/`achievementVisibility` missing).
 
-- [ ] **Step 2: Domain** — in `src/domain/achievements.ts` replace `newPublicUnlocks` with:
+- [x] **Step 2: Domain** — in `src/domain/achievements.ts` replace `newPublicUnlocks` with:
 
 ```ts
 export function newUnlocks(before: Unlock[], after: Unlock[]): Unlock[] {
@@ -3911,9 +3911,9 @@ export function withUnlockAnnouncements<T>(tx: Tx, write: () => T): T {
 Run: `npm test`
 Expected: PASS (if `"corrections announce only unlocks that are new"` now reports extra sealed ids, list the actual ids it prints and confirm each is a genuine new unlock of that edit before updating the expected array).
 
-- [ ] **Step 3: Strings** — `src/i18n/en.ts` `screen`: add `sealedUnlocked: "Sealed achievement unlocked",` and change `sealedUntilFinale` to `"Sealed, explained at the finale"`. `src/i18n/ru.ts` `screen`: add `sealedUnlocked: "Открыто скрытое достижение",` and change `sealedUntilFinale` to `"Скрытые, условие раскроется в финале"`.
+- [x] **Step 3: Strings** — `src/i18n/en.ts` `screen`: add `sealedUnlocked: "Sealed achievement unlocked",` and change `sealedUntilFinale` to `"Sealed, explained at the finale"`. `src/i18n/ru.ts` `screen`: add `sealedUnlocked: "Открыто скрытое достижение",` and change `sealedUntilFinale` to `"Скрытые, условие раскроется в финале"`.
 
-- [ ] **Step 4: Public achievements page** — replace `src/components/public/AchievementsView.tsx` with:
+- [x] **Step 4: Public achievements page** — replace `src/components/public/AchievementsView.tsx` with:
 
 ```tsx
 "use client";
@@ -3998,7 +3998,7 @@ export function AchievementsView() {
 }
 ```
 
-- [ ] **Step 5: Profile** — in `src/components/public/ProfileView.tsx` change the lucide import to `import { ArrowLeft, Lock } from "lucide-react";`, add `import { achievementVisibility } from "@/domain/achievements";`, and in the achievements list replace
+- [x] **Step 5: Profile** — in `src/components/public/ProfileView.tsx` change the lucide import to `import { ArrowLeft, Lock } from "lucide-react";`, add `import { achievementVisibility } from "@/domain/achievements";`, and in the achievements list replace
 
 ```tsx
                   <div className="font-display uppercase tracking-wide">{text.title}</div>
@@ -4017,7 +4017,7 @@ with
 
 and add `const titleOnly = achievementVisibility(a.sealed, profile.revealed) === "titleOnly";` after `const done = a.unlockedAt !== null;`.
 
-- [ ] **Step 6: Projector card** — in `src/components/screen/AchievementCard.tsx` add `import { Lock } from "lucide-react";` and `import { achievementVisibility } from "@/domain/achievements";` (merge with the existing `type AchievementId` import), add after `const def = …`:
+- [x] **Step 6: Projector card** — in `src/components/screen/AchievementCard.tsx` add `import { Lock } from "lucide-react";` and `import { achievementVisibility } from "@/domain/achievements";` (merge with the existing `type AchievementId` import), add after `const def = …`:
 
 ```tsx
   const titleOnly =
@@ -4043,7 +4043,7 @@ with
           )}
 ```
 
-- [ ] **Step 7: Achievements scene** — in `src/components/screen/scenes/SceneAchievements.tsx` change the domain import to `import { achievementVisibility, rarityOf } from "@/domain/achievements";`, add `const sealed = new Set(snapshot.achievements.sealed);` after `const groups = …`, and replace
+- [x] **Step 7: Achievements scene** — in `src/components/screen/scenes/SceneAchievements.tsx` change the domain import to `import { achievementVisibility, rarityOf } from "@/domain/achievements";`, add `const sealed = new Set(snapshot.achievements.sealed);` after `const groups = …`, and replace
 
 ```tsx
                       <div className="truncate font-display text-[54px] uppercase leading-none tracking-wide">
@@ -4064,7 +4064,7 @@ with
                       </div>
 ```
 
-- [ ] **Step 8: Verify**
+- [x] **Step 8: Verify**
 
 Run: `grep -rn "includeSealed\|newPublicUnlocks" src || echo "gone"`
 Expected: `gone`.
@@ -4072,7 +4072,7 @@ Expected: `gone`.
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass. Browser (verify server, not logged in): `/achievements` shows sealed titles with a lock, their holders, and "Revealed at the finale." instead of the description; `/players/{id}` of a holder shows the same; record a result that unlocks Joker Master → the projector shows "Sealed achievement unlocked · Joker Master" with no description. Finish the event and step the finale past Final standings → the pages show the descriptions.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/domain src/server/services src/components/public/AchievementsView.tsx src/components/public/ProfileView.tsx src/components/screen/AchievementCard.tsx src/components/screen/scenes/SceneAchievements.tsx src/i18n
@@ -4091,7 +4091,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 **Interfaces:**
 - Produces: `priorFieldRise(before: StandingRow[], after: StandingRow[], playerId: number): { from: number; to: number; field: number } | null`; `COMEBACK_MIN_RISE = 3`, `COMEBACK_MIN_FIELD = 8`.
 
-- [ ] **Step 1: Write the failing standings test** — in `src/domain/standings.test.ts` change the import to `import { priorFieldRise, rankStandings, selectCounted, type PlayerTotals, type StandingRow } from "./standings";` and append:
+- [x] **Step 1: Write the failing standings test** — in `src/domain/standings.test.ts` change the import to `import { priorFieldRise, rankStandings, selectCounted, type PlayerTotals, type StandingRow } from "./standings";` and append:
 
 ```ts
 describe("priorFieldRise", () => {
@@ -4117,7 +4117,7 @@ describe("priorFieldRise", () => {
 });
 ```
 
-- [ ] **Step 2: Replace the Comeback test** — in `src/domain/achievements.test.ts` replace the test `"comeback: rise of 3+ ranks counts only from the 10th result"` with:
+- [x] **Step 2: Replace the Comeback test** — in `src/domain/achievements.test.ts` replace the test `"comeback: rise of 3+ ranks counts only from the 10th result"` with:
 
 ```ts
   test("comeback: climb 3+ places among already-ranked players, once at least 8 are ranked", () => {
@@ -4138,7 +4138,7 @@ describe("priorFieldRise", () => {
 Run: `npx vitest run src/domain/standings.test.ts src/domain/achievements.test.ts`
 Expected: FAIL — `priorFieldRise` not exported; `field(7)` still unlocks under the old rule.
 
-- [ ] **Step 3: Implement the measure** — append to `src/domain/standings.ts`:
+- [x] **Step 3: Implement the measure** — append to `src/domain/standings.ts`:
 
 ```ts
 /**
@@ -4159,7 +4159,7 @@ export function priorFieldRise(
 }
 ```
 
-- [ ] **Step 4: New Comeback rule** — in `src/domain/achievements.ts`:
+- [x] **Step 4: New Comeback rule** — in `src/domain/achievements.ts`:
   - change `import type { StandingRow } from "./standings";` to `import { priorFieldRise, type StandingRow } from "./standings";`
   - delete the `rankIn` helper line
   - add above `ACHIEVEMENTS`:
@@ -4183,7 +4183,7 @@ export const COMEBACK_MIN_FIELD = 8;
   },
 ```
 
-- [ ] **Step 5: Same measure for the stats** — in `src/domain/stats.ts` change `import type { StandingRow } from "./standings";` to `import { priorFieldRise, type StandingRow } from "./standings";` and replace the loop body of `biggestComeback` with:
+- [x] **Step 5: Same measure for the stats** — in `src/domain/stats.ts` change `import type { StandingRow } from "./standings";` to `import { priorFieldRise, type StandingRow } from "./standings";` and replace the loop body of `biggestComeback` with:
 
 ```ts
     for (const p of rp.results[i].players) {
@@ -4197,14 +4197,14 @@ export const COMEBACK_MIN_FIELD = 8;
 
 (`rankIn` in `stats.ts` stays; `rankRace` still uses it.) Update its doc comment to `/** Largest single-result rise among players ranked before that result. The earliest wins a tie. */`.
 
-- [ ] **Step 6: Description** — `src/i18n/en.ts`: `comeback: { title: "Comeback", description: "Climb three or more places among ranked players with one result." },`. `src/i18n/ru.ts`: `comeback: { title: "Камбэк", description: "Поднимитесь на три места и выше среди игроков с результатами за одну игру." },`.
+- [x] **Step 6: Description** — `src/i18n/en.ts`: `comeback: { title: "Comeback", description: "Climb three or more places among ranked players with one result." },`. `src/i18n/ru.ts`: `comeback: { title: "Камбэк", description: "Поднимитесь на три места и выше среди игроков с результатами за одну игру." },`.
 
-- [ ] **Step 7: Verify**
+- [x] **Step 7: Verify**
 
 Run: `npm test && npm run typecheck && npm run lint`
 Expected: all pass, including the unchanged `"biggest single-result rise"` stats test (its field is all four players, so the result stays `{ playerId: 4, sessionId: 4, from: 4, to: 1 }`).
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/domain/standings.ts src/domain/standings.test.ts src/domain/achievements.ts src/domain/achievements.test.ts src/domain/stats.ts src/i18n
@@ -4220,14 +4220,14 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 **Files:**
 - Modify: `CLAUDE.md`, `docs/superpowers/plans/2026-09-17-board-games-cup-tier4.md` (check boxes)
 
-- [ ] **Step 1: Production build still works** (the root layout now reads the database)
+- [x] **Step 1: Production build still works** (the root layout now reads the database)
 
 Run: `npm run build`
 Expected: build succeeds. If it fails because a dev server holds `.next`, stop dev servers and rerun.
 
-- [ ] **Step 2: Fresh verify database and server** — follow "Browser checks" (delete and recreate `data/verify.db`, seed demo, start port 3100). Add players until there are at least 30 (`/admin/players`, bulk add), add tables until there are 10.
+- [x] **Step 2: Fresh verify database and server** — follow "Browser checks" (delete and recreate `data/verify.db`, seed demo, start port 3100). Add players until there are at least 30 (`/admin/players`, bulk add), add tables until there are 10.
 
-- [ ] **Step 3: Walk every surface at 1920×1080 and 390×844 with Playwright**
+- [x] **Step 3: Walk every surface at 1920×1080 and 390×844 with Playwright**
 
   1. `/` (EN and RU toggle): hero shows the brand; tab title matches; favicon is the brand mark.
   2. Settings → Branding: press the RU preset, save; RU site and a projector set to RU show `HIS^` / `ВЕЧЕР НАСТОЛОК`; clearing the fields returns to the default.
@@ -4242,7 +4242,7 @@ Expected: build succeeds. If it fails because a dev server holds `.next`, stop d
 
   Fix anything found with its own small commit before continuing.
 
-- [ ] **Step 4: Document the new rules** — append to `CLAUDE.md` after the Tier 3 section:
+- [x] **Step 4: Document the new rules** — append to `CLAUDE.md` after the Tier 3 section:
 
 ```markdown
 ## Tier 4 (shipped via docs/superpowers/plans/2026-09-17-board-games-cup-tier4.md)
@@ -4258,7 +4258,7 @@ Expected: build succeeds. If it fails because a dev server holds `.next`, stop d
 - Browser checks run against `DB_PATH=data/verify.db` on port 3100, never against `data/board-cup.db`.
 ```
 
-- [ ] **Step 5: Tick every checkbox in this plan, clean up, commit**
+- [x] **Step 5: Tick every checkbox in this plan, clean up, commit**
 
 ```bash
 rm -f data/verify.db data/verify.db-shm data/verify.db-wal
@@ -4270,4 +4270,4 @@ git commit -m "docs: document Tier 4 rules and check off the plan
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 ```
 
-- [ ] **Step 6: Merge** — use `superpowers:finishing-a-development-branch`: rebase `tier4` onto `master`, fast-forward `master`, delete `tier4` (same flow as Tiers 2–3). Restart the port-3000 dev server if it was stopped, and confirm `ss -ltn | grep 3000` shows it listening.
+- [x] **Step 6: Merge** — use `superpowers:finishing-a-development-branch`: rebase `tier4` onto `master`, fast-forward `master`, delete `tier4` (same flow as Tiers 2–3). Restart the port-3000 dev server if it was stopped, and confirm `ss -ltn | grep 3000` shows it listening.
