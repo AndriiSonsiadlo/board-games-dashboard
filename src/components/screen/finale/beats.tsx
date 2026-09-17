@@ -16,7 +16,7 @@ import { fmt, ordinal, plural } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
 import { pad2 } from "@/lib/format";
-import { formatHours, type FinaleLookups } from "./lookups";
+import { formatHours, statFontSizeClass, type FinaleLookups } from "./lookups";
 
 type Beat<K extends FinaleBeat["kind"]> = Extract<FinaleBeat, { kind: K }>;
 
@@ -35,10 +35,11 @@ function Label({ children, delay = 0 }: { children: React.ReactNode; delay?: num
 
 export function BeatComplete({ beat }: { beat: Beat<"complete"> }) {
   const { t } = useI18n();
+  const duration = formatHours(beat.minutes);
   const items = [
-    { label: t.finale.gamesPlayed, node: <NumberRoll value={beat.games} delay={0.6} /> },
-    { label: t.finale.duration, node: <span>{formatHours(beat.minutes)}</span> },
-    { label: t.finale.players, node: <NumberRoll value={beat.players} delay={0.9} /> },
+    { label: t.finale.gamesPlayed, text: String(beat.games), node: <NumberRoll value={beat.games} delay={0.6} /> },
+    { label: t.finale.duration, text: duration, node: <span>{duration}</span> },
+    { label: t.finale.players, text: String(beat.players), node: <NumberRoll value={beat.players} delay={0.9} /> },
   ];
   return (
     <div className="flex h-full flex-col justify-center px-[140px]">
@@ -52,7 +53,7 @@ export function BeatComplete({ beat }: { beat: Beat<"complete"> }) {
             transition={{ duration: 1, ease: EASE, delay: 0.4 + i * 0.25 }}
             className="px-14 first:pl-0"
           >
-            <div className="font-display text-[260px] leading-none tabular">{item.node}</div>
+            <div className={cn("font-display leading-none tabular", statFontSizeClass(item.text))}>{item.node}</div>
             <div className="mt-6 font-display text-[40px] uppercase tracking-[0.2em] text-muted">{item.label}</div>
           </motion.div>
         ))}

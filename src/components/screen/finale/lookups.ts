@@ -28,3 +28,10 @@ export function formatHours(minutes: number | null): string {
   if (minutes === null) return "--";
   return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`;
 }
+
+/** Tailwind font-size class for a big stat value, shrunk by character count so it never crowds its column's divider. */
+export function statFontSizeClass(text: string): string {
+  if (text.length <= 3) return "text-[260px]";
+  if (text.length === 4) return "text-[200px]";
+  return "text-[150px]";
+}
