@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import type { Rarity } from "../../domain/achievements";
 import type { AuditAction, SceneId, ScreenControl, SessionFact } from "../../domain/types";
 
 export const event = sqliteTable("event", {
@@ -34,6 +35,14 @@ export const event = sqliteTable("event", {
     .$type<ScreenControl>()
     .notNull()
     .default(sql`'{"paused":false,"skipNonce":0,"finaleStep":0}'`),
+  showFollowLink: integer({ mode: "boolean" }).notNull().default(true),
+  showFollowQr: integer({ mode: "boolean" }).notNull().default(true),
+  followText: text(),
+  showTicker: integer({ mode: "boolean" }).notNull().default(true),
+  showAchievementCards: integer({ mode: "boolean" }).notNull().default(true),
+  showPodium: integer({ mode: "boolean" }).notNull().default(true),
+  achievementOrder: text({ enum: ["recent", "rarity"] }).notNull().default("recent"),
+  finaleShowcaseRarities: text({ mode: "json" }).$type<Rarity[]>().notNull().default(sql`'[]'`),
   dataVersion: integer().notNull().default(1),
 });
 

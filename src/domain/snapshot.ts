@@ -1,4 +1,4 @@
-import { ACHIEVEMENTS, isAchievementId, isSealed, type AchievementId, type Unlock } from "./achievements";
+import { ACHIEVEMENTS, isAchievementId, isSealed, type AchievementId, type Rarity, type Unlock } from "./achievements";
 import { resolveBrand, type Brand, type BrandFields } from "./brand";
 import { buildFinaleScript, clampStep, revealStepOf, type FinaleBeat } from "./finale";
 import type { Replay, ReplayResult } from "./replay";
@@ -8,6 +8,7 @@ import { buildStories, type Story } from "./stories";
 import { isOpenSession, tableState, type TableState } from "./tables";
 import { buildTimeline, type TimelineItem } from "./timeline";
 import type {
+  AchievementOrder,
   EventFact,
   EventStatus,
   Facts,
@@ -43,11 +44,19 @@ export interface PublicEventView {
   publicBaseUrl: string | null;
   brand: Brand;
   screenControl: ScreenControl;
+  showFollowLink: boolean;
+  showFollowQr: boolean;
+  followText: string | null;
+  showTicker: boolean;
+  showAchievementCards: boolean;
+  showPodium: boolean;
+  achievementOrder: AchievementOrder;
 }
 
 export interface AdminEventView extends PublicEventView {
   scoring: ScoringSettings;
   brandFields: BrandFields;
+  finaleShowcaseRarities: Rarity[];
 }
 
 export interface PlayerView {
@@ -213,6 +222,13 @@ function eventView(e: EventFact): PublicEventView {
     publicBaseUrl: e.publicBaseUrl,
     brand: resolveBrand(e.brandFields),
     screenControl: e.screenControl,
+    showFollowLink: e.showFollowLink,
+    showFollowQr: e.showFollowQr,
+    followText: e.followText,
+    showTicker: e.showTicker,
+    showAchievementCards: e.showAchievementCards,
+    showPodium: e.showPodium,
+    achievementOrder: e.achievementOrder,
   };
 }
 
@@ -431,7 +447,12 @@ export function buildAdminSnapshot(facts: Facts, rp: Replay, now: number): Admin
   return {
     audience: "admin",
     version: facts.event.dataVersion,
-    event: { ...eventView(facts.event), scoring: facts.event.scoring, brandFields: facts.event.brandFields },
+    event: {
+      ...eventView(facts.event),
+      scoring: facts.event.scoring,
+      brandFields: facts.event.brandFields,
+      finaleShowcaseRarities: facts.event.finaleShowcaseRarities,
+    },
     players: facts.players.map((p) => ({
       ...playerView(p),
       source: p.source,

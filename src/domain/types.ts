@@ -1,3 +1,4 @@
+import type { Rarity } from "./achievements";
 import type { BrandFields } from "./brand";
 
 export type EventStatus = "draft" | "live" | "finished";
@@ -6,6 +7,7 @@ export type SessionStatus = "setup" | "playing" | "pending" | "done" | "cancelle
 export type SceneId = "title" | "room" | "recent" | "counters" | "achievements" | "story" | "popular" | "contenders";
 export type Lang = "en" | "ru";
 export type PlayerSource = "admin" | "checkin";
+export type AchievementOrder = "recent" | "rarity";
 
 export const ALL_SCENES: SceneId[] = ["title", "room", "recent", "counters", "achievements", "story", "popular", "contenders"];
 export const DEFAULT_SCENES: SceneId[] = ["title", "room", "recent", "counters", "achievements", "story", "popular"];
@@ -41,6 +43,14 @@ export interface EventFact {
   publicBaseUrl: string | null;
   brandFields: BrandFields;
   screenControl: ScreenControl;
+  showFollowLink: boolean;
+  showFollowQr: boolean;
+  followText: string | null;
+  showTicker: boolean;
+  showAchievementCards: boolean;
+  showPodium: boolean;
+  achievementOrder: AchievementOrder;
+  finaleShowcaseRarities: Rarity[];
   dataVersion: number;
 }
 
