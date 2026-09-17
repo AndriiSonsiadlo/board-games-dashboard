@@ -24,7 +24,7 @@ const facts = { sessions, sealedOverrides: {} };
 const rp = replay({ players, games, sessions }, makeSettings());
 
 test("newest first with started, result, unlock and milestone items", () => {
-  const items = buildTimeline(facts, rp, { includeSealed: false });
+  const items = buildTimeline(facts, rp);
   expect(items[0]).toEqual({ kind: "started", at: 1050 * MIN, sessionId: 20, gameId: 1, tableId: 2, playerIds: [3] });
   const started = items.flatMap((i) => (i.kind === "started" ? [i.sessionId] : []));
   expect(started).toEqual([20, 10, 9, 8, 7, 6, 5, 4, 3, 2]);
@@ -45,15 +45,12 @@ test("newest first with started, result, unlock and milestone items", () => {
   expect(items.some((i) => i.kind === "unlock" && i.achievementId === "opening-move")).toBe(true);
 });
 
-test("sealed unlocks only when included", () => {
-  const sealed = (includeSealed: boolean) =>
-    buildTimeline(facts, rp, { includeSealed }).some((i) => i.kind === "unlock" && i.achievementId === "joker-master");
-  expect(sealed(false)).toBe(false);
-  expect(sealed(true)).toBe(true);
+test("sealed unlocks are part of the timeline", () => {
+  expect(buildTimeline(facts, rp).some((i) => i.kind === "unlock" && i.achievementId === "joker-master")).toBe(true);
 });
 
 test("limit keeps the newest items", () => {
-  const items = buildTimeline(facts, rp, { includeSealed: true, limit: 3 });
+  const items = buildTimeline(facts, rp, { limit: 3 });
   expect(items).toHaveLength(3);
   expect(items[0].kind).toBe("started");
 });

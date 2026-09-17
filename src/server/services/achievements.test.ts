@@ -30,9 +30,9 @@ const achievementAnnouncements = () =>
 const placements = (order: number[], jokerFor?: number) =>
   order.map((playerId, i) => ({ playerId, placement: i + 1, jokerDeclared: playerId === jokerFor }));
 
-test("a new result queues public unlocks only, with its session id", () => {
+test("a new result queues every new unlock, sealed ones too, with its session id", () => {
   const sessionId = recordDirectResult(ctx.db, { gameId: catan, tableId: null, placements: placements(ids, ids[0]) });
-  expect(achievementAnnouncements()).toEqual([`catan-lord:${ids[0]}`, `opening-move:${ids[0]}`]);
+  expect(achievementAnnouncements()).toEqual([`catan-lord:${ids[0]}`, `joker-master:${ids[0]}`, `opening-move:${ids[0]}`]);
   const first = loadFacts(ctx.db).announcements.find((a) => a.type === "achievement");
   expect(first?.type === "achievement" && first.payload.sessionId).toBe(sessionId);
 });

@@ -316,7 +316,7 @@ function announcements(
   facts: Facts,
   rp: Replay,
   now: number,
-  opts: { withPoints: boolean; includeSealed: boolean },
+  opts: { withPoints: boolean },
 ): ScreenAnnouncement[] {
   const results = new Map(rp.results.map((r) => [r.sessionId, r]));
   const unlocked = new Set(rp.unlocks.map((u) => `${u.achievementId}:${u.playerId}`));
@@ -330,7 +330,6 @@ function announcements(
       if (a.type === "achievement") {
         const { achievementId, playerId, sessionId } = a.payload;
         if (!isAchievementId(achievementId)) return [];
-        if (isSealed(achievementId, facts.sealedOverrides) && !opts.includeSealed) return [];
         if (!unlocked.has(`${achievementId}:${playerId}`)) return [];
         return [{ id: a.id, createdAt: a.createdAt, type: "achievement", achievementId, playerId, sessionId }];
       }
@@ -350,14 +349,13 @@ function leaderboard(facts: Facts, rp: Replay): LeaderboardRow[] {
   }));
 }
 
-function achievementsView(facts: Facts, rp: Replay, includeSealed: boolean): AchievementsView {
+function achievementsView(facts: Facts, rp: Replay): AchievementsView {
   const disabled = new Set(facts.disabledAchievements);
   const sealed = (u: Unlock) => isSealed(u.achievementId, facts.sealedOverrides);
   return {
     enabled: ACHIEVEMENTS.filter((d) => !disabled.has(d.id)).map((d) => d.id),
     sealed: ACHIEVEMENTS.filter((d) => isSealed(d.id, facts.sealedOverrides)).map((d) => d.id),
     unlocks: rp.unlocks
-      .filter((u) => includeSealed || !sealed(u))
       .map((u, i) => ({ u, i }))
       .sort((a, b) => b.u.at - a.u.at || b.i - a.i)
       .map(({ u }) => u),
@@ -391,7 +389,7 @@ export function buildPublicSnapshot(facts: Facts, rp: Replay, now: number): Publ
     : null;
   const script = finaleScript(facts, rp);
   const finaleStep = facts.event.screenControl.finaleStep;
-  const achievements = achievementsView(facts, rp, revealed);
+  const achievements = achievementsView(facts, rp);
   const stats = buildPublicStats(facts, rp);
   const streaks = hotStreaks(rp.byPlayer);
 
@@ -409,7 +407,6 @@ export function buildPublicSnapshot(facts: Facts, rp: Replay, now: number): Publ
     counters: counters(facts, rp, tables),
     announcements: announcements(facts, rp, now, {
       withPoints: revealed || facts.event.showPointsInReveals,
-      includeSealed: revealed,
     }),
     achievements,
     finale: script && finaleStep > 0 ? finaleView(script, finaleStep) : null,
@@ -419,7 +416,7 @@ export function buildPublicSnapshot(facts: Facts, rp: Replay, now: number): Publ
     finaleStats: revealed ? buildFinaleStats(rp) : null,
     streaks,
     stories: buildStories({ streaks, stats, unlocks: achievements.unlocks }),
-    timeline: buildTimeline(facts, rp, { includeSealed: revealed }),
+    timeline: buildTimeline(facts, rp),
   };
 }
 
@@ -449,8 +446,8 @@ export function buildAdminSnapshot(facts: Facts, rp: Replay, now: number): Admin
     tables,
     results: [...rp.results].reverse().map(adminResult),
     counters: counters(facts, rp, tables),
-    announcements: announcements(facts, rp, now, { withPoints: true, includeSealed: true }),
-    achievements: achievementsView(facts, rp, true),
+    announcements: announcements(facts, rp, now, { withPoints: true }),
+    achievements: achievementsView(facts, rp),
     finale: script
       ? { ...finaleView(script, facts.event.screenControl.finaleStep), beats: script, revealStep: revealStepOf(script) }
       : null,

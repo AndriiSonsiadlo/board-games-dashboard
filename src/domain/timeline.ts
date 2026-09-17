@@ -1,4 +1,4 @@
-import { isSealed, type AchievementId } from "./achievements";
+import type { AchievementId } from "./achievements";
 import type { Replay } from "./replay";
 import { MILESTONES, type Facts, type SessionStatus } from "./types";
 
@@ -16,9 +16,9 @@ const STARTED: SessionStatus[] = ["playing", "pending", "done"];
 const sessionOf = (item: TimelineItem) => (item.kind === "milestone" ? 0 : item.sessionId);
 
 export function buildTimeline(
-  facts: Pick<Facts, "sessions" | "sealedOverrides">,
+  facts: Pick<Facts, "sessions">,
   rp: Pick<Replay, "results" | "unlocks">,
-  opts: { includeSealed: boolean; limit?: number },
+  opts: { limit?: number } = {},
 ): TimelineItem[] {
   const timed = new Map(rp.results.map((r) => [r.sessionId, r.durationMin !== null]));
   const items: TimelineItem[] = [];
@@ -53,7 +53,6 @@ export function buildTimeline(
   }
 
   for (const u of rp.unlocks) {
-    if (!opts.includeSealed && isSealed(u.achievementId, facts.sealedOverrides)) continue;
     items.push({ kind: "unlock", at: u.at, sessionId: u.sessionId, achievementId: u.achievementId, playerId: u.playerId });
   }
 

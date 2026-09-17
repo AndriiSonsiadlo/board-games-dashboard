@@ -1,4 +1,4 @@
-import { achievementDef, isAchievementId, newPublicUnlocks, type Unlock } from "@/domain/achievements";
+import { achievementDef, isAchievementId, newUnlocks, type Unlock } from "@/domain/achievements";
 import { replay } from "@/domain/replay";
 import type { Db, Tx } from "../db/client";
 import { loadFacts } from "../repo/facts";
@@ -6,18 +6,17 @@ import { insertAnnouncement, upsertAchievementSetting } from "../repo/writes";
 import { ServiceError } from "./errors";
 import { mutate } from "./mutate";
 
-function unlocksNow(tx: Tx): { unlocks: Unlock[]; sealedOverrides: Record<string, boolean> } {
+function unlocksNow(tx: Tx): Unlock[] {
   const facts = loadFacts(tx);
-  return { unlocks: replay(facts, facts.event.scoring).unlocks, sealedOverrides: facts.sealedOverrides };
+  return replay(facts, facts.event.scoring).unlocks;
 }
 
-/** Runs a result-changing write and queues projector cards for public achievements it newly unlocked. */
+/** Runs a result-changing write and queues projector cards for every achievement it newly unlocked, sealed ones included. */
 export function withUnlockAnnouncements<T>(tx: Tx, write: () => T): T {
-  const before = unlocksNow(tx).unlocks;
+  const before = unlocksNow(tx);
   const value = write();
-  const after = unlocksNow(tx);
   const now = Date.now();
-  for (const u of newPublicUnlocks(before, after.unlocks, after.sealedOverrides)) {
+  for (const u of newUnlocks(before, unlocksNow(tx))) {
     insertAnnouncement(
       tx,
       { type: "achievement", payload: { sessionId: u.sessionId, playerId: u.playerId, achievementId: u.achievementId } },

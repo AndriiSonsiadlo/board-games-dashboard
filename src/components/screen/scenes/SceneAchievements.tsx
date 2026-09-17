@@ -6,7 +6,7 @@ import { AchievementIcon } from "@/components/common/AchievementIcon";
 import { usePublicLookups } from "@/components/common/lookups";
 import { EASE } from "@/components/motion/FadeRise";
 import { NumberRoll } from "@/components/motion/NumberRoll";
-import { rarityOf } from "@/domain/achievements";
+import { achievementVisibility, rarityOf } from "@/domain/achievements";
 import type { PublicSnapshot } from "@/domain/snapshot";
 import { fmt } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
@@ -21,6 +21,7 @@ export function SceneAchievements({ snapshot }: { snapshot: PublicSnapshot }) {
   const lookups = usePublicLookups(snapshot);
   const { unlocks, sealedUnlockCount, eligiblePlayers } = snapshot.achievements;
   const groups = holdersByAchievement(unlocks);
+  const sealed = new Set(snapshot.achievements.sealed);
 
   return (
     <div className="flex h-full flex-col">
@@ -56,8 +57,13 @@ export function SceneAchievements({ snapshot }: { snapshot: PublicSnapshot }) {
                   >
                     <AchievementIcon id={group.achievementId} className="size-[64px] text-accent" />
                     <div className="min-w-0">
-                      <div className="truncate font-display text-[54px] uppercase leading-none tracking-wide">
-                        {t.achievements.defs[group.achievementId].title}
+                      <div className="flex min-w-0 items-center gap-4">
+                        <span className="truncate font-display text-[54px] uppercase leading-none tracking-wide">
+                          {t.achievements.defs[group.achievementId].title}
+                        </span>
+                        {achievementVisibility(sealed.has(group.achievementId), snapshot.event.finaleRevealed) === "titleOnly" ? (
+                          <Lock className="size-[36px] shrink-0 text-muted" strokeWidth={1.5} />
+                        ) : null}
                       </div>
                       <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2 text-[30px] text-muted">
                         {shown.map((id) => {

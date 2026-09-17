@@ -3,9 +3,10 @@ import {
   ACHIEVEMENT_IDS,
   ACHIEVEMENTS,
   achievementDef,
+  achievementVisibility,
   isAchievementId,
   isSealed,
-  newPublicUnlocks,
+  newUnlocks,
   rarityOf,
   type AchievementId,
   type Unlock,
@@ -276,13 +277,18 @@ describe("settings, rarity and diffs", () => {
     expect(rarityOf(9, 20)).toBe("common");
   });
 
-  test("newPublicUnlocks returns only new, non-sealed unlocks", () => {
+  test("newUnlocks returns every new unlock, sealed ones included", () => {
     const a: Unlock = { achievementId: "catan-lord", playerId: 1, sessionId: 1, at: 1 };
     const b: Unlock = { achievementId: "opening-move", playerId: 2, sessionId: 2, at: 2 };
     const sealed: Unlock = { achievementId: "underdog", playerId: 2, sessionId: 2, at: 2 };
-    expect(newPublicUnlocks([a], [a, b, sealed], {})).toEqual([b]);
-    expect(newPublicUnlocks([a, b], [b], {})).toEqual([]);
-    expect(newPublicUnlocks([], [sealed], { underdog: false })).toEqual([sealed]);
+    expect(newUnlocks([a], [a, b, sealed])).toEqual([b, sealed]);
+    expect(newUnlocks([a, b], [b])).toEqual([]);
+  });
+
+  test("achievementVisibility hides only a sealed description, only before the reveal", () => {
+    expect(achievementVisibility(true, false)).toBe("titleOnly");
+    expect(achievementVisibility(true, true)).toBe("full");
+    expect(achievementVisibility(false, false)).toBe("full");
   });
 
   test("isSealed prefers the admin override over the built-in default", () => {

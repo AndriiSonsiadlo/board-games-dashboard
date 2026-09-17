@@ -227,11 +227,14 @@ export function rarityOf(count: number, eligiblePlayers: number): Rarity | null 
   return "common";
 }
 
-export function newPublicUnlocks(
-  before: Unlock[],
-  after: Unlock[],
-  overrides: Readonly<Record<string, boolean>>,
-): Unlock[] {
+export function newUnlocks(before: Unlock[], after: Unlock[]): Unlock[] {
   const known = new Set(before.map(unlockKey));
-  return after.filter((u) => !known.has(unlockKey(u)) && !isSealed(u.achievementId, overrides));
+  return after.filter((u) => !known.has(unlockKey(u)));
+}
+
+export type AchievementVisibility = "full" | "titleOnly";
+
+/** Sealed achievements show title, icon and holders during the event; the description waits for the finale reveal. */
+export function achievementVisibility(sealed: boolean, revealed: boolean): AchievementVisibility {
+  return sealed && !revealed ? "titleOnly" : "full";
 }

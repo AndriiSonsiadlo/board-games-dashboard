@@ -1,12 +1,13 @@
 "use client";
 
+import { Lock } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect } from "react";
 import { AchievementIcon } from "@/components/common/AchievementIcon";
 import { usePublicLookups } from "@/components/common/lookups";
 import { EASE } from "@/components/motion/FadeRise";
 import { MaskReveal } from "@/components/motion/MaskReveal";
-import type { AchievementId } from "@/domain/achievements";
+import { achievementVisibility, type AchievementId } from "@/domain/achievements";
 import type { PublicSnapshot } from "@/domain/snapshot";
 import { useI18n } from "@/i18n/LangProvider";
 
@@ -27,6 +28,8 @@ export function AchievementCard({
   const lookups = usePublicLookups(snapshot);
   const player = lookups.players.get(playerId);
   const def = t.achievements.defs[achievementId];
+  const titleOnly =
+    achievementVisibility(snapshot.achievements.sealed.includes(achievementId), snapshot.event.finaleRevealed) === "titleOnly";
 
   useEffect(() => {
     const id = setTimeout(onDone, ACHIEVEMENT_CARD_MS);
@@ -56,7 +59,7 @@ export function AchievementCard({
           transition={{ duration: 1, ease: EASE }}
           className="font-display text-[40px] uppercase text-accent"
         >
-          {t.screen.achievementUnlocked}
+          {titleOnly ? t.screen.sealedUnlocked : t.screen.achievementUnlocked}
         </motion.div>
         <MaskReveal delay={0.35} className="mt-4">
           <div className="font-display text-[150px] uppercase leading-[0.9] tracking-tight">{def.title}</div>
@@ -67,7 +70,14 @@ export function AchievementCard({
           transition={{ duration: 0.6, delay: 0.9 }}
           className="mt-6 text-[40px] text-muted"
         >
-          {def.description}
+          {titleOnly ? (
+            <span className="inline-flex items-center gap-4">
+              <Lock className="size-[40px]" strokeWidth={1.5} />
+              {t.achievements.sealedBody}
+            </span>
+          ) : (
+            def.description
+          )}
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 24 }}

@@ -27,7 +27,7 @@ const profileOf = (f: Facts, id: number, audience: "public" | "admin" = "public"
   buildProfile(f, replay(f, f.event.scoring), id, audience);
 
 describe("public profile before the finale", () => {
-  test("room facts only, no standings keys, no sealed achievements", () => {
+  test("room facts only, no standings keys, sealed achievements listed", () => {
     const p = profileOf(facts(), 1)!;
     expect(p.revealed).toBe(false);
     expect(p.player).toEqual({ id: 1, name: "Amy", nickname: null, color: "#8b8b90" });
@@ -39,7 +39,7 @@ describe("public profile before the finale", () => {
     expect(p.favoriteGameId).toBe(1);
     expect(p.tablesPlayed).toBe(2);
     expect(p.standing).toBeNull();
-    expect(p.achievements.some((a) => a.sealed)).toBe(false);
+    expect(p.achievements.find((a) => a.id === "joker-master")).toMatchObject({ sealed: true, unlockedAt: 10 * MIN });
     expect(p.achievements.find((a) => a.id === "opening-move")?.unlockedAt).toBe(10 * MIN);
     expect(p.achievements.find((a) => a.id === "all-rounder")).toEqual({
       id: "all-rounder",

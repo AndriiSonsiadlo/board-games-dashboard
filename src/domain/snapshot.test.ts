@@ -181,12 +181,11 @@ const achievementAnnouncement = (id: number, achievementId: string, playerId: nu
 });
 
 describe("achievements in snapshots", () => {
-  test("public sees public unlocks and only a sealed count; admin sees everything", () => {
+  test("public sees every unlock, sealed included, plus the sealed count", () => {
     const { pub, admin } = build(facts());
     const sealed = (id: Parameters<typeof achievementDef>[0]) => achievementDef(id).sealed;
-    expect(admin.achievements.unlocks.some((u) => u.achievementId === "joker-master" && u.playerId === 1)).toBe(true);
-    expect(pub.achievements.unlocks.some((u) => u.achievementId === "opening-move" && u.playerId === 1)).toBe(true);
-    expect(pub.achievements.unlocks.every((u) => !sealed(u.achievementId))).toBe(true);
+    expect(pub.achievements.unlocks).toEqual(admin.achievements.unlocks);
+    expect(pub.achievements.unlocks.some((u) => u.achievementId === "joker-master" && u.playerId === 1)).toBe(true);
     expect(pub.achievements.sealedUnlockCount).toBe(admin.achievements.unlocks.filter((u) => sealed(u.achievementId)).length);
     expect(pub.achievements.sealedUnlockCount).toBeGreaterThan(0);
     expect(pub.achievements.eligiblePlayers).toBe(3);
@@ -212,25 +211,22 @@ describe("achievements in snapshots", () => {
     expect(pub.achievements.unlocks.some((u) => u.achievementId === "joker-master")).toBe(true);
   });
 
-  test("achievement announcements: sealed and stale ones never reach the public", () => {
+  test("achievement announcements: sealed ones are public, stale ones never are", () => {
     const f = facts({}, [
       achievementAnnouncement(1, "opening-move", 1),
       achievementAnnouncement(2, "joker-master", 1),
       achievementAnnouncement(3, "hot-streak", 2),
     ]);
     const { pub, admin } = build(f);
-    expect(pub.announcements).toEqual([
-      { id: 1, createdAt: NOW - 5_000, type: "achievement", achievementId: "opening-move", playerId: 1, sessionId: 10 },
-    ]);
+    expect(pub.announcements.map((a) => a.id)).toEqual([1, 2]);
     expect(admin.announcements.map((a) => a.id)).toEqual([1, 2]);
   });
 
-  test("sealed overrides decide which unlocks stay hidden before the reveal and are listed in the view", () => {
+  test("the view lists effective sealed ids", () => {
     const { pub } = build({ ...facts(), sealedOverrides: { "joker-master": false, phoenix: true } });
     expect(pub.achievements.sealed).toContain("phoenix");
     expect(pub.achievements.sealed).toContain("underdog");
     expect(pub.achievements.sealed).not.toContain("joker-master");
-    expect(pub.achievements.unlocks.some((u) => u.achievementId === "joker-master")).toBe(true);
   });
 });
 
@@ -269,7 +265,7 @@ describe("finale views", () => {
 });
 
 describe("stats, streaks, stories and timeline", () => {
-  test("public before the reveal: stats and stories yes, finale stats and sealed timeline items no", () => {
+  test("public before the reveal: stats, stories and sealed timeline items yes, finale stats no", () => {
     const { pub } = build(facts());
     expect(pub.stats.gamesCompleted).toBe(2);
     expect(pub.stats.rivals).toEqual({ playerIds: [2, 3], count: 2 });
@@ -277,7 +273,7 @@ describe("stats, streaks, stories and timeline", () => {
     expect(pub.streaks).toEqual([]);
     expect(pub.stories.map((s) => s.kind)).toEqual(["rivals", "longest"]);
     expect(pub.timeline.flatMap((i) => (i.kind === "started" ? [i.sessionId] : []))).toEqual([11, 10, 12]);
-    expect(pub.timeline.some((i) => i.kind === "unlock" && i.achievementId === "joker-master")).toBe(false);
+    expect(pub.timeline.some((i) => i.kind === "unlock" && i.achievementId === "joker-master")).toBe(true);
     expect(keysDeep(pub).filter(([key]) => FORBIDDEN_PUBLIC_KEYS.includes(key))).toEqual([]);
   });
 

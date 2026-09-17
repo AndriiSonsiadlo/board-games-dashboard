@@ -101,7 +101,7 @@ export function buildProfile(
   }));
 
   const sealed = (id: AchievementId) => isSealed(id, facts.sealedOverrides);
-  const achievements: ProfileAchievement[] = ACHIEVEMENTS.filter((d) => !disabled.has(d.id) && (revealed || !sealed(d.id))).map((d) => ({
+  const achievements: ProfileAchievement[] = ACHIEVEMENTS.filter((d) => !disabled.has(d.id)).map((d) => ({
     id: d.id,
     sealed: sealed(d.id),
     unlockedAt: unlockedAt.get(d.id) ?? null,

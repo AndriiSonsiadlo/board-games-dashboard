@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { achievementVisibility } from "@/domain/achievements";
 import type { PlayerProfile } from "@/domain/profile";
 import { formatPoints } from "@/domain/scoring";
 import { fmt, ordinal } from "@/i18n";
@@ -114,12 +115,16 @@ export function ProfileView({ profile }: { profile: PlayerProfile }) {
           {[...unlocked, ...locked].map((a) => {
             const text = t.achievements.defs[a.id];
             const done = a.unlockedAt !== null;
+            const titleOnly = achievementVisibility(a.sealed, profile.revealed) === "titleOnly";
             return (
               <li key={a.id} className={cn("flex items-center gap-3 py-3", !done && "opacity-60")}>
                 <AchievementIcon id={a.id} className={cn("size-5 shrink-0", done ? "text-accent" : "text-muted")} />
                 <div className="min-w-0 flex-1">
-                  <div className="font-display uppercase tracking-wide">{text.title}</div>
-                  <div className="text-xs text-muted">{text.description}</div>
+                  <div className="flex items-center gap-2 font-display uppercase tracking-wide">
+                    {text.title}
+                    {titleOnly ? <Lock className="size-3.5 text-muted" strokeWidth={1.5} aria-label={t.achievements.sealed} /> : null}
+                  </div>
+                  <div className="text-xs text-muted">{titleOnly ? t.achievements.sealedBody : text.description}</div>
                   {!done && a.progress ? (
                     <div className="mt-2 flex items-center gap-2">
                       <div className="h-1 flex-1 overflow-hidden rounded-full bg-line">
