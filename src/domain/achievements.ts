@@ -1,5 +1,5 @@
 import type { PlayerResult, ReplayResult, ReplayStep } from "./replay";
-import type { StandingRow } from "./standings";
+import { priorFieldRise, type StandingRow } from "./standings";
 import type { GameFact } from "./types";
 
 export const ACHIEVEMENT_IDS = [
@@ -62,7 +62,6 @@ const EPSILON = 1e-6;
 const placementOf = (ctx: ResultContext, playerId: number) =>
   ctx.result.players.find((p) => p.playerId === playerId);
 const won = (ctx: ResultContext, playerId: number) => placementOf(ctx, playerId)?.placement === 1;
-const rankIn = (rows: StandingRow[], playerId: number) => rows.find((r) => r.playerId === playerId)?.rank ?? null;
 const countedIn = (rows: StandingRow[], playerId: number) => rows.find((r) => r.playerId === playerId)?.counted ?? 0;
 
 function winStreak(history: PlayerResult[]): number {
@@ -89,6 +88,9 @@ function counter(
     progress: (history) => ({ current: Math.min(measure(history), target), target }),
   };
 }
+
+export const COMEBACK_MIN_RISE = 3;
+export const COMEBACK_MIN_FIELD = 8;
 
 export const ACHIEVEMENTS: AchievementDef[] = [
   winGame("catan-lord", "Hexagon", "catan"),
@@ -121,10 +123,8 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     icon: "TrendingUp",
     sealed: true,
     check: (ctx, p) => {
-      if (ctx.index < 9) return false;
-      const before = rankIn(ctx.before, p);
-      const after = rankIn(ctx.after, p);
-      return before !== null && after !== null && before - after >= 3;
+      const rise = priorFieldRise(ctx.before, ctx.after, p);
+      return rise !== null && rise.field >= COMEBACK_MIN_FIELD && rise.from - rise.to >= COMEBACK_MIN_RISE;
     },
   },
   {

@@ -428,7 +428,7 @@ export const en = {
       "table-hopper": { title: "Table Hopper", description: "Play at four different tables." },
       "social-butterfly": { title: "Social Butterfly", description: "Play against eight different opponents." },
       marathon: { title: "Marathon", description: "Spend 180 minutes at the tables." },
-      comeback: { title: "Comeback", description: "Climb three or more places with one result." },
+      comeback: { title: "Comeback", description: "Climb three or more places among ranked players with one result." },
       underdog: { title: "Underdog", description: "Win with the fewest points at the table." },
       "giant-slayer": { title: "Giant Slayer", description: "Finish above the tournament leader." },
       "joker-master": { title: "Joker Master", description: "Win with your Joker declared." },

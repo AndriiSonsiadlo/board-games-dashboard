@@ -1,5 +1,5 @@
 import type { PlayerResult, Replay, ReplayResult } from "./replay";
-import type { StandingRow } from "./standings";
+import { priorFieldRise, type StandingRow } from "./standings";
 import type { Facts, GameFact, TableFact } from "./types";
 
 export interface GameCount {
@@ -253,16 +253,17 @@ export interface FinaleStats {
 
 const rankIn = (rows: StandingRow[], playerId: number) => rows.find((r) => r.playerId === playerId)?.rank ?? null;
 
-/** Largest rank rise from one result, for players in that result. The earliest wins a tie. */
+/** Largest single-result rise among players ranked before that result. The earliest wins a tie. */
 export function biggestComeback(rp: Pick<Replay, "results" | "steps">): Comeback | null {
   let best: Comeback | null = null;
   for (let i = 0; i < rp.steps.length; i++) {
     const step = rp.steps[i];
     for (const p of rp.results[i].players) {
-      const from = rankIn(step.before, p.playerId);
-      const to = rankIn(step.after, p.playerId);
-      if (from === null || to === null || from - to < 1) continue;
-      if (!best || from - to > best.from - best.to) best = { playerId: p.playerId, sessionId: step.sessionId, from, to };
+      const rise = priorFieldRise(step.before, step.after, p.playerId);
+      if (!rise || rise.from - rise.to < 1) continue;
+      if (!best || rise.from - rise.to > best.from - best.to) {
+        best = { playerId: p.playerId, sessionId: step.sessionId, from: rise.from, to: rise.to };
+      }
     }
   }
   return best;

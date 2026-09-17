@@ -427,7 +427,7 @@ export const ru: Dict = {
       "table-hopper": { title: "Кочевник", description: "Сыграйте за четырьмя разными столами." },
       "social-butterfly": { title: "Душа компании", description: "Сыграйте против восьми разных соперников." },
       marathon: { title: "Марафонец", description: "Проведите за играми 180 минут." },
-      comeback: { title: "Камбэк", description: "Поднимитесь на три места и выше за одну игру." },
+      comeback: { title: "Камбэк", description: "Поднимитесь на три места и выше среди игроков с результатами за одну игру." },
       underdog: { title: "Тёмная лошадка", description: "Победите, имея меньше всех очков за столом." },
       "giant-slayer": { title: "Победитель гигантов", description: "Финишируйте выше лидера турнира." },
       "joker-master": { title: "Мастер Джокера", description: "Победите с объявленным Джокером." },

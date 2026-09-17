@@ -77,3 +77,20 @@ export function rankStandings(totals: PlayerTotals[]): StandingRow[] {
     rank: row.gamesPlayed > 0 ? ++rank : null,
   }));
 }
+
+/**
+ * Rank movement measured only among players who were ranked before a result, so first-time scorers
+ * in the same result can neither inflate nor hide a climb. `field` is how many players that is.
+ */
+export function priorFieldRise(
+  before: StandingRow[],
+  after: StandingRow[],
+  playerId: number,
+): { from: number; to: number; field: number } | null {
+  const prior = new Set(before.filter((r) => r.rank !== null).map((r) => r.playerId));
+  const from = before.find((r) => r.playerId === playerId)?.rank ?? null;
+  if (from === null) return null;
+  const order = after.filter((r) => prior.has(r.playerId) && r.rank !== null).sort((a, b) => a.rank! - b.rank!);
+  const to = order.findIndex((r) => r.playerId === playerId) + 1;
+  return to === 0 ? null : { from, to, field: prior.size };
+}

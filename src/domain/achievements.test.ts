@@ -203,14 +203,18 @@ describe("progress achievements", () => {
 });
 
 describe("sealed achievements", () => {
-  const filler = (id: number, at: number, winner: number) => duel(id, 9, at, winner, 7);
-
-  test("comeback: rise of 3+ ranks counts only from the 10th result", () => {
-    const early = [filler(1, 1, 2), filler(2, 2, 3), filler(3, 3, 4), filler(4, 4, 5), duel(5, 9, 5, 6, 1)];
-    const bigWin = (id: number, at: number) => duel(id, 10, at, 1, 7);
-    expect(has(unlocksOf([...early, bigWin(6, 6)]), "comeback", 1)).toBe(false);
-    const later = [...early, filler(6, 6, 2), filler(7, 7, 3), filler(8, 8, 4), filler(9, 9, 5), bigWin(10, 10)];
-    expect(has(unlocksOf(later), "comeback", 1)).toBe(true);
+  test("comeback: climb 3+ places among already-ranked players, once at least 8 are ranked", () => {
+    /** Players 2.. each beat player 12 once, player 1 enters low, then player 1 wins big. `size` players are ranked before that win. */
+    const field = (size: number) => {
+      const sessions = Array.from({ length: size - 2 }, (_, i) => duel(i + 1, 9, i + 1, i + 2, 12));
+      sessions.push(duel(sessions.length + 1, 9, sessions.length + 1, 2, 1));
+      sessions.push(duel(sessions.length + 1, 10, sessions.length + 1, 1, 12));
+      return sessions;
+    };
+    expect(has(unlocksOf(field(8)), "comeback", 1)).toBe(true);
+    expect(has(unlocksOf(field(7)), "comeback", 1)).toBe(false);
+    const newcomerWins = [...field(8).slice(0, -1), duel(99, 10, 99, 11, 12)];
+    expect(has(unlocksOf(newcomerWins), "comeback", 11)).toBe(false);
   });
 
   test("underdog: win with the strictly lowest counted score at the table", () => {

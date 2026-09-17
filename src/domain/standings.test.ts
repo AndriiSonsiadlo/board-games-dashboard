@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { rankStandings, selectCounted, type PlayerTotals } from "./standings";
+import { priorFieldRise, rankStandings, selectCounted, type PlayerTotals, type StandingRow } from "./standings";
 
 function totals(playerId: number, name: string, t: Partial<PlayerTotals>): PlayerTotals {
   return {
@@ -83,5 +83,27 @@ describe("rankStandings", () => {
   test("does not leak name into rows", () => {
     const [row] = rankStandings([totals(1, "A", { gamesPlayed: 1 })]);
     expect(row).not.toHaveProperty("name");
+  });
+});
+
+describe("priorFieldRise", () => {
+  const row = (playerId: number, rank: number | null): StandingRow => ({
+    playerId,
+    rank,
+    raw: 0,
+    counted: 0,
+    wins: 0,
+    podiums: 0,
+    gamesPlayed: rank === null ? 0 : 1,
+    countedSessionIds: [],
+    excludedSessionIds: [],
+  });
+
+  test("ranks only among players ranked before the result; newcomers count on neither side", () => {
+    const before = [row(1, 1), row(2, 2), row(3, 3), row(4, null), row(5, null)];
+    const after = [row(4, 1), row(5, 2), row(3, 3), row(1, 4), row(2, 5)];
+    expect(priorFieldRise(before, after, 3)).toEqual({ from: 3, to: 1, field: 3 });
+    expect(priorFieldRise(before, after, 1)).toEqual({ from: 1, to: 2, field: 3 });
+    expect(priorFieldRise(before, after, 4)).toBeNull();
   });
 });
