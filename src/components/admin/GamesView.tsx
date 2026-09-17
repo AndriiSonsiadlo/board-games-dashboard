@@ -87,7 +87,7 @@ function GameCard({ game, floor, onEdit }: { game: GameFact; floor: number; onEd
           onCheckedChange={(active) => run(() => updateGameAction(game.id, { active }))}
         />
       </div>
-      <dl className="grid grid-cols-4 gap-2 border-t border-line pt-3">
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-line pt-3">
         <Stat label={t.games.weight} value={`${formatPoints(game.weight)}/${formatPoints(game.weight * floor)}`} />
         <Stat label={t.games.players} value={`${game.minPlayers}–${game.maxPlayers}`} />
         <Stat label={t.games.minutes} value={game.durationMin} />
