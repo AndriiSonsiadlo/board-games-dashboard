@@ -82,6 +82,11 @@ describe("revealed profile", () => {
     expect(profileOf(f, 1)).toEqual(profileOf(f, 1, "admin"));
   });
 
+  test("public after showPointsInReveals equals admin view", () => {
+    const f = facts({ showPointsInReveals: true });
+    expect(profileOf(f, 1)).toEqual(profileOf(f, 1, "admin"));
+  });
+
   test("strongest/weakest need two different games", () => {
     expect(profileOf(facts(), 3, "admin")!.standing).toMatchObject({ strongestGameId: null, weakestGameId: null });
   });

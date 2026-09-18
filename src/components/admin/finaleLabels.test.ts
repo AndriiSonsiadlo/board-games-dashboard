@@ -16,13 +16,13 @@ test("labels name the beat and, where it helps the host, the player", () => {
     "Achievement of the night: Opening Move · #1",
     "3rd place · #3",
     "2nd place · #2",
-    "Champion · #1",
+    "Winner · #1",
     "Final standings (makes standings public)",
     "Closing card",
   ]);
 });
 
 test("co-champions and Russian ordinals", () => {
-  expect(beatLabel(en, "en", { kind: "champion", playerIds: [1, 2], co: true }, name)).toBe("Co-champions · #1 · #2");
+  expect(beatLabel(en, "en", { kind: "champion", playerIds: [1, 2], co: true }, name)).toBe("Co-winners · #1 · #2");
   expect(beatLabel(ru, "ru", { kind: "place", place: 3, playerId: 4 }, name)).toBe("3-е место · #4");
 });

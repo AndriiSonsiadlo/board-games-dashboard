@@ -84,7 +84,7 @@ export function buildProfile(
   const history = rp.byPlayer.get(playerId) ?? [];
   if (audience === "public" && !player.active && history.length === 0) return null;
 
-  const revealed = audience === "admin" || facts.event.finaleRevealed;
+  const revealed = audience === "admin" || facts.event.finaleRevealed || facts.event.showPointsInReveals;
   const row = rp.standings.find((r) => r.playerId === playerId);
   const countedIds = new Set(row?.countedSessionIds ?? []);
   const disabled = new Set(facts.disabledAchievements);
