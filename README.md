@@ -48,6 +48,19 @@ npm run dev                   # http://localhost:3000
 
 Backups are written automatically to `data/backups/` at most every 5 minutes after changes. `npm run backup` takes one on demand.
 
+## Hosted deployment for one evening (not Vercel)
+
+This app is one long-running Node process writing to a local SQLite file (`data/board-cup.db`), with facts polled by phones every 2 s. **Vercel's serverless functions don't fit that shape**: their filesystem is read-only outside `/tmp`, `/tmp` isn't shared between instances or invocations, and a live event needs every visitor reading and writing the same data. Use a host that gives you one persistent container plus a persistent disk instead — Railway is the simplest:
+
+1. Push this repo to GitHub and create a Railway project from it (Node 22 is auto-detected via Nixpacks; no Dockerfile needed — it also has the build tools `better-sqlite3` needs to compile).
+2. Add a Volume mounted at `/app/data`. That's the app's default database and backup location (`DB_PATH` unset), so nothing else has to point at it.
+3. Set the `ADMIN_PIN` environment variable. Railway injects `PORT` automatically; `npm run start` now honors it (it used to hardcode port 3000).
+4. Set the start command to `npm run setup && npm run start` so the database is migrated/seeded on first boot — `npm run setup` is idempotent, so it's safe to run on every restart too.
+5. Deploy. Railway gives you a public HTTPS URL — open `/admin`, log in, go to Settings → Network, paste that URL into the custom address field and save, then print codes from `/admin/qr`.
+6. Run one-off commands (`npm run db:seed:demo`, `npm run db:clear-demo`, `npm run backup`, `npm run pin:reset`) against the same volume via `railway run <command>` from your machine, or Railway's web shell.
+
+Fly.io works the same way (one machine + a persistent volume) if you'd rather use it; `fly launch` generates a Dockerfile for a Next.js app automatically — just confirm the image installs `python3 make g++` (or uses a base image that already has them) since `better-sqlite3` needs to compile a native module during `npm install`.
+
 ## Commands
 
 | Command | What it does |

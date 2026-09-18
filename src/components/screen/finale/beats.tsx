@@ -41,10 +41,11 @@ export function BeatComplete({ beat }: { beat: Beat<"complete"> }) {
     { label: t.finale.duration, text: duration, node: <span>{duration}</span> },
     { label: t.finale.players, text: String(beat.players), node: <NumberRoll value={beat.players} delay={0.9} /> },
   ];
+  const fontSizeClass = statFontSizeClass(items.reduce((longest, item) => (item.text.length > longest.length ? item.text : longest), ""));
   return (
     <div className="flex h-full flex-col justify-center px-[140px]">
       <Label>{t.finale.complete}</Label>
-      <div className="mt-20 grid grid-cols-3 divide-x divide-line">
+      <div className="mt-20 grid grid-cols-[1fr_1.3fr_1fr] divide-x divide-line">
         {items.map((item, i) => (
           <motion.div
             key={item.label}
@@ -53,7 +54,7 @@ export function BeatComplete({ beat }: { beat: Beat<"complete"> }) {
             transition={{ duration: 1, ease: EASE, delay: 0.4 + i * 0.25 }}
             className="px-14 first:pl-0"
           >
-            <div className={cn("font-display leading-none tabular", statFontSizeClass(item.text))}>{item.node}</div>
+            <div className={cn("font-display leading-none tabular", fontSizeClass)}>{item.node}</div>
             <div className="mt-6 font-display text-[40px] uppercase tracking-[0.2em] text-muted">{item.label}</div>
           </motion.div>
         ))}
