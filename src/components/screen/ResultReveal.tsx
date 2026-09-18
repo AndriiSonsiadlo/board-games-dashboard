@@ -126,32 +126,30 @@ export function ResultReveal({
               <h2 className="font-display text-[170px] uppercase leading-[0.9] tracking-tight">{game?.name}</h2>
             </MaskReveal>
 
-            {phase === "winner" ? (
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9, ease: EASE }}
-                className="relative mt-16 overflow-hidden border-t border-accent/60 pt-10"
-              >
-                <div className="font-display text-[40px] uppercase tracking-[0.3em] text-accent">{t.screen.winner}</div>
-                {winners.map((w) => (
-                  <div key={w.playerId} className="mt-2 flex items-baseline gap-10">
-                    <span className="font-display text-[190px] uppercase leading-none tracking-tight">
-                      <span className="animate-text-shimmer" style={{ animationDelay: "0.9s" }}>
-                        {name(w.playerId)}
-                      </span>
+            <motion.div
+              initial={false}
+              animate={{ opacity: phase === "winner" ? 1 : 0, y: phase === "winner" ? 0 : 40 }}
+              transition={{ duration: 0.9, ease: EASE }}
+              className="relative mt-16 overflow-hidden border-t border-accent/60 pt-10"
+            >
+              <div className="font-display text-[40px] uppercase tracking-[0.3em] text-accent">{t.screen.winner}</div>
+              {winners.map((w) => (
+                <div key={w.playerId} className="mt-2 flex items-baseline gap-10">
+                  <span className="font-display text-[190px] uppercase leading-none tracking-tight">
+                    <span className={cn(phase === "winner" && "animate-text-shimmer")} style={{ animationDelay: "0.9s" }}>
+                      {name(w.playerId)}
                     </span>
-                    {w.points !== undefined ? (
-                      <span className="font-mono text-[60px] text-accent">{formatPoints(w.points)}</span>
-                    ) : null}
-                  </div>
-                ))}
-              </motion.div>
-            ) : null}
+                  </span>
+                  {w.points !== undefined ? (
+                    <span className="font-mono text-[60px] text-accent">{formatPoints(w.points)}</span>
+                  ) : null}
+                </div>
+              ))}
+            </motion.div>
           </div>
 
           <div className="flex min-h-0 flex-col">
-            <AutoScroll from="bottom" startDelayMs={listTimeline.firstPlaceMs} windowMs={listTimeline.winnerMs}>
+            <AutoScroll from="bottom" startDelayMs={listTimeline.firstPlaceMs} windowMs={listTimeline.winnerMs} loop={false}>
             <ol className="space-y-7">
               {[...groups]
                 .reverse()

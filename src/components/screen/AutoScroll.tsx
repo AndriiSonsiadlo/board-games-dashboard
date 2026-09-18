@@ -15,6 +15,7 @@ export function AutoScroll({
   startDelayMs = 1500,
   windowMs,
   align = "center",
+  loop = true,
 }: {
   children: React.ReactNode;
   className?: string;
@@ -22,6 +23,8 @@ export function AutoScroll({
   startDelayMs?: number;
   windowMs?: number;
   align?: "center" | "start";
+  /** false glides once and holds at the far edge instead of looping back and forth forever. */
+  loop?: boolean;
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -44,7 +47,7 @@ export function AutoScroll({
     return () => observer.disconnect();
   }, []);
 
-  const plan = reduce || size.viewport === 0 ? null : autoScrollPlan({ ...size, from, startDelayMs, windowMs });
+  const plan = reduce || size.viewport === 0 ? null : autoScrollPlan({ ...size, from, startDelayMs, windowMs, loop });
 
   return (
     <div
@@ -59,7 +62,9 @@ export function AutoScroll({
         initial={false}
         animate={plan ? { y: plan.offsets.map((o) => -o) } : { y: 0 }}
         transition={
-          plan ? { duration: plan.durationMs / 1000, times: plan.times, ease: "easeInOut", repeat: Infinity } : { duration: 0 }
+          plan
+            ? { duration: plan.durationMs / 1000, times: plan.times, ease: "easeInOut", repeat: plan.loop ? Infinity : 0 }
+            : { duration: 0 }
         }
       >
         {children}
