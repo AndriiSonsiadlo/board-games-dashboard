@@ -22,13 +22,19 @@ export function availableScenes(
   return scenes.length > 0 ? scenes : ["title"];
 }
 
+/**
+ * The "seen" cursor is a createdAt timestamp, not an id: a DB reseed or backup restore can
+ * restart the announcement id sequence from 1, and an id-based cursor left over from before
+ * that would then exceed every future id forever. Wall-clock time only moves forward, so it
+ * survives resets that ids don't.
+ */
 export function nextAnnouncements(
   all: ScreenAnnouncement[],
-  lastSeenId: number,
+  lastSeenAt: number,
   now: number,
   windowMs = ANNOUNCEMENT_WINDOW_MS,
 ): ScreenAnnouncement[] {
-  return all.filter((a) => a.id > lastSeenId && a.createdAt >= now - windowMs).sort((a, b) => a.id - b.id);
+  return all.filter((a) => a.createdAt > lastSeenAt && a.createdAt >= now - windowMs).sort((a, b) => a.id - b.id);
 }
 
 const TITLE_MS = 2200;

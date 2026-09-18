@@ -34,14 +34,22 @@ test("availableScenes drops empty scenes, keeps canonical order and never return
   expect(availableScenes(["recent"], { ...empty, contenders: [] })).toEqual(["title"]);
 });
 
-test("nextAnnouncements keeps unseen, recent announcements in id order", () => {
+test("nextAnnouncements keeps unseen (by creation time), recent announcements in id order", () => {
   const all: ScreenAnnouncement[] = [
     { id: 5, createdAt: 9_000, type: "milestone", count: 10 },
     { id: 3, createdAt: 9_500, type: "milestone", count: 25 },
     { id: 7, createdAt: 1_000, type: "milestone", count: 50 },
     { id: 6, createdAt: 9_900, type: "result_reveal", result },
   ];
-  expect(nextAnnouncements(all, 4, 10_000, 5_000).map((a) => a.id)).toEqual([5, 6]);
+  expect(nextAnnouncements(all, 8_000, 10_000, 5_000).map((a) => a.id)).toEqual([3, 5, 6]);
+});
+
+test("nextAnnouncements still surfaces a low id whose createdAt is newer than the seen cursor", () => {
+  // A DB reseed can restart the announcement id sequence from 1 while a screen's browser still
+  // holds a "seen" cursor from before the reset; the cursor must key off wall-clock time (which
+  // only moves forward) rather than id (which can go backwards) or the screen gets stuck forever.
+  const all: ScreenAnnouncement[] = [{ id: 2, createdAt: 20_000, type: "milestone", count: 10 }];
+  expect(nextAnnouncements(all, 19_000, 21_000, 5_000).map((a) => a.id)).toEqual([2]);
 });
 
 test("revealTimeline spaces placements, holds the winner, then the podium", () => {

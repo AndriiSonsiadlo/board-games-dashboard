@@ -10,7 +10,8 @@ import { ResultReveal } from "./ResultReveal";
 
 const SEEN_KEY = "bgc_screen_seen";
 
-function readSeen(): number {
+/** Stores the createdAt of the last played announcement, not its id — see nextAnnouncements. */
+function readSeenAt(): number {
   try {
     return Number(localStorage.getItem(SEEN_KEY) ?? 0) || 0;
   } catch {
@@ -18,9 +19,9 @@ function readSeen(): number {
   }
 }
 
-function writeSeen(id: number) {
+function writeSeenAt(at: number) {
   try {
-    localStorage.setItem(SEEN_KEY, String(id));
+    localStorage.setItem(SEEN_KEY, String(at));
   } catch {
     // ignore
   }
@@ -40,11 +41,11 @@ export function AnnouncementPlayer({
   const seen = useRef<number | null>(null);
 
   useEffect(() => {
-    if (seen.current === null) seen.current = readSeen();
+    if (seen.current === null) seen.current = readSeenAt();
     const fresh = nextAnnouncements(snapshot.announcements, seen.current, Date.now());
     if (fresh.length === 0) return;
-    seen.current = fresh[fresh.length - 1].id;
-    writeSeen(seen.current);
+    seen.current = fresh[fresh.length - 1].createdAt;
+    writeSeenAt(seen.current);
     setQueue((q) => [...q, ...fresh]);
   }, [snapshot.announcements]);
 
