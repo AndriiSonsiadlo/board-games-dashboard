@@ -9,6 +9,7 @@ import {
   podiumSlots,
   revealGroups,
   revealTimeline,
+  winnerVisible,
 } from "./logic";
 
 const result = { sessionId: 1, gameId: 1, tableId: 1, startedAt: 0, finishedAt: 0, durationMin: null, placements: [] };
@@ -50,6 +51,16 @@ test("nextAnnouncements still surfaces a low id whose createdAt is newer than th
   // only moves forward) rather than id (which can go backwards) or the screen gets stuck forever.
   const all: ScreenAnnouncement[] = [{ id: 2, createdAt: 20_000, type: "milestone", count: 10 }];
   expect(nextAnnouncements(all, 19_000, 21_000, 5_000).map((a) => a.id)).toEqual([2]);
+});
+
+test("winnerVisible stays true through the podium hold, not just the winner phase", () => {
+  // The reveal holds on the winner phase's layout for the whole podium hold when the podium
+  // scene is disabled (showPodium off); the winner name must not fade out ahead of that hold,
+  // or it visibly disappears before the rest of the overlay does.
+  expect(winnerVisible("title")).toBe(false);
+  expect(winnerVisible("places")).toBe(false);
+  expect(winnerVisible("winner")).toBe(true);
+  expect(winnerVisible("podium")).toBe(true);
 });
 
 test("revealTimeline spaces placements, holds the winner, then the podium", () => {

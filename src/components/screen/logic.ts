@@ -37,6 +37,18 @@ export function nextAnnouncements(
   return all.filter((a) => a.createdAt > lastSeenAt && a.createdAt >= now - windowMs).sort((a, b) => a.id - b.id);
 }
 
+export type RevealPhase = "title" | "places" | "winner" | "podium";
+
+/**
+ * When the podium scene is off, the reveal just holds on the winner layout through the whole
+ * podium hold instead of swapping to a dedicated podium view — the winner name must stay shown
+ * for that whole hold, not just during the "winner" phase, or it fades out well before the rest
+ * of the overlay does.
+ */
+export function winnerVisible(phase: RevealPhase): boolean {
+  return phase === "winner" || phase === "podium";
+}
+
 const TITLE_MS = 2200;
 const FIRST_PLACE_MS = 2600;
 const STEP_MS = 900;

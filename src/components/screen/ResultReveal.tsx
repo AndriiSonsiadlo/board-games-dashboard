@@ -13,9 +13,7 @@ import { fmt, ordinal } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
 import { AutoScroll } from "./AutoScroll";
-import { podiumSlots, revealGroups, revealTimeline } from "./logic";
-
-type Phase = "title" | "places" | "winner" | "podium";
+import { podiumSlots, revealGroups, revealTimeline, winnerVisible, type RevealPhase } from "./logic";
 
 const PODIUM_HEIGHT = { 1: 360, 2: 250, 3: 180 } as const;
 
@@ -34,7 +32,7 @@ export function ResultReveal({
   const table = result.tableId !== null ? lookups.tables.get(result.tableId) : undefined;
   const winners = result.placements.filter((p) => p.placement === 1);
   const groups = revealGroups(result.placements);
-  const [phase, setPhase] = useState<Phase>("title");
+  const [phase, setPhase] = useState<RevealPhase>("title");
   const [revealed, setRevealed] = useState(0);
   const name = (playerId: number) => lookups.players.get(playerId)?.name ?? "";
 
@@ -128,7 +126,7 @@ export function ResultReveal({
 
             <motion.div
               initial={false}
-              animate={{ opacity: phase === "winner" ? 1 : 0, y: phase === "winner" ? 0 : 40 }}
+              animate={{ opacity: winnerVisible(phase) ? 1 : 0, y: winnerVisible(phase) ? 0 : 40 }}
               transition={{ duration: 0.9, ease: EASE }}
               className="relative mt-16 overflow-hidden border-t border-accent/60 pt-10"
             >
