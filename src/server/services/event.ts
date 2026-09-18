@@ -1,5 +1,6 @@
+import { RARITIES, type Rarity } from "@/domain/achievements";
 import { BRAND_MAX_LENGTH, type BrandFields } from "@/domain/brand";
-import { ALL_SCENES, type Lang, type SceneId, type ScoringStrategy } from "@/domain/types";
+import { ALL_SCENES, FOLLOW_TEXT_MAX_LENGTH, type AchievementOrder, type Lang, type SceneId, type ScoringStrategy } from "@/domain/types";
 import { isOpenSession } from "@/domain/tables";
 import { hashPin, randomSecret, verifyPin } from "../auth/pin";
 import type { Db } from "../db/client";
@@ -20,6 +21,14 @@ export interface ScreenPatch {
   enabledScenes?: SceneId[];
   showPointsInReveals?: boolean;
   screenLang?: Lang;
+  showFollowLink?: boolean;
+  showFollowQr?: boolean;
+  followText?: string | null;
+  showTicker?: boolean;
+  showAchievementCards?: boolean;
+  showPodium?: boolean;
+  achievementOrder?: AchievementOrder;
+  finaleShowcaseRarities?: Rarity[];
 }
 
 export interface EventInfoPatch {
@@ -95,6 +104,13 @@ export function updateScreenSettings(db: Db, patch: ScreenPatch): void {
     check(patch.enabledScenes.length > 0 && patch.enabledScenes.every((scene) => ALL_SCENES.includes(scene)));
   }
   if (patch.screenLang !== undefined) check(patch.screenLang === "en" || patch.screenLang === "ru");
+  if (patch.followText !== undefined) {
+    check(patch.followText === null || patch.followText.length <= FOLLOW_TEXT_MAX_LENGTH);
+  }
+  if (patch.achievementOrder !== undefined) check(patch.achievementOrder === "recent" || patch.achievementOrder === "rarity");
+  if (patch.finaleShowcaseRarities !== undefined) {
+    check(patch.finaleShowcaseRarities.every((r) => RARITIES.includes(r)));
+  }
   mutate(db, (tx) => updateEventRow(tx, patch), { allowWhenFinished: true });
 }
 

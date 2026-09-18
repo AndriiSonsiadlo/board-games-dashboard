@@ -1,7 +1,7 @@
-import type { AchievementId, Unlock } from "@/domain/achievements";
+import { rarityOf, rarityRank, type AchievementId, type Unlock } from "@/domain/achievements";
 import { ANNOUNCEMENT_WINDOW_MS, type PublicSnapshot, type ScreenAnnouncement } from "@/domain/snapshot";
 import type { PublicStats } from "@/domain/stats";
-import { ALL_SCENES, type SceneId } from "@/domain/types";
+import { ALL_SCENES, type AchievementOrder, type SceneId } from "@/domain/types";
 
 export function availableScenes(
   enabled: SceneId[],
@@ -78,6 +78,18 @@ export function holdersByAchievement(unlocks: Unlock[]): AchievementHolders[] {
     groups.set(u.achievementId, group);
   }
   return [...groups.values()].sort((a, b) => b.latestAt - a.latestAt);
+}
+
+/** Recency (default, most recently unlocked first) or rarest-first for the projector's achievements scene. */
+export function orderAchievementGroups(
+  groups: AchievementHolders[],
+  order: AchievementOrder,
+  eligiblePlayers: number,
+): AchievementHolders[] {
+  if (order === "recent") return groups;
+  return [...groups].sort(
+    (a, b) => rarityRank(rarityOf(a.playerIds.length, eligiblePlayers)) - rarityRank(rarityOf(b.playerIds.length, eligiblePlayers)),
+  );
 }
 
 /** Non-winning placements grouped by value, last place first; tied players share a group and appear together. */

@@ -1,4 +1,4 @@
-import { isSealed, type AchievementId } from "./achievements";
+import { isSealed, rarityOf, type AchievementId } from "./achievements";
 import type { Replay } from "./replay";
 import type { PlayerView } from "./snapshot";
 import { pointsEqual, type StandingRow } from "./standings";
@@ -17,6 +17,7 @@ export type FinaleBeat =
   | { kind: "complete"; games: number; minutes: number | null; players: number }
   | { kind: "numbers"; mostPlayed: GameCount | null; longest: LongestResult | null; busiestTable: TableCount | null; rivals: RivalPair | null }
   | { kind: "sealed"; achievementId: AchievementId; playerIds: number[]; order: number; total: number }
+  | { kind: "highlight"; achievementId: AchievementId; playerIds: number[]; order: number; total: number }
   | { kind: "place"; place: number; playerId: number }
   | { kind: "champion"; playerIds: number[]; co: boolean }
   | { kind: "podium"; championIds: number[]; rows: PodiumRow[] }
@@ -69,6 +70,22 @@ export function buildFinaleScript(facts: Facts, rp: Replay): FinaleBeat[] {
   [...holders].forEach(([achievementId, playerIds], i) =>
     beats.push({ kind: "sealed", achievementId, playerIds, order: i + 1, total: holders.size }),
   );
+
+  const showcaseRarities = facts.event.finaleShowcaseRarities;
+  if (showcaseRarities.length > 0) {
+    const counts = new Map<AchievementId, number>();
+    for (const u of rp.unlocks) counts.set(u.achievementId, (counts.get(u.achievementId) ?? 0) + 1);
+    const highlights = new Map<AchievementId, number[]>();
+    for (const u of rp.unlocks) {
+      if (isSealed(u.achievementId, facts.sealedOverrides)) continue;
+      const rarity = rarityOf(counts.get(u.achievementId) ?? 0, ranked.length);
+      if (!rarity || !showcaseRarities.includes(rarity)) continue;
+      highlights.set(u.achievementId, [...(highlights.get(u.achievementId) ?? []), u.playerId]);
+    }
+    [...highlights].forEach(([achievementId, playerIds], i) =>
+      beats.push({ kind: "highlight", achievementId, playerIds, order: i + 1, total: highlights.size }),
+    );
+  }
 
   const groups = podiumGroups(rp.standings);
   const firstPlaceAfterChampions = groups.champions.length + 1;
@@ -155,6 +172,7 @@ export function buildRehearsal(): RehearsalData {
       },
       { kind: "sealed", achievementId: "giant-slayer", playerIds: [6, 9], order: 1, total: 2 },
       { kind: "sealed", achievementId: "joker-master", playerIds: [3], order: 2, total: 2 },
+      { kind: "highlight", achievementId: "opening-move", playerIds: [1], order: 1, total: 1 },
       { kind: "place", place: 3, playerId: 3 },
       { kind: "place", place: 2, playerId: 2 },
       { kind: "champion", playerIds: [1], co: false },

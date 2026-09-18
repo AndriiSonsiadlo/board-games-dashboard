@@ -12,6 +12,8 @@ export function beatLabel(t: Dict, lang: Lang, beat: FinaleBeat, playerName: (id
       return b.numbers;
     case "sealed":
       return `${fmt(b.sealed, { title: t.achievements.defs[beat.achievementId].title })} · ${beat.playerIds.map(playerName).join(", ")}`;
+    case "highlight":
+      return `${fmt(b.highlight, { title: t.achievements.defs[beat.achievementId].title })} · ${beat.playerIds.map(playerName).join(", ")}`;
     case "place":
       return `${fmt(b.place, { place: ordinal(lang, beat.place) })} · ${playerName(beat.playerId)}`;
     case "champion":

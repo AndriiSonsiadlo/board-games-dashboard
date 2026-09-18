@@ -29,6 +29,7 @@ export const ACHIEVEMENT_IDS = [
 
 export type AchievementId = (typeof ACHIEVEMENT_IDS)[number];
 export type Rarity = "legendary" | "epic" | "rare" | "common";
+export const RARITIES: Rarity[] = ["legendary", "epic", "rare", "common"];
 
 export interface ResultContext {
   /** 0-based position of this result among all results of the event. */

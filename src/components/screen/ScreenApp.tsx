@@ -89,7 +89,7 @@ function ScreenInner({ snapshot }: { snapshot: PublicSnapshot }) {
           </AnimatePresence>
 
           <ScreenFooter snapshot={snapshot} scenes={scenes} scene={scene} cycle={cycle} paused={paused} />
-          <ScreenTicker snapshot={snapshot} />
+          {snapshot.event.showTicker ? <ScreenTicker snapshot={snapshot} /> : null}
           <AnnouncementPlayer snapshot={snapshot} onActiveChange={onActiveChange} />
         </>
       )}

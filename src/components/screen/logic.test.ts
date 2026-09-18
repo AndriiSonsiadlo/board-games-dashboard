@@ -1,6 +1,15 @@
 import { describe, expect, test } from "vitest";
 import type { ScreenAnnouncement } from "@/domain/snapshot";
-import { availableScenes, holdersByAchievement, nextAnnouncements, pickNext, podiumSlots, revealGroups, revealTimeline } from "./logic";
+import {
+  availableScenes,
+  holdersByAchievement,
+  nextAnnouncements,
+  orderAchievementGroups,
+  pickNext,
+  podiumSlots,
+  revealGroups,
+  revealTimeline,
+} from "./logic";
 
 const result = { sessionId: 1, gameId: 1, tableId: 1, startedAt: 0, finishedAt: 0, durationMin: null, placements: [] };
 
@@ -113,6 +122,17 @@ test("holdersByAchievement groups unlocks, newest achievement first, holders in 
     { achievementId: "marathon", playerIds: [1], latestAt: 40 },
   ]);
   expect(holdersByAchievement([])).toEqual([]);
+});
+
+test("orderAchievementGroups keeps recency order by default, sorts rarest-first in rarity mode", () => {
+  // Already in recency order (latestAt descending), as holdersByAchievement produces.
+  const groups = [
+    { achievementId: "underdog" as const, playerIds: [1, 2, 3, 4, 5, 6, 7, 8, 9], latestAt: 50 }, // common: 9/20
+    { achievementId: "marathon" as const, playerIds: [1, 2], latestAt: 30 }, // epic: 2/20
+    { achievementId: "phoenix" as const, playerIds: [1], latestAt: 10 }, // legendary: 1/20
+  ];
+  expect(orderAchievementGroups(groups, "recent", 20).map((g) => g.achievementId)).toEqual(["underdog", "marathon", "phoenix"]);
+  expect(orderAchievementGroups(groups, "rarity", 20).map((g) => g.achievementId)).toEqual(["phoenix", "marathon", "underdog"]);
 });
 
 test("revealGroups: last place first, ties revealed together, winners excluded", () => {

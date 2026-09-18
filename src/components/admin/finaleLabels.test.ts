@@ -13,6 +13,7 @@ test("labels name the beat and, where it helps the host, the player", () => {
     "The evening in numbers",
     "Sealed: Giant Slayer · #6, #9",
     "Sealed: Joker Master · #3",
+    "Achievement of the night: Opening Move · #1",
     "3rd place · #3",
     "2nd place · #2",
     "Champion · #1",

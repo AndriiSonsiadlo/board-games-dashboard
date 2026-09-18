@@ -178,6 +178,55 @@ export function BeatSealed({ beat, lookups }: { beat: Beat<"sealed">; lookups: F
   );
 }
 
+/** Like BeatSealed, but for an already-public achievement spotlighted for its rarity - no lock, no mystery build-up. */
+export function BeatHighlight({ beat, lookups }: { beat: Beat<"highlight">; lookups: FinaleLookups }) {
+  const { t } = useI18n();
+  const def = t.achievements.defs[beat.achievementId];
+  const many = beat.playerIds.length > 3;
+  return (
+    <div className="flex h-full items-center px-[160px]">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.7 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.9, ease: EASE, delay: 0.3 }}
+        className="grid size-[380px] shrink-0 place-items-center rounded-md border border-accent/60"
+      >
+        <AchievementIcon id={beat.achievementId} className="size-[200px] text-accent" />
+      </motion.div>
+      <div className="ml-[100px] min-w-0">
+        <Label>
+          {t.finale.highlightAchievement} · {beat.order}/{beat.total}
+        </Label>
+        <MaskReveal delay={0.5} className="mt-4">
+          <div className="font-display text-[150px] uppercase leading-[0.9] tracking-tight">{def.title}</div>
+        </MaskReveal>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 1.1 }} className="mt-6 text-[40px] text-muted">
+          {def.description}
+        </motion.p>
+        <ul className="mt-12 flex flex-wrap gap-x-14 gap-y-6 border-t border-line pt-8">
+          {beat.playerIds.map((id, i) => {
+            const p = lookups.players.get(id);
+            return (
+              <motion.li
+                key={id}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: EASE, delay: 2.1 + Math.min(i, 10) * 0.25 }}
+                className="flex items-center gap-5"
+              >
+                <span className={cn("w-[6px] rounded-sm", many ? "h-[48px]" : "h-[76px]")} style={{ backgroundColor: p?.color }} />
+                <span className={cn("font-display uppercase leading-none tracking-tight", many ? "text-[64px]" : "text-[100px]")}>
+                  {p?.name}
+                </span>
+              </motion.li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export function BeatPlace({ beat, lookups }: { beat: Beat<"place">; lookups: FinaleLookups }) {
   const { t, lang } = useI18n();
   return (

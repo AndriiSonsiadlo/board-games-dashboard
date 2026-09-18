@@ -14,9 +14,10 @@ import {
   updateScoringAction,
   updateScreenSettingsAction,
 } from "@/app/admin/actions";
+import { RARITIES, type Rarity } from "@/domain/achievements";
 import { BRAND_MAX_LENGTH, DEFAULT_BRAND, RU_BRAND_PRESET, resolveBrand, type BrandFields } from "@/domain/brand";
 import { formatPoints, scoreResult } from "@/domain/scoring";
-import { ALL_SCENES, type Lang, type SceneId, type ScoringSettings } from "@/domain/types";
+import { ALL_SCENES, FOLLOW_TEXT_MAX_LENGTH, type AchievementOrder, type Lang, type SceneId, type ScoringSettings } from "@/domain/types";
 import { fmt } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
@@ -103,6 +104,9 @@ export function SettingsView({ addresses, port }: { addresses: { name: string; a
       </Section>
       <Section title={t.settings.screen.title}>
         <ScreenControls key={snapshot.version} />
+      </Section>
+      <Section title={t.settings.finale.title}>
+        <FinaleControls key={snapshot.version} rarities={snapshot.event.finaleShowcaseRarities} />
       </Section>
       <Section title={t.settings.network.title}>
         <Network addresses={addresses} port={port} />
@@ -295,11 +299,18 @@ function ScoringControls({ scoring }: { scoring: ScoringSettings }) {
 function ScreenControls() {
   const { t } = useI18n();
   const { snapshot } = useAdminLive();
-  const { run } = useRunner();
+  const { run, pending } = useRunner();
   const [duration, setDuration] = useState(snapshot.event.sceneDurationSec);
   const [scenes, setScenes] = useState<SceneId[]>(snapshot.event.enabledScenes);
   const [showPoints, setShowPoints] = useState(snapshot.event.showPointsInReveals);
   const [lang, setLang] = useState<Lang>(snapshot.event.screenLang);
+  const [showFollowLink, setShowFollowLink] = useState(snapshot.event.showFollowLink);
+  const [showFollowQr, setShowFollowQr] = useState(snapshot.event.showFollowQr);
+  const [followText, setFollowText] = useState(snapshot.event.followText ?? t.screen.follow);
+  const [showTicker, setShowTicker] = useState(snapshot.event.showTicker);
+  const [showAchievementCards, setShowAchievementCards] = useState(snapshot.event.showAchievementCards);
+  const [showPodium, setShowPodium] = useState(snapshot.event.showPodium);
+  const [achievementOrder, setAchievementOrder] = useState<AchievementOrder>(snapshot.event.achievementOrder);
 
   const toggleScene = (scene: SceneId, on: boolean) => {
     const next = on ? ALL_SCENES.filter((s) => s === scene || scenes.includes(s)) : scenes.filter((s) => s !== scene);
@@ -338,14 +349,94 @@ function ScreenControls() {
           ))}
         </div>
       </Field>
+      <Field label={t.settings.screen.achievementOrder}>
+        <Segmented
+          value={achievementOrder}
+          options={[
+            { value: "recent", label: t.settings.screen.achievementOrderRecent },
+            { value: "rarity", label: t.settings.screen.achievementOrderRarity },
+          ]}
+          onChange={(value) => {
+            setAchievementOrder(value);
+            run(() => updateScreenSettingsAction({ achievementOrder: value }));
+          }}
+        />
+      </Field>
+      <Switch
+        checked={showTicker}
+        onCheckedChange={(on) => {
+          setShowTicker(on);
+          run(() => updateScreenSettingsAction({ showTicker: on }));
+        }}
+        label={t.settings.screen.showTicker}
+      />
+      <Switch
+        checked={showAchievementCards}
+        onCheckedChange={(on) => {
+          setShowAchievementCards(on);
+          run(() => updateScreenSettingsAction({ showAchievementCards: on }));
+        }}
+        label={t.settings.screen.showAchievementCards}
+      />
+      <Switch
+        checked={showPodium}
+        onCheckedChange={(on) => {
+          setShowPodium(on);
+          run(() => updateScreenSettingsAction({ showPodium: on }));
+        }}
+        label={t.settings.screen.showPodium}
+      />
       <Switch
         checked={showPoints}
         onCheckedChange={(on) => {
           setShowPoints(on);
           run(() => updateScreenSettingsAction({ showPointsInReveals: on }));
         }}
-        label={t.settings.screen.showPoints}
+        label={
+          <span>
+            {t.settings.screen.showPoints}
+            <span className="block text-xs text-muted">{t.settings.screen.showPointsHint}</span>
+          </span>
+        }
       />
+      <Field label={t.settings.screen.follow}>
+        <div className="flex flex-col gap-3">
+          <Switch
+            checked={showFollowLink}
+            onCheckedChange={(on) => {
+              setShowFollowLink(on);
+              run(() => updateScreenSettingsAction({ showFollowLink: on }));
+            }}
+            label={t.settings.screen.showFollowLink}
+          />
+          <Switch
+            checked={showFollowQr}
+            onCheckedChange={(on) => {
+              setShowFollowQr(on);
+              run(() => updateScreenSettingsAction({ showFollowQr: on }));
+            }}
+            label={t.settings.screen.showFollowQr}
+          />
+          <Field label={t.settings.screen.followText} hint={t.settings.screen.followTextHint}>
+            <div className="flex gap-2">
+              <input
+                value={followText}
+                onChange={(e) => setFollowText(e.target.value)}
+                placeholder={t.settings.screen.followTextPlaceholder}
+                maxLength={FOLLOW_TEXT_MAX_LENGTH}
+                className={inputClass}
+              />
+              <Button
+                className="shrink-0"
+                loading={pending}
+                onClick={() => run(() => updateScreenSettingsAction({ followText }), { success: t.common.saved })}
+              >
+                {t.common.save}
+              </Button>
+            </div>
+          </Field>
+        </div>
+      </Field>
       <Field label={t.settings.screen.language}>
         <Segmented
           value={lang}
@@ -360,6 +451,33 @@ function ScreenControls() {
         />
       </Field>
     </div>
+  );
+}
+
+function FinaleControls({ rarities }: { rarities: Rarity[] }) {
+  const { t } = useI18n();
+  const { run } = useRunner();
+  const [selected, setSelected] = useState<Rarity[]>(rarities);
+
+  const toggle = (rarity: Rarity, on: boolean) => {
+    const next = on ? [...selected, rarity] : selected.filter((r) => r !== rarity);
+    setSelected(next);
+    run(() => updateScreenSettingsAction({ finaleShowcaseRarities: next }));
+  };
+
+  return (
+    <Field label={t.settings.finale.showcaseRarities}>
+      <div className="flex flex-col">
+        {RARITIES.map((rarity) => (
+          <Switch
+            key={rarity}
+            checked={selected.includes(rarity)}
+            onCheckedChange={(on) => toggle(rarity, on)}
+            label={t.achievements.rarity[rarity]}
+          />
+        ))}
+      </div>
+    </Field>
   );
 }
 

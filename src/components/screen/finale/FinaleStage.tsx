@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { EASE } from "@/components/motion/FadeRise";
 import type { FinaleBeat } from "@/domain/finale";
-import { BeatChampion, BeatClosing, BeatComplete, BeatNumbers, BeatPlace, BeatPodium, BeatSealed } from "./beats";
+import { BeatChampion, BeatClosing, BeatComplete, BeatHighlight, BeatNumbers, BeatPlace, BeatPodium, BeatSealed } from "./beats";
 import type { FinaleLookups } from "./lookups";
 
 export function FinaleStage({
@@ -30,6 +30,7 @@ export function FinaleStage({
         {current?.kind === "complete" ? <BeatComplete beat={current} /> : null}
         {current?.kind === "numbers" ? <BeatNumbers beat={current} lookups={lookups} /> : null}
         {current?.kind === "sealed" ? <BeatSealed beat={current} lookups={lookups} /> : null}
+        {current?.kind === "highlight" ? <BeatHighlight beat={current} lookups={lookups} /> : null}
         {current?.kind === "place" ? <BeatPlace beat={current} lookups={lookups} /> : null}
         {current?.kind === "champion" ? <BeatChampion beat={current} lookups={lookups} /> : null}
         {current?.kind === "podium" ? <BeatPodium beat={current} lookups={lookups} /> : null}

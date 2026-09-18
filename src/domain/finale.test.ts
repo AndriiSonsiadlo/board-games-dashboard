@@ -4,13 +4,13 @@ import { buildFinaleScript, buildRehearsal, clampStep, podiumGroups, revealStepO
 import { makeDoneSession, makeEvent, makeGame, makePlayer, makeSettings } from "./fixtures";
 import { replay } from "./replay";
 import type { StandingRow } from "./standings";
-import type { Facts, SessionFact } from "./types";
+import type { EventFact, Facts, SessionFact } from "./types";
 
 const MIN = 60_000;
 
-function facts(sessions: SessionFact[], playerCount = 5): Facts {
+function facts(sessions: SessionFact[], playerCount = 5, eventOverrides: Partial<EventFact> = {}): Facts {
   return {
-    event: makeEvent({ status: "finished", startedAt: 0, finishedAt: 185 * MIN, scoring: makeSettings() }),
+    event: makeEvent({ status: "finished", startedAt: 0, finishedAt: 185 * MIN, scoring: makeSettings(), ...eventOverrides }),
     players: Array.from({ length: playerCount }, (_, i) => makePlayer(i + 1, `P${i + 1}`)),
     games: [makeGame(1, 10)],
     tables: [],
@@ -126,6 +126,23 @@ describe("buildFinaleScript", () => {
     expect(beats.find((b) => b.kind === "place")).toEqual({ kind: "place", place: 2, playerId: 2 });
   });
 
+  test("finaleShowcaseRarities adds a highlight beat for non-sealed unlocks at that rarity, never for sealed ones", () => {
+    const f = facts(sessions, 5, { finaleShowcaseRarities: ["legendary"] });
+    const rp = replay(f, f.event.scoring);
+    const beats = buildFinaleScript(f, rp);
+    const highlight = beats.find(
+      (b): b is Extract<FinaleBeat, { kind: "highlight" }> => b.kind === "highlight" && b.achievementId === "opening-move",
+    );
+    expect(highlight).toMatchObject({ achievementId: "opening-move", playerIds: [1] });
+    expect(beats.some((b) => b.kind === "highlight" && achievementDef(b.achievementId).sealed)).toBe(false);
+  });
+
+  test("no highlight beats when finaleShowcaseRarities is empty (the default)", () => {
+    const f = facts(sessions);
+    const beats = buildFinaleScript(f, replay(f, f.event.scoring));
+    expect(beats.some((b) => b.kind === "highlight")).toBe(false);
+  });
+
   test("clampStep keeps the step inside the script", () => {
     const beats = buildFinaleScript(facts([]), replay(facts([]), makeSettings()));
     expect(clampStep(99, beats)).toBe(beats.length);
@@ -135,7 +152,9 @@ describe("buildFinaleScript", () => {
 
 test("rehearsal contains every beat kind with resolvable names", () => {
   const r = buildRehearsal();
-  expect(new Set(kinds(r.beats))).toEqual(new Set(["complete", "numbers", "sealed", "place", "champion", "podium", "closing"]));
+  expect(new Set(kinds(r.beats))).toEqual(
+    new Set(["complete", "numbers", "sealed", "highlight", "place", "champion", "podium", "closing"]),
+  );
   const ids = new Set(r.players.map((p) => p.id));
   const champion = r.beats.find((b) => b.kind === "champion");
   expect(champion && champion.kind === "champion" && champion.playerIds.every((id) => ids.has(id))).toBe(true);

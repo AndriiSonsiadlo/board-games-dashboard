@@ -107,12 +107,12 @@ describe("public snapshot before finale", () => {
     expect(pub.players.map((p) => p.id)).toEqual([1, 2, 3, 4, 5]);
   });
 
-  test("reveal points appear only inside announcements when enabled", () => {
+  test("reveal points and the leaderboard appear early only in those two spots when enabled", () => {
     const { pub } = build(facts({ showPointsInReveals: true }, [reveal(1, 11)]));
     const leaks = keysDeep(pub).filter(([key]) => FORBIDDEN_PUBLIC_KEYS.includes(key));
     expect(leaks.length).toBeGreaterThan(0);
-    expect(leaks.every(([, path]) => path.startsWith("$.announcements"))).toBe(true);
-    expect(leaks.every(([key]) => key === "points")).toBe(true);
+    expect(leaks.every(([, path]) => path.startsWith("$.announcements") || path.startsWith("$.leaderboard"))).toBe(true);
+    expect(leaks.filter(([, path]) => path.startsWith("$.announcements")).every(([key]) => key === "points")).toBe(true);
   });
 
   test("contenders lists top 5 alphabetically when the scene is enabled", () => {

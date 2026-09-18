@@ -11,7 +11,7 @@ import type { PublicSnapshot } from "@/domain/snapshot";
 import { fmt } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
 import { AutoScroll } from "../AutoScroll";
-import { holdersByAchievement } from "../logic";
+import { holdersByAchievement, orderAchievementGroups } from "../logic";
 import { SceneHeading } from "./SceneRoom";
 
 const HOLDERS_SHOWN = 6;
@@ -20,7 +20,7 @@ export function SceneAchievements({ snapshot }: { snapshot: PublicSnapshot }) {
   const { t } = useI18n();
   const lookups = usePublicLookups(snapshot);
   const { unlocks, sealedUnlockCount, eligiblePlayers } = snapshot.achievements;
-  const groups = holdersByAchievement(unlocks);
+  const groups = orderAchievementGroups(holdersByAchievement(unlocks), snapshot.event.achievementOrder, eligiblePlayers);
   const sealed = new Set(snapshot.achievements.sealed);
 
   return (

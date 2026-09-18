@@ -55,6 +55,7 @@ export function ResultReveal({
 
   const visible = new Set(groups.slice(0, revealed).flat().map((p) => p.playerId));
   const listTimeline = revealTimeline(groups.length);
+  const showPodiumPhase = phase === "podium" && snapshot.event.showPodium;
 
   return (
     <motion.div
@@ -64,9 +65,9 @@ export function ResultReveal({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
     >
-      {phase === "winner" || phase === "podium" ? <GoldDust count={32} /> : null}
+      {phase === "winner" || showPodiumPhase ? <GoldDust count={32} /> : null}
 
-      {phase === "podium" ? (
+      {showPodiumPhase ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

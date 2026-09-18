@@ -12,6 +12,7 @@ export type AchievementOrder = "recent" | "rarity";
 export const ALL_SCENES: SceneId[] = ["title", "room", "recent", "counters", "achievements", "story", "popular", "contenders"];
 export const DEFAULT_SCENES: SceneId[] = ["title", "room", "recent", "counters", "achievements", "story", "popular"];
 export const MILESTONES = [10, 25, 50, 75, 100] as const;
+export const FOLLOW_TEXT_MAX_LENGTH = 80;
 
 export interface ScoringSettings {
   strategy: ScoringStrategy;

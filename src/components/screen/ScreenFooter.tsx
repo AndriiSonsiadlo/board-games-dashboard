@@ -24,6 +24,8 @@ export function ScreenFooter({
   const { t } = useI18n();
   const brand = useBrand();
   const url = snapshot.event.publicBaseUrl?.replace(/^https?:\/\//, "");
+  const { showFollowLink, showFollowQr, followText } = snapshot.event;
+  const caption = followText === "" ? null : (followText ?? t.screen.follow);
 
   return (
     <div data-screen-chrome className="absolute inset-x-0 bottom-0 z-10 h-[110px] border-t border-line px-[120px]">
@@ -45,14 +47,18 @@ export function ScreenFooter({
             <span key={s} className={cn("h-[6px] w-[34px] rounded-full", s === scene ? "bg-text" : "bg-line-strong")} />
           ))}
         </div>
-        {url ? (
+        {url && (showFollowLink || showFollowQr || caption) ? (
           <div className="flex items-center gap-5">
-            <span className="text-right text-[24px] leading-tight text-muted">
-              {t.screen.follow}
-              <span className="block font-mono text-text">{url}</span>
-            </span>
-            {/* eslint-disable-next-line @next/next/no-img-element -- live SVG from /api/qr, no optimization wanted */}
-            <img src={`/api/qr?theme=dark&u=${encodeURIComponent(url)}`} alt="" className="size-[88px] rounded-[4px]" />
+            {caption || showFollowLink ? (
+              <span className="text-right text-[24px] leading-tight text-muted">
+                {caption}
+                {showFollowLink ? <span className="block font-mono text-text">{url}</span> : null}
+              </span>
+            ) : null}
+            {showFollowQr ? (
+              // eslint-disable-next-line @next/next/no-img-element -- live SVG from /api/qr, no optimization wanted
+              <img src={`/api/qr?theme=dark&u=${encodeURIComponent(url)}`} alt="" className="size-[88px] rounded-[4px]" />
+            ) : null}
           </div>
         ) : null}
       </div>

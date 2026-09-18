@@ -332,7 +332,7 @@ function announcements(
   facts: Facts,
   rp: Replay,
   now: number,
-  opts: { withPoints: boolean },
+  opts: { withPoints: boolean; showAchievementCards: boolean },
 ): ScreenAnnouncement[] {
   const results = new Map(rp.results.map((r) => [r.sessionId, r]));
   const unlocked = new Set(rp.unlocks.map((u) => `${u.achievementId}:${u.playerId}`));
@@ -344,6 +344,7 @@ function announcements(
         return [{ id: a.id, createdAt: a.createdAt, type: "milestone", count: a.payload.count }];
       }
       if (a.type === "achievement") {
+        if (!opts.showAchievementCards) return [];
         const { achievementId, playerId, sessionId } = a.payload;
         if (!isAchievementId(achievementId)) return [];
         if (!unlocked.has(`${achievementId}:${playerId}`)) return [];
@@ -423,11 +424,12 @@ export function buildPublicSnapshot(facts: Facts, rp: Replay, now: number): Publ
     counters: counters(facts, rp, tables),
     announcements: announcements(facts, rp, now, {
       withPoints: revealed || facts.event.showPointsInReveals,
+      showAchievementCards: facts.event.showAchievementCards,
     }),
     achievements,
     finale: script && finaleStep > 0 ? finaleView(script, finaleStep) : null,
     contenders,
-    leaderboard: revealed ? leaderboard(facts, rp) : null,
+    leaderboard: revealed || facts.event.showPointsInReveals ? leaderboard(facts, rp) : null,
     stats,
     finaleStats: revealed ? buildFinaleStats(rp) : null,
     streaks,
@@ -467,7 +469,7 @@ export function buildAdminSnapshot(facts: Facts, rp: Replay, now: number): Admin
     tables,
     results: [...rp.results].reverse().map(adminResult),
     counters: counters(facts, rp, tables),
-    announcements: announcements(facts, rp, now, { withPoints: true }),
+    announcements: announcements(facts, rp, now, { withPoints: true, showAchievementCards: true }),
     achievements: achievementsView(facts, rp),
     finale: script
       ? { ...finaleView(script, facts.event.screenControl.finaleStep), beats: script, revealStep: revealStepOf(script) }
