@@ -6,6 +6,7 @@ import { useBrand } from "@/components/brand/BrandProvider";
 import { AchievementIcon } from "@/components/common/AchievementIcon";
 import { GameIcon } from "@/components/common/GameIcon";
 import { EASE } from "@/components/motion/FadeRise";
+import { ConfettiBurst } from "@/components/motion/ConfettiBurst";
 import { GoldDust } from "@/components/motion/GoldDust";
 import { MaskReveal } from "@/components/motion/MaskReveal";
 import { NumberRoll } from "@/components/motion/NumberRoll";
@@ -228,19 +229,43 @@ export function BeatHighlight({ beat, lookups }: { beat: Beat<"highlight">; look
   );
 }
 
+const MEDALS = {
+  3: { color: "var(--color-bronze)", confetti: 26 },
+  2: { color: "var(--color-silver)", confetti: 42 },
+} as const;
+
 export function BeatPlace({ beat, lookups }: { beat: Beat<"place">; lookups: FinaleLookups }) {
   const { t, lang } = useI18n();
+  const medal = beat.place === 3 || beat.place === 2 ? MEDALS[beat.place] : undefined;
   return (
-    <div className="flex h-full flex-col items-center justify-center text-center">
-      <Label>{fmt(t.finale.place, { place: ordinal(lang, beat.place) })}</Label>
-      <motion.div
-        initial={{ opacity: 0, y: 60 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: EASE, delay: 2.2 }}
-        className="mt-10 font-display text-[240px] uppercase leading-[0.85] tracking-tight"
-      >
-        {lookups.players.get(beat.playerId)?.name}
-      </motion.div>
+    <div className="relative flex h-full flex-col items-center justify-center overflow-hidden text-center">
+      {medal ? (
+        <>
+          <div aria-hidden className="pointer-events-none absolute inset-0 grid place-items-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.6, ease: EASE, delay: 1.6 }}
+              className="h-[600px] w-[1100px] rounded-full"
+              style={{
+                background: `radial-gradient(closest-side, color-mix(in oklab, ${medal.color} 18%, transparent), color-mix(in oklab, ${medal.color} 6%, transparent) 55%, transparent)`,
+              }}
+            />
+          </div>
+          <ConfettiBurst count={medal.confetti} color={medal.color} delayMs={1800} />
+        </>
+      ) : null}
+      <div className="relative z-10">
+        <Label>{fmt(t.finale.place, { place: ordinal(lang, beat.place) })}</Label>
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, ease: EASE, delay: 2.2 }}
+          className="mt-10 font-display text-[240px] uppercase leading-[0.85] tracking-tight"
+        >
+          {lookups.players.get(beat.playerId)?.name}
+        </motion.div>
+      </div>
     </div>
   );
 }
@@ -264,6 +289,7 @@ export function BeatChampion({ beat, lookups }: { beat: Beat<"champion">; lookup
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 3.4 }}>
         <GoldDust count={40} />
       </motion.div>
+      <ConfettiBurst count={70} color="var(--color-accent)" delayMs={3200} />
       <div className="relative z-10 flex flex-col items-center">
         <Label delay={0.4}>{beat.co ? t.finale.coChampions : t.finale.champion}</Label>
         <motion.div
