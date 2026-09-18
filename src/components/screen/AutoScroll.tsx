@@ -5,7 +5,9 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { autoScrollPlan } from "./scrollPlan";
 
-const FADE = "linear-gradient(to bottom, transparent 0, black 56px, black calc(100% - 56px), transparent 100%)";
+/** Height of the top/bottom fade band. Scrollable content should pad itself by this much so a row never rests half-faded inside it. */
+export const AUTOSCROLL_FADE_SIZE = 56;
+const FADE = `linear-gradient(to bottom, transparent 0, black ${AUTOSCROLL_FADE_SIZE}px, black calc(100% - ${AUTOSCROLL_FADE_SIZE}px), transparent 100%)`;
 
 /** Fills its flex parent. When the content is taller, it glides between the edges in a slow loop. */
 export function AutoScroll({

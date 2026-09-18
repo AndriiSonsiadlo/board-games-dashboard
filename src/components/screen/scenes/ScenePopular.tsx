@@ -8,7 +8,7 @@ import type { PublicSnapshot } from "@/domain/snapshot";
 import { plural } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
 import { cn } from "@/lib/cn";
-import { AutoScroll } from "../AutoScroll";
+import { AUTOSCROLL_FADE_SIZE, AutoScroll } from "../AutoScroll";
 import { SceneHeading } from "./SceneRoom";
 
 const ROWS = 8;
@@ -24,7 +24,7 @@ export function ScenePopular({ snapshot }: { snapshot: PublicSnapshot }) {
     <div className="flex h-full flex-col">
       <SceneHeading index="06" title={t.screen.popular} note={`${total} ${plural(lang, total, t.plurals.games)}`} />
       <AutoScroll className="mt-12" startDelayMs={1500} windowMs={snapshot.event.sceneDurationSec * 1000}>
-      <ul className="flex flex-col gap-7">
+      <ul className="flex flex-col gap-7" style={{ paddingBlock: AUTOSCROLL_FADE_SIZE }}>
         {rows.map((row, i) => {
           const game = lookups.games.get(row.gameId);
           return (
