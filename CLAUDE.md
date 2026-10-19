@@ -52,8 +52,12 @@ full 9-beat finale ceremony — has been visually verified in a real browser
 
 ## Environment notes for agent sessions
 
-- **Playwright browser tools work** — Chrome is installed at
-  `/opt/google/chrome/chrome`. The MCP `browser_click` tool takes a `target`
+- **Browser tools drive the Windows Chrome**, not WSL's: `mcp__playwright__*`
+  (`--cdp-endpoint`) and `mcp__chrome-devtools__*` (`--browser-url`) both
+  attach to `localhost:9222` (WSL mirrored networking). If
+  `curl -s localhost:9222/json/version` fails, start it with
+  `"$BROWSER" --remote-debugging-port=9222 --user-data-dir='C:\temp\chrome-debug' &`.
+  The Playwright plugin is disabled on purpose (it launches WSL Chrome). The MCP `browser_click` tool takes a `target`
   (exact ref or selector), not `ref`. Get refs from `browser_snapshot` output
   and re-snapshot after any DOM change (refs go stale on re-render).
 - **The dev server can go stale across sandbox sessions**: `ps aux` may show a
