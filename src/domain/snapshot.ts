@@ -193,6 +193,7 @@ export interface AdminSnapshot {
   players: AdminPlayerView[];
   games: GameFact[];
   playedGameIds: number[];
+  seatedPlayerIds: number[];
   allTables: TableFact[];
   tables: TableView<AdminSeatView>[];
   results: ResultView<ScoredPlacementView>[];
@@ -465,6 +466,7 @@ export function buildAdminSnapshot(facts: Facts, rp: Replay, now: number): Admin
     })),
     games: facts.games,
     playedGameIds: [...new Set(facts.sessions.map((s) => s.gameId))].sort((a, b) => a - b),
+    seatedPlayerIds: [...new Set(facts.sessions.flatMap((s) => s.players.map((p) => p.playerId)))].sort((a, b) => a - b),
     allTables: [...facts.tables].sort((a, b) => a.number - b.number),
     tables,
     results: [...rp.results].reverse().map(adminResult),

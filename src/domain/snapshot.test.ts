@@ -171,6 +171,14 @@ describe("admin snapshot", () => {
     expect(admin.playedGameIds).toEqual([1, 2]);
     expect("playedGameIds" in pub).toBe(false);
   });
+
+  test("admin snapshot lists players seated in any session; the public one does not", () => {
+    const { pub, admin } = build(facts());
+    const seated = [...new Set(facts().sessions.flatMap((s) => s.players.map((p) => p.playerId)))].sort((a, b) => a - b);
+    expect(admin.seatedPlayerIds).toEqual(seated);
+    expect(admin.seatedPlayerIds).not.toContain(6);
+    expect("seatedPlayerIds" in pub).toBe(false);
+  });
 });
 
 const achievementAnnouncement = (id: number, achievementId: string, playerId: number): AnnouncementFact => ({

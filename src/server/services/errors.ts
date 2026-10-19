@@ -19,7 +19,8 @@ export type ErrorCode =
   | "wrong_pin"
   | "demo_player_in_use"
   | "duplicate_name"
-  | "game_in_use";
+  | "game_in_use"
+  | "player_in_use";
 
 export class ServiceError extends Error {
   constructor(readonly code: ErrorCode) {

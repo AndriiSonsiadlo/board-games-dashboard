@@ -32,7 +32,7 @@ import {
   type ScreenPatch,
 } from "@/server/services/event";
 import { finaleCommand, finaleGoto, setFinaleRevealed, type FinaleCommand } from "@/server/services/finale";
-import { addPlayer, bulkAddPlayers, mergePlayers, updatePlayer, type PlayerPatch } from "@/server/services/players";
+import { addPlayer, bulkAddPlayers, deletePlayer, mergePlayers, updatePlayer, type PlayerPatch } from "@/server/services/players";
 import {
   cancelSession,
   correctJoker,
@@ -153,6 +153,10 @@ export async function updatePlayerAction(id: number, patch: PlayerPatch): Result
 
 export async function mergePlayersAction(input: { keepId: number; removeId: number }): Result {
   return runAdminAction((db) => mergePlayers(db, input));
+}
+
+export async function deletePlayerAction(id: number): Result {
+  return runAdminAction((db) => deletePlayer(db, id));
 }
 
 // Catalog

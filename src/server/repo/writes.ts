@@ -48,6 +48,12 @@ export function deletePlayerRow(tx: Tx, id: number): void {
   tx.delete(s.players).where(eq(s.players.id, id)).run();
 }
 
+export function playerHasSeats(tx: Tx, playerId: number): boolean {
+  return Boolean(
+    tx.select({ id: s.sessionPlayers.sessionId }).from(s.sessionPlayers).where(eq(s.sessionPlayers.playerId, playerId)).get(),
+  );
+}
+
 export function reassignPlayerSeats(tx: Tx, fromId: number, toId: number): void {
   tx.update(s.sessionPlayers).set({ playerId: toId }).where(eq(s.sessionPlayers.playerId, fromId)).run();
 }

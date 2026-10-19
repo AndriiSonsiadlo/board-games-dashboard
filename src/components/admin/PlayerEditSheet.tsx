@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 import { useState } from "react";
-import { mergePlayersAction, updatePlayerAction } from "@/app/admin/actions";
+import { deletePlayerAction, mergePlayersAction, updatePlayerAction } from "@/app/admin/actions";
 import { PLAYER_COLORS } from "@/domain/players";
 import type { AdminPlayerView } from "@/domain/snapshot";
 import { fmt } from "@/i18n";
@@ -30,6 +30,7 @@ export function PlayerEditSheet({ player, onClose }: { player: AdminPlayerView; 
   const [mergeQuery, setMergeQuery] = useState("");
   const [mergeTarget, setMergeTarget] = useState<number | null>(null);
 
+  const seated = snapshot.seatedPlayerIds.includes(player.id);
   const others = snapshot.players
     .filter((p) => p.id !== player.id && matchesQuery(p.name, mergeQuery))
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -114,6 +115,20 @@ export function PlayerEditSheet({ player, onClose }: { player: AdminPlayerView; 
             run(() => mergePlayersAction({ keepId: mergeTarget, removeId: player.id }), { success: t.players.merged, onOk: onClose });
           }}
         />
+      </section>
+
+      <section className="mt-8 border-t border-line pt-6">
+        {seated ? (
+          <p className="border-l-2 border-line-strong pl-3 text-xs text-muted">{t.players.seatedNoDelete}</p>
+        ) : (
+          <ConfirmButton
+            size="sm"
+            disabled={pending}
+            label={t.players.delete}
+            confirmLabel={t.common.tapToConfirm}
+            onConfirm={() => run(() => deletePlayerAction(player.id), { success: t.players.deleted, onOk: onClose })}
+          />
+        )}
       </section>
     </Sheet>
   );

@@ -4,6 +4,7 @@ import type { Db, Tx } from "../db/client";
 import { loadFacts } from "../repo/facts";
 import {
   deletePlayerRow,
+  playerHasSeats,
   insertAudit,
   insertPlayer,
   reassignPlayerSeats,
@@ -121,5 +122,15 @@ export function mergePlayers(db: Db, input: { keepId: number; removeId: number }
       after: null,
       at: Date.now(),
     });
+  });
+}
+
+export function deletePlayer(db: Db, id: number): void {
+  mutate(db, (tx) => {
+    const player = loadFacts(tx).players.find((p) => p.id === id);
+    if (!player) throw new ServiceError("not_found");
+    if (playerHasSeats(tx, id)) throw new ServiceError("player_in_use");
+    deletePlayerRow(tx, id);
+    insertAudit(tx, { action: "player.delete", summary: `${player.name} deleted`, before: null, after: null, at: Date.now() });
   });
 }

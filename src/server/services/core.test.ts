@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { verifyPin } from "../auth/pin";
 import { signToken, verifyToken } from "../auth/token";
-import { getDataVersion, loadFacts, loadSecrets } from "../repo/facts";
+import { getDataVersion, listAudit, loadFacts, loadSecrets } from "../repo/facts";
 import { insertPlayer, insertSession } from "../repo/writes";
 import { createTestDb } from "../testDb";
 import { addTable, createGame, deleteGame, removeTable, updateGame, updateTable } from "./catalog";
@@ -18,7 +18,7 @@ import {
   updateScoring,
   updateScreenSettings,
 } from "./event";
-import { addPlayer, bulkAddPlayers, checkIn, mergePlayers, updatePlayer } from "./players";
+import { addPlayer, bulkAddPlayers, checkIn, deletePlayer, mergePlayers, updatePlayer } from "./players";
 
 let ctx: ReturnType<typeof createTestDb>;
 beforeEach(() => {
@@ -249,6 +249,19 @@ describe("players", () => {
     ]);
     expectCode(() => mergePlayers(ctx.db, { keepId: c, removeId: d }), "merge_conflict");
     expectCode(() => mergePlayers(ctx.db, { keepId: c, removeId: c }), "invalid_value");
+  });
+
+  test("delete removes a never-seated player and refuses one with any seat", () => {
+    const unused = addPlayer(ctx.db, { name: "Typo" });
+    deletePlayer(ctx.db, unused);
+    expect(facts().players.find((p) => p.id === unused)).toBeUndefined();
+    expect(listAudit(ctx.db, 1)[0]).toMatchObject({ action: "player.delete", summary: "Typo deleted" });
+    const seated = addPlayer(ctx.db, { name: "Seated" });
+    insertSession(ctx.db, { tableId: null, gameId: 1, status: "cancelled", createdAt: 1 }, [
+      { playerId: seated, seat: 0, jokerDeclared: false, placement: null },
+    ]);
+    expectCode(() => deletePlayer(ctx.db, seated), "player_in_use");
+    expectCode(() => deletePlayer(ctx.db, 999), "not_found");
   });
 });
 

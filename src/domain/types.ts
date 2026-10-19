@@ -140,6 +140,7 @@ export type AuditAction =
   | "joker.correct"
   | "session.cancel"
   | "player.merge"
+  | "player.delete"
   | "undo";
 
 export const UNDOABLE_ACTIONS: AuditAction[] = [
