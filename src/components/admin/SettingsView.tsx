@@ -15,7 +15,7 @@ import {
   updateScreenSettingsAction,
 } from "@/app/admin/actions";
 import { RARITIES, type Rarity } from "@/domain/achievements";
-import { BRAND_MAX_LENGTH, DEFAULT_BRAND, RU_BRAND_PRESET, resolveBrand, type BrandFields } from "@/domain/brand";
+import { BRAND_MAX_LENGTH, DEFAULT_BRAND, resolveBrand, type BrandFields } from "@/domain/brand";
 import { formatPoints, scoreResult } from "@/domain/scoring";
 import { ALL_SCENES, FOLLOW_TEXT_MAX_LENGTH, type AchievementOrder, type Lang, type SceneId, type ScoringSettings } from "@/domain/types";
 import { fmt } from "@/i18n";
@@ -609,59 +609,43 @@ const BRAND_KEYS = {
 } as const satisfies Record<Lang, { top: keyof BrandFields; main: keyof BrandFields }>;
 
 function BrandingControls() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { snapshot } = useAdminLive();
   const { run, pending } = useRunner();
   const [fields, setFields] = useState<BrandFields>(snapshot.event.brandFields);
   const preview = resolveBrand(fields);
   const edit = (key: keyof BrandFields) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setFields((f) => ({ ...f, [key]: e.target.value }));
+  const keys = BRAND_KEYS[lang];
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted">{t.settings.branding.hint}</p>
-      {(["en", "ru"] as const).map((lang) => {
-        const keys = BRAND_KEYS[lang];
-        return (
-          <div key={lang} className="space-y-3 rounded-md border border-line bg-surface p-4">
-            <div className="flex items-center justify-between gap-3">
-              <span className="label-caps">{lang.toUpperCase()}</span>
-              {lang === "ru" ? (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setFields((f) => ({ ...f, brandTopRu: RU_BRAND_PRESET.top, brandMainRu: RU_BRAND_PRESET.main }))}
-                >
-                  {t.settings.branding.ruPreset}
-                </Button>
-              ) : null}
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label={t.settings.branding.top}>
-                <input
-                  value={fields[keys.top] ?? ""}
-                  onChange={edit(keys.top)}
-                  placeholder={lang === "en" ? DEFAULT_BRAND.top : preview.en.top}
-                  maxLength={BRAND_MAX_LENGTH}
-                  className={inputClass}
-                />
-              </Field>
-              <Field label={t.settings.branding.main}>
-                <input
-                  value={fields[keys.main] ?? ""}
-                  onChange={edit(keys.main)}
-                  placeholder={lang === "en" ? DEFAULT_BRAND.main : preview.en.main}
-                  maxLength={BRAND_MAX_LENGTH}
-                  className={inputClass}
-                />
-              </Field>
-            </div>
-            <div className="rounded-md border border-line bg-bg px-4 py-3">
-              <Wordmark size="sm" lines={preview[lang]} />
-            </div>
-          </div>
-        );
-      })}
+      <div className="space-y-3 rounded-md border border-line bg-surface p-4">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label={t.settings.branding.top}>
+            <input
+              value={fields[keys.top] ?? ""}
+              onChange={edit(keys.top)}
+              placeholder={lang === "en" ? DEFAULT_BRAND.top : preview.en.top}
+              maxLength={BRAND_MAX_LENGTH}
+              className={inputClass}
+            />
+          </Field>
+          <Field label={t.settings.branding.main}>
+            <input
+              value={fields[keys.main] ?? ""}
+              onChange={edit(keys.main)}
+              placeholder={lang === "en" ? DEFAULT_BRAND.main : preview.en.main}
+              maxLength={BRAND_MAX_LENGTH}
+              className={inputClass}
+            />
+          </Field>
+        </div>
+        <div className="rounded-md border border-line bg-bg px-4 py-3">
+          <Wordmark size="sm" lines={preview[lang]} />
+        </div>
+      </div>
       <Button loading={pending} onClick={() => run(() => updateBrandingAction(fields), { success: t.common.saved })}>
         {t.common.save}
       </Button>

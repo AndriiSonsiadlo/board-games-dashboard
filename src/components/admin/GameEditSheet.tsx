@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createGameAction, deleteGameAction, updateGameAction } from "@/app/admin/actions";
 import { formatPoints } from "@/domain/scoring";
-import type { GameFact } from "@/domain/types";
+import type { GameFact, Lang } from "@/domain/types";
 import { fmt } from "@/i18n";
 import { useI18n } from "@/i18n/LangProvider";
 import { GameIcon } from "../common/GameIcon";
@@ -42,9 +42,12 @@ const EMPTY = {
   active: true,
 };
 
+const DESCRIPTION_KEYS = { en: "descriptionEn", ru: "descriptionRu" } as const satisfies Record<Lang, keyof typeof EMPTY>;
+
 /** `game: null` adds a new game. */
 export function GameEditSheet({ game, onClose }: { game: GameFact | null; onClose: () => void }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const descriptionKey = DESCRIPTION_KEYS[lang];
   const { snapshot } = useAdminLive();
   const { run, pending } = useRunner();
   const [draft, setDraft] = useState(() => {
@@ -149,19 +152,10 @@ export function GameEditSheet({ game, onClose }: { game: GameFact | null; onClos
           <Switch checked={draft.active} onCheckedChange={(v) => set("active", v)} label={t.games.active} />
         </div>
 
-        <Field label={t.games.descriptionEn}>
+        <Field label={t.games.description}>
           <textarea
-            value={draft.descriptionEn}
-            onChange={(e) => set("descriptionEn", e.target.value)}
-            maxLength={300}
-            rows={2}
-            className={`${inputClass} h-auto py-2`}
-          />
-        </Field>
-        <Field label={t.games.descriptionRu}>
-          <textarea
-            value={draft.descriptionRu}
-            onChange={(e) => set("descriptionRu", e.target.value)}
+            value={draft[descriptionKey]}
+            onChange={(e) => set(descriptionKey, e.target.value)}
             maxLength={300}
             rows={2}
             className={`${inputClass} h-auto py-2`}

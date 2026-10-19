@@ -83,7 +83,7 @@ full 9-beat finale ceremony — has been visually verified in a real browser
 
 ## Tier 4 (shipped via docs/superpowers/plans/2026-09-17-board-games-cup-tier4.md)
 
-- Brand lines live in four nullable `event` columns; `resolveBrand` (`domain/brand.ts`) falls back per line to English, then `HIS^ BOARD GAMES` / `CUP`. Client code reads `useBrand()`; the projector wraps its own `BrandProvider` fed by the live snapshot.
+- Brand lines live in four nullable `event` columns; `resolveBrand` (`domain/brand.ts`) falls back per line to English, then `BOARD GAMES` / `CUP` (organizers set their own name in settings). Client code reads `useBrand()`; the projector wraps its own `BrandProvider` fed by the live snapshot.
 - `/players/[id]` always renders the public audience unless an admin adds `?view=admin` (the admin leaderboard links do). Don't bring back "admin cookie means admin view" on public pages.
 - Projector scenes render inside `SCENE_FRAME` (`components/screen/layout.ts`); never add per-scene bottom padding. Long lists go in `<AutoScroll>`; its timing lives in `scrollPlan.ts`. Keep those two file names distinct: the event laptop runs Windows (case-insensitive paths).
 - Sealed now means "description hidden until `finaleRevealed`": sealed unlocks are public, appear in the timeline and queue projector cards. The effective flag is `isSealed(id, facts.sealedOverrides)`; don't read `achievementDef(id).sealed` anywhere else. Descriptions ship in the client dictionary, so "hidden" is presentation, not secrecy.

@@ -15,8 +15,7 @@ export interface BrandFields {
   brandMainRu: string | null;
 }
 
-export const DEFAULT_BRAND: BrandLines = { top: "HIS^ BOARD GAMES", main: "CUP" };
-export const RU_BRAND_PRESET: BrandLines = { top: "HIS^", main: "ВЕЧЕР НАСТОЛОК" };
+export const DEFAULT_BRAND: BrandLines = { top: "BOARD GAMES", main: "CUP" };
 export const BRAND_MAX_LENGTH = 40;
 
 const clean = (value: string | null) => (value && value.trim() ? value.trim() : null);

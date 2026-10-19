@@ -208,8 +208,7 @@ export const en = {
     add: "Add game",
     edit: "Edit game",
     name: "Name",
-    descriptionEn: "Description (EN)",
-    descriptionRu: "Description (RU)",
+    description: "Description",
     icon: "Icon",
     iconSearch: "Search icons, e.g. cards or кубики",
     iconNone: "No icons match.",
@@ -307,10 +306,9 @@ export const en = {
     },
     branding: {
       title: "Branding",
-      hint: "The name on the site, the projector and the QR sheet. An empty field uses the English line.",
+      hint: "The name on the site, the projector and the QR sheet. Set it for each site language; an empty field uses the English line.",
       top: "Top line",
       main: "Main line",
-      ruPreset: "Use Вечер настолок",
     },
     network: {
       title: "Network",

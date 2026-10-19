@@ -64,7 +64,7 @@ test("public snapshot carries the resolved brand; only admin sees the raw fields
   const f = facts({ brandFields: { brandTopEn: null, brandMainEn: null, brandTopRu: "HIS^", brandMainRu: "ВЕЧЕР НАСТОЛОК" } });
   const { pub, admin } = build(f);
   expect(pub.event.brand).toEqual({
-    en: { top: "HIS^ BOARD GAMES", main: "CUP" },
+    en: { top: "BOARD GAMES", main: "CUP" },
     ru: { top: "HIS^", main: "ВЕЧЕР НАСТОЛОК" },
   });
   expect("brandFields" in pub.event).toBe(false);
