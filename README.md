@@ -1,8 +1,83 @@
+<div align="center">
+
 # Board Games Cup
 
-A live tournament platform for a one-evening board game event: the organizer runs tables and enters results from a phone, participants follow along on their phones, and a projector shows a cinematic, anonymous view of the room. Everything runs on one laptop with a local SQLite database.
+**A live tournament platform for a one-evening board game event.**
 
-## Quick start (development)
+The organizer runs tables from a phone, players follow along on theirs, and a projector turns the room into a show, ending with a staged finale ceremony. It runs on one laptop with a local SQLite database.
+
+![Projector: live room](docs/screenshots/screen-live-room.png)
+
+</div>
+
+## Contents
+
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Tech stack](#tech-stack)
+- [Quick start](#quick-start)
+- [Event night on Windows](#event-night-on-windows)
+- [Hosted deployment](#hosted-deployment-for-one-evening-not-vercel)
+- [Commands](#commands)
+- [How it works](#architecture)
+- [Customization](#where-to-change-things)
+- [Troubleshooting](#troubleshooting)
+
+## Features
+
+- **Control room for the organizer.** Seat players, start games, enter results, undo and redo, merge duplicate players and fix Joker declarations. It's built for a phone and protected by a PIN, and every change goes into the audit log.
+- **Standings stay secret until the end.** Phones and the projector only receive data that's public in the room. Points and ranks never leave the server before the finale, and a test enforces this.
+- **Projector mode.** A 1920×1080 stage with rotating scenes: live room, recent results, event stats, achievements, stories of the night, popular games and an optional contenders scene. Results get a reveal from last place up to the winner, and milestones and achievement unlocks get their own cards.
+- **22 achievements**, recomputed from results, so a corrected result also corrects them. Five are *sealed*: their meaning stays hidden until the finale.
+- **Finale ceremony.** The organizer steps through the beats from a phone remote: event in numbers, sealed achievements, 3rd, 2nd, champion, then the final standings. You can rehearse it with placeholder data at `/screen?rehearsal=1`.
+- **Player profiles, stats and timeline.** Covers game popularity, the longest and fastest games, rivals, hot streaks and a heatmap of table hours.
+- **Fair scoring.** Points depend on game weight and include a participation floor. Each player has one Joker for the evening, and the tournament score is either Best N results or Total.
+- **Self check-in by QR**, with printable QR codes for the site, check-in, projector and admin.
+- **English and Russian**, set separately for phones and the projector.
+- **Works offline.** One Node process and one SQLite file, with automatic backups.
+
+## Screenshots
+
+### Projector (`/screen`)
+
+| Recent results | Achievements |
+|---|---|
+| ![Recent results](docs/screenshots/screen-results.png) | ![Achievements](docs/screenshots/screen-achievements.png) |
+| **Stories of the night** | **Title** |
+| ![Stories](docs/screenshots/screen-stories.png) | ![Title](docs/screenshots/screen-title.png) |
+
+### Finale ceremony
+
+| Sealed achievement | Podium | Final standings |
+|---|---|---|
+| ![Sealed achievement](docs/screenshots/finale-sealed.png) | ![Podium](docs/screenshots/finale-podium.png) | ![Final standings](docs/screenshots/finale-standings.png) |
+
+### Phones (participants)
+
+| Home | Achievements | Stats | Timeline |
+|---|---|---|---|
+| ![Home](docs/screenshots/mobile-home.png) | ![Achievements](docs/screenshots/mobile-achievements.png) | ![Stats](docs/screenshots/mobile-stats.png) | ![Timeline](docs/screenshots/mobile-timeline.png) |
+
+### Organizer (`/admin`)
+
+| Control room | Standings | Achievements |
+|---|---|---|
+| ![Control room](docs/screenshots/admin-control.png) | ![Standings](docs/screenshots/admin-leaderboard.png) | ![Admin achievements](docs/screenshots/admin-achievements.png) |
+
+*Screenshots use the built-in demo data (`npm run db:seed:demo`).*
+
+## Tech stack
+
+| Layer | Tools |
+|---|---|
+| App | Next.js 16 (App Router, server actions), React 19, TypeScript |
+| UI | Tailwind CSS 4, Radix UI, Motion, lucide-react, dnd-kit |
+| Data | SQLite (better-sqlite3) via Drizzle ORM and drizzle-kit migrations |
+| Tests | Vitest |
+
+## Quick start
+
+Requires Node.js 22 or later.
 
 ```bash
 npm install
@@ -17,14 +92,14 @@ npm run dev                   # http://localhost:3000
 | `/` | Participants: live room, recent results, check-in |
 | `/checkin` | Self check-in |
 | `/leaderboard` | Sealed until the finale |
-| `/achievements` | Achievements, rarity and who unlocked them (sealed ones hidden until the finale) |
-| `/players/<id>` | Player profile; standings part appears after the finale (or for the organizer) |
+| `/achievements` | Achievements, rarity and who unlocked them |
+| `/players/<id>` | Player profile; standings part appears after the finale |
 | `/stats` | Game popularity, longest and fastest games, rivals, table-hour heatmap; finale stats after the reveal |
 | `/timeline` | Everything that happened, newest first |
 | `/screen` | Projector (always anonymous) |
 | `/screen?rehearsal=1` | Finale rehearsal with placeholder names (add `&lang=ru` for Russian) |
 | `/admin` | Organizer (PIN) |
-| `/admin/qr` | Printable QR codes for the site, check-in, screen and admin (Settings → Network) |
+| `/admin/qr` | Printable QR codes (Settings → Network) |
 
 ## Event night on Windows
 
@@ -54,7 +129,7 @@ This app is one long-running Node process writing to a local SQLite file (`data/
 
 1. Push this repo to GitHub and create a Railway project from it (Node 22 is auto-detected via Nixpacks; no Dockerfile needed — it also has the build tools `better-sqlite3` needs to compile).
 2. Add a Volume mounted at `/app/data`. That's the app's default database and backup location (`DB_PATH` unset), so nothing else has to point at it.
-3. Set the `ADMIN_PIN` environment variable. Railway injects `PORT` automatically; `npm run start` now honors it (it used to hardcode port 3000).
+3. Set the `ADMIN_PIN` environment variable. Railway injects `PORT` automatically and `npm run start` honors it.
 4. Set the start command to `npm run setup && npm run start` so the database is migrated/seeded on first boot — `npm run setup` is idempotent, so it's safe to run on every restart too.
 5. Deploy. Railway gives you a public HTTPS URL — open `/admin`, log in, go to Settings → Network, paste that URL into the custom address field and save, then print codes from `/admin/qr`.
 6. Run one-off commands (`npm run db:seed:demo`, `npm run db:clear-demo`, `npm run backup`, `npm run pin:reset`) against the same volume via `railway run <command>` from your machine, or Railway's web shell.
@@ -67,7 +142,7 @@ Fly.io works the same way (one machine + a persistent volume) if you'd rather us
 |---|---|
 | `npm run dev` | Development server on all interfaces |
 | `npm run event` | Production build + start (use on event night) |
-| `npm run setup` / `db:migrate` / `db:seed` | Apply migrations and create base data (idempotent) |
+| `npm run setup` | Apply migrations and create base data (idempotent) |
 | `npm run db:seed:demo` | Add demo players and results (marked as demo) |
 | `npm run db:clear-demo` | Remove demo data |
 | `npm run db:reset` | Delete the database and recreate base data (stop the server first) |
@@ -75,6 +150,7 @@ Fly.io works the same way (one machine + a persistent volume) if you'd rather us
 | `npm run pin:reset` | Set the admin PIN from `ADMIN_PIN` in `.env`, keeping all data |
 | `npm test` | Unit and service tests |
 | `npm run typecheck` | TypeScript check |
+| `npm run lint` | ESLint |
 
 ## Architecture
 
@@ -132,7 +208,7 @@ Standings are secret until the finale. The server builds two different snapshots
 
 `/screen` always requests the public snapshot, even in a browser logged in as admin. A unit test asserts no forbidden fields exist in the public snapshot. Optional exceptions, both controlled in Settings: per-game points inside a result reveal, and the Contenders scene (top five in alphabetical order, no ranks).
 
-Achievements are recomputed from results like points, so a correction or undo also corrects them. Public achievements are announced on the projector a few seconds after a result (after its reveal, if you press "Show on screen"). Five achievements are sealed (Comeback, Underdog, Giant Slayer, Joker Master, Risk Taker): until the finale only their total count is public. Stats, stories, the timeline and hot-streak markers only use facts visible in the room; biggest comeback, best Joker, most games played and the rank race stay hidden until the finale.
+Achievements are recomputed from results like points, so a correction or undo also corrects them. Public achievements are announced on the projector a few seconds after a result (after its reveal, if you press "Show on screen"). Five achievements are sealed (Comeback, Underdog, Giant Slayer, Joker Master, Risk Taker): their unlocks are announced like any other, but what they are for stays hidden until the finale, where each gets its own beat. Stats, stories, the timeline and hot-streak markers only use facts visible in the room; biggest comeback, best Joker, most games played and the rank race stay hidden until the finale.
 
 ## Projector mode
 
@@ -166,6 +242,6 @@ Achievements are recomputed from results like points, so a correction or undo al
 - Port 3000 busy: `npx next start -H 0.0.0.0 -p 3001` and select the matching address in Settings.
 - Demo announcements or milestones reappear after going live: they are removed together with demo data; if a result was entered on demo players by hand, clear demo data again from Settings → Data.
 
-## Roadmap
+## Out of scope
 
-- All tiers shipped. Out of scope: sound effects, in-game raw scores, player accounts, websockets.
+Sound effects, in-game raw scores, player accounts and websockets (clients poll every 2 s).

@@ -2,9 +2,8 @@
 
 # Board Games Cup — project state for agent sessions
 
-**Spec:** `docs/superpowers/specs/2026-09-15-board-games-cup-design.md`
-**Tier 1 plan (shipped):** `docs/superpowers/plans/2026-09-15-board-games-cup-tier1.md`
-**Tier 2 plan (shipped):** `docs/superpowers/plans/2026-09-16-board-games-cup-tier2.md`
+**Spec:** `docs/design/design.md` (Tier 4 additions: `docs/design/tier4-design.md`).
+The per-tier implementation plans were removed once shipped; see git history.
 
 Tier 2 covers: result celebration reveal, achievements/unlock announcements, the
 finale ceremony, and player profiles. It shipped as 13 TDD tasks (full code, no
@@ -72,7 +71,7 @@ full 9-beat finale ceremony — has been visually verified in a real browser
   the public site's EN/RU toggle — seeing Russian on `/screen` while the
   public site is in English is expected, not a bug.
 
-## Tier 3 (shipped via docs/superpowers/plans/2026-09-17-board-games-cup-tier3.md)
+## Tier 3 (shipped)
 
 - Stats, stories, streaks and timeline are derived in `src/domain/stats.ts`,
   `stories.ts`, `timeline.ts` and ride on the **public** snapshot only.
@@ -85,7 +84,7 @@ full 9-beat finale ceremony — has been visually verified in a real browser
 - `deleteDemoData` also removes announcements tied to demo sessions/players and
   milestones above the remaining result count.
 
-## Tier 4 (shipped via docs/superpowers/plans/2026-09-17-board-games-cup-tier4.md)
+## Tier 4 (shipped)
 
 - Brand lines live in four nullable `event` columns; `resolveBrand` (`domain/brand.ts`) falls back per line to English, then `BOARD GAMES` / `CUP` (organizers set their own name in settings). Client code reads `useBrand()`; the projector wraps its own `BrandProvider` fed by the live snapshot.
 - `/players/[id]` always renders the public audience unless an admin adds `?view=admin` (the admin leaderboard links do). Don't bring back "admin cookie means admin view" on public pages.
