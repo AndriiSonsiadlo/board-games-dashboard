@@ -141,17 +141,12 @@ src/i18n        English and Russian dictionaries.
 
 ### Scoring
 
-For a game with weight `W`, `N` players and a participation floor `f` (default 20%):
+- **Heavier games are worth more.** Every game has a weight, so a long strategy game is worth more than a quick party game.
+- **Everyone scores.** The winner gets the most points, but even last place earns some, so nobody's evening at a long game is wasted.
+- **One Joker per player.** Declare it before a game starts and that game's points are multiplied (×1.5 by default).
+- **Your best games count.** By default, only each player's best 4 results go toward the final standings, so playing more games doesn't win on its own.
 
-```
-share  = f + (1 − f) × (N − place) / (N − 1)
-points = W × share
-```
-
-- Last place still earns `W × f`, so time spent at a long game is rewarded.
-- Ties (only in games that allow them) use competition ranking (1, 1, 3), and tied players split the spanned places evenly.
-- Each player has one Joker for the event. It's declared when they're seated and multiplies that game's points (default ×1.5).
-- The tournament score is the Best N results (default 4) or the Total. Ranking order: counted points, then wins, then raw points, then fewer games played, then name.
+All of these can be changed in Admin → Settings → Scoring.
 
 ### Privacy and the finale
 
